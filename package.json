@@ -16,7 +16,7 @@
     "src"
   ],
   "scripts": {
-    "build": "tsup --clean --dts",
+    "build": "tsup src/index.ts --clean --dts",
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
     "prepare": "npm run build",
