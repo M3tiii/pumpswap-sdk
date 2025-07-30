@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import BN from "bn.js";
 import { buyBaseInputInternal } from "../sdk/buy";
+import { PublicKey } from "@solana/web3.js";
 
 describe("buyBaseInput with fees", () => {
   it("should compute quote + fees + slippage correctly", () => {
@@ -19,6 +20,7 @@ describe("buyBaseInput with fees", () => {
     //   Protocol fee = 20 basis points (0.20%)
     const lpFeeBps = new BN(30);
     const protocolFeeBps = new BN(20);
+    const coinCreatorFeeBps = new BN(0);
 
     const result = buyBaseInputInternal(
       base,
@@ -27,6 +29,8 @@ describe("buyBaseInput with fees", () => {
       quoteReserve,
       lpFeeBps,
       protocolFeeBps,
+      coinCreatorFeeBps,
+      PublicKey.default,
     );
 
     console.log("quote =", result.uiQuote.toString());
@@ -48,6 +52,7 @@ describe("buyBaseInput with fees", () => {
     const slippage = 1;
     const lpFeeBps = new BN(30);
     const protocolFeeBps = new BN(20);
+    const coinCreatorFeeBps = new BN(0);
 
     expect(() =>
       buyBaseInputInternal(
@@ -57,6 +62,8 @@ describe("buyBaseInput with fees", () => {
         quoteReserve,
         lpFeeBps,
         protocolFeeBps,
+        coinCreatorFeeBps,
+        PublicKey.default,
       ),
     ).to.throw("Cannot buy more base tokens than the pool reserves.");
   });

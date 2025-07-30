@@ -160,6 +160,93 @@ export type PumpAmm = {
         {
           name: "program";
         },
+        {
+          name: "coinCreatorVaultAta";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "account";
+                path: "coinCreatorVaultAuthority";
+              },
+              {
+                kind: "account";
+                path: "quoteTokenProgram";
+              },
+              {
+                kind: "account";
+                path: "quoteMint";
+              },
+            ];
+            program: {
+              kind: "const";
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89,
+              ];
+            };
+          };
+        },
+        {
+          name: "coinCreatorVaultAuthority";
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  99,
+                  114,
+                  101,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116,
+                ];
+              },
+              {
+                kind: "account";
+                path: "pool.coin_creator";
+                account: "pool";
+              },
+            ];
+          };
+        },
       ];
       args: [
         {
@@ -171,6 +258,145 @@ export type PumpAmm = {
           type: "u64";
         },
       ];
+    },
+    {
+      name: "collectCoinCreatorFee";
+      discriminator: [160, 57, 89, 42, 181, 139, 43, 66];
+      accounts: [
+        {
+          name: "quoteMint";
+        },
+        {
+          name: "quoteTokenProgram";
+        },
+        {
+          name: "coinCreator";
+          signer: true;
+        },
+        {
+          name: "coinCreatorVaultAuthority";
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  99,
+                  114,
+                  101,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116,
+                ];
+              },
+              {
+                kind: "account";
+                path: "coinCreator";
+              },
+            ];
+          };
+        },
+        {
+          name: "coinCreatorVaultAta";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "account";
+                path: "coinCreatorVaultAuthority";
+              },
+              {
+                kind: "account";
+                path: "quoteTokenProgram";
+              },
+              {
+                kind: "account";
+                path: "quoteMint";
+              },
+            ];
+            program: {
+              kind: "const";
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89,
+              ];
+            };
+          };
+        },
+        {
+          name: "coinCreatorTokenAccount";
+          writable: true;
+        },
+        {
+          name: "eventAuthority";
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121,
+                ];
+              },
+            ];
+          };
+        },
+        {
+          name: "program";
+        },
+      ];
+      args: [];
     },
     {
       name: "createConfig";
@@ -259,6 +485,10 @@ export type PumpAmm = {
           type: {
             array: ["pubkey", 8];
           };
+        },
+        {
+          name: "coinCreatorFeeBasisPoints";
+          type: "u64";
         },
       ];
     },
@@ -579,6 +809,10 @@ export type PumpAmm = {
         {
           name: "quoteAmountIn";
           type: "u64";
+        },
+        {
+          name: "coinCreator";
+          type: "pubkey";
         },
       ];
     },
@@ -955,6 +1189,93 @@ export type PumpAmm = {
         {
           name: "program";
         },
+        {
+          name: "coinCreatorVaultAta";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "account";
+                path: "coinCreatorVaultAuthority";
+              },
+              {
+                kind: "account";
+                path: "quoteTokenProgram";
+              },
+              {
+                kind: "account";
+                path: "quoteMint";
+              },
+            ];
+            program: {
+              kind: "const";
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89,
+              ];
+            };
+          };
+        },
+        {
+          name: "coinCreatorVaultAuthority";
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  99,
+                  114,
+                  101,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116,
+                ];
+              },
+              {
+                kind: "account";
+                path: "pool.coin_creator";
+                account: "pool";
+              },
+            ];
+          };
+        },
       ];
       args: [
         {
@@ -966,6 +1287,209 @@ export type PumpAmm = {
           type: "u64";
         },
       ];
+    },
+    {
+      name: "setCoinCreator";
+      docs: [
+        "Sets Pool::coin_creator from Metaplex metadata creator or BondingCurve::creator",
+      ];
+      discriminator: [210, 149, 128, 45, 188, 58, 78, 175];
+      accounts: [
+        {
+          name: "pool";
+          writable: true;
+        },
+        {
+          name: "metadata";
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [109, 101, 116, 97, 100, 97, 116, 97];
+              },
+              {
+                kind: "const";
+                value: [
+                  11,
+                  112,
+                  101,
+                  177,
+                  227,
+                  209,
+                  124,
+                  69,
+                  56,
+                  157,
+                  82,
+                  127,
+                  107,
+                  4,
+                  195,
+                  205,
+                  88,
+                  184,
+                  108,
+                  115,
+                  26,
+                  160,
+                  253,
+                  181,
+                  73,
+                  182,
+                  209,
+                  188,
+                  3,
+                  248,
+                  41,
+                  70,
+                ];
+              },
+              {
+                kind: "account";
+                path: "pool.base_mint";
+                account: "pool";
+              },
+            ];
+            program: {
+              kind: "const";
+              value: [
+                11,
+                112,
+                101,
+                177,
+                227,
+                209,
+                124,
+                69,
+                56,
+                157,
+                82,
+                127,
+                107,
+                4,
+                195,
+                205,
+                88,
+                184,
+                108,
+                115,
+                26,
+                160,
+                253,
+                181,
+                73,
+                182,
+                209,
+                188,
+                3,
+                248,
+                41,
+                70,
+              ];
+            };
+          };
+        },
+        {
+          name: "bondingCurve";
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  45,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101,
+                ];
+              },
+              {
+                kind: "account";
+                path: "pool.base_mint";
+                account: "pool";
+              },
+            ];
+            program: {
+              kind: "const";
+              value: [
+                1,
+                86,
+                224,
+                246,
+                147,
+                102,
+                90,
+                207,
+                68,
+                219,
+                21,
+                104,
+                191,
+                23,
+                91,
+                170,
+                81,
+                137,
+                203,
+                151,
+                245,
+                210,
+                255,
+                59,
+                101,
+                93,
+                43,
+                182,
+                253,
+                109,
+                24,
+                176,
+              ];
+            };
+          };
+        },
+        {
+          name: "eventAuthority";
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121,
+                ];
+              },
+            ];
+          };
+        },
+        {
+          name: "program";
+        },
+      ];
+      args: [];
     },
     {
       name: "updateAdmin";
@@ -1079,6 +1603,10 @@ export type PumpAmm = {
             array: ["pubkey", 8];
           };
         },
+        {
+          name: "coinCreatorFeeBasisPoints";
+          type: "u64";
+        },
       ];
     },
     {
@@ -1190,6 +1718,10 @@ export type PumpAmm = {
   ];
   accounts: [
     {
+      name: "bondingCurve";
+      discriminator: [23, 183, 248, 55, 96, 216, 172, 96];
+    },
+    {
       name: "globalConfig";
       discriminator: [149, 8, 156, 202, 160, 252, 176, 217];
     },
@@ -1202,6 +1734,10 @@ export type PumpAmm = {
     {
       name: "buyEvent";
       discriminator: [103, 244, 82, 31, 44, 245, 119, 119];
+    },
+    {
+      name: "collectCoinCreatorFeeEvent";
+      discriminator: [232, 245, 194, 238, 234, 218, 58, 89];
     },
     {
       name: "createConfigEvent";
@@ -1226,6 +1762,14 @@ export type PumpAmm = {
     {
       name: "sellEvent";
       discriminator: [62, 47, 55, 10, 165, 3, 220, 42];
+    },
+    {
+      name: "setBondingCurveCoinCreatorEvent";
+      discriminator: [242, 231, 235, 102, 65, 99, 189, 211];
+    },
+    {
+      name: "setMetaplexCoinCreatorEvent";
+      discriminator: [150, 107, 199, 123, 124, 207, 102, 228];
     },
     {
       name: "updateAdminEvent";
@@ -1353,8 +1897,48 @@ export type PumpAmm = {
       code: 6027;
       name: "accountTypeNotSupported";
     },
+    {
+      code: 6028;
+      name: "onlyCanonicalPumpPoolsCanHaveCoinCreator";
+    },
   ];
   types: [
+    {
+      name: "bondingCurve";
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "virtualTokenReserves";
+            type: "u64";
+          },
+          {
+            name: "virtualSolReserves";
+            type: "u64";
+          },
+          {
+            name: "realTokenReserves";
+            type: "u64";
+          },
+          {
+            name: "realSolReserves";
+            type: "u64";
+          },
+          {
+            name: "tokenTotalSupply";
+            type: "u64";
+          },
+          {
+            name: "complete";
+            type: "bool";
+          },
+          {
+            name: "creator";
+            type: "pubkey";
+          },
+        ];
+      };
+    },
     {
       name: "buyEvent";
       type: {
@@ -1440,6 +2024,46 @@ export type PumpAmm = {
             name: "protocolFeeRecipientTokenAccount";
             type: "pubkey";
           },
+          {
+            name: "coinCreator";
+            type: "pubkey";
+          },
+          {
+            name: "coinCreatorFeeBasisPoints";
+            type: "u64";
+          },
+          {
+            name: "coinCreatorFee";
+            type: "u64";
+          },
+        ];
+      };
+    },
+    {
+      name: "collectCoinCreatorFeeEvent";
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "timestamp";
+            type: "i64";
+          },
+          {
+            name: "coinCreator";
+            type: "pubkey";
+          },
+          {
+            name: "coinCreatorFee";
+            type: "u64";
+          },
+          {
+            name: "coinCreatorVaultAta";
+            type: "pubkey";
+          },
+          {
+            name: "coinCreatorTokenAccount";
+            type: "pubkey";
+          },
         ];
       };
     },
@@ -1469,6 +2093,10 @@ export type PumpAmm = {
             type: {
               array: ["pubkey", 8];
             };
+          },
+          {
+            name: "coinCreatorFeeBasisPoints";
+            type: "u64";
           },
         ];
       };
@@ -1552,6 +2180,10 @@ export type PumpAmm = {
           },
           {
             name: "userQuoteTokenAccount";
+            type: "pubkey";
+          },
+          {
+            name: "coinCreator";
             type: "pubkey";
           },
         ];
@@ -1732,6 +2364,11 @@ export type PumpAmm = {
               array: ["pubkey", 8];
             };
           },
+          {
+            name: "coinCreatorFeeBasisPoints";
+            docs: ["The coin creator fee in basis points (0.01%)"];
+            type: "u64";
+          },
         ];
       };
     },
@@ -1776,6 +2413,10 @@ export type PumpAmm = {
             name: "lpSupply";
             docs: ["True circulating supply without burns and lock-ups"];
             type: "u64";
+          },
+          {
+            name: "coinCreator";
+            type: "pubkey";
           },
         ];
       };
@@ -1865,6 +2506,74 @@ export type PumpAmm = {
             name: "protocolFeeRecipientTokenAccount";
             type: "pubkey";
           },
+          {
+            name: "coinCreator";
+            type: "pubkey";
+          },
+          {
+            name: "coinCreatorFeeBasisPoints";
+            type: "u64";
+          },
+          {
+            name: "coinCreatorFee";
+            type: "u64";
+          },
+        ];
+      };
+    },
+    {
+      name: "setBondingCurveCoinCreatorEvent";
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "timestamp";
+            type: "i64";
+          },
+          {
+            name: "baseMint";
+            type: "pubkey";
+          },
+          {
+            name: "pool";
+            type: "pubkey";
+          },
+          {
+            name: "bondingCurve";
+            type: "pubkey";
+          },
+          {
+            name: "coinCreator";
+            type: "pubkey";
+          },
+        ];
+      };
+    },
+    {
+      name: "setMetaplexCoinCreatorEvent";
+      type: {
+        kind: "struct";
+        fields: [
+          {
+            name: "timestamp";
+            type: "i64";
+          },
+          {
+            name: "baseMint";
+            type: "pubkey";
+          },
+          {
+            name: "pool";
+            type: "pubkey";
+          },
+          {
+            name: "metadata";
+            type: "pubkey";
+          },
+          {
+            name: "coinCreator";
+            type: "pubkey";
+          },
         ];
       };
     },
@@ -1914,6 +2623,10 @@ export type PumpAmm = {
             type: {
               array: ["pubkey", 8];
             };
+          },
+          {
+            name: "coinCreatorFeeBasisPoints";
+            type: "u64";
           },
         ];
       };

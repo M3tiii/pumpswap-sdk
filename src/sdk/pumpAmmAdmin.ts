@@ -25,6 +25,7 @@ export class PumpAmmAdminSdk {
     lpFeeBasisPoints: BN,
     protocolFeeBasisPoints: BN,
     protocolFeeRecipients: PublicKey[],
+    coinCreatorFeeBasisPoints: BN,
     admin: PublicKey,
   ): Promise<TransactionInstruction> {
     return this.program.methods
@@ -32,6 +33,7 @@ export class PumpAmmAdminSdk {
         lpFeeBasisPoints,
         protocolFeeBasisPoints,
         protocolFeeRecipients,
+        coinCreatorFeeBasisPoints,
       )
       .accountsPartial({
         admin,
@@ -80,6 +82,7 @@ export class PumpAmmAdminSdk {
     lpFeeBasisPoints: BN,
     protocolFeeBasisPoints: BN,
     protocolFeeRecipients: PublicKey[],
+    coinCreatorFeeBasisPoints: BN,
     admin: PublicKey,
   ): Promise<TransactionInstruction> {
     return this.program.methods
@@ -87,6 +90,7 @@ export class PumpAmmAdminSdk {
         lpFeeBasisPoints,
         protocolFeeBasisPoints,
         protocolFeeRecipients,
+        coinCreatorFeeBasisPoints,
       )
       .accountsPartial({
         admin,

@@ -85,11 +85,16 @@ interface SellQuoteInputResult {
 }
 type Direction = "quoteToBase" | "baseToQuote";
 interface Pool {
+    poolBump: number;
+    index: number;
+    creator: PublicKey;
     baseMint: PublicKey;
     quoteMint: PublicKey;
     lpMint: PublicKey;
     poolBaseTokenAccount: PublicKey;
     poolQuoteTokenAccount: PublicKey;
+    lpSupply: BN;
+    coinCreator: PublicKey;
 }
 
 export type { BuyBaseInputResult as B, DepositBaseResult as D, Pool as P, SellBaseInputResult as S, WithdrawResult as W, DepositQuoteAndLpTokenFromBaseResult as a, DepositQuoteResult as b, DepositBaseAndLpTokenFromQuoteResult as c, DepositResult as d, DepositLpTokenResult as e, WithdrawAutocompleteResult as f, BuyQuoteInputResult as g, SellQuoteInputResult as h, Direction as i };

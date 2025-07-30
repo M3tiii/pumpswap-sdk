@@ -4728,7 +4728,8 @@ function fee(amount, basisPoints) {
 }
 
 // src/sdk/buy.ts
-function buyBaseInputInternal(base, slippage, baseReserve, quoteReserve, lpFeeBps, protocolFeeBps) {
+var import_web32 = require("@solana/web3.js");
+function buyBaseInputInternal(base, slippage, baseReserve, quoteReserve, lpFeeBps, protocolFeeBps, coinCreatorFeeBps, coinCreator) {
   if (base.isZero()) {
     throw new Error("Invalid input: 'base' cannot be zero.");
   }
@@ -4740,9 +4741,6 @@ function buyBaseInputInternal(base, slippage, baseReserve, quoteReserve, lpFeeBp
   if (base.gt(baseReserve)) {
     throw new Error("Cannot buy more base tokens than the pool reserves.");
   }
-  if (lpFeeBps.isNeg() || protocolFeeBps.isNeg()) {
-    throw new Error("Fee basis points cannot be negative.");
-  }
   const numerator = quoteReserve.mul(base);
   const denominator = baseReserve.sub(base);
   if (denominator.isZero()) {
@@ -4751,7 +4749,8 @@ function buyBaseInputInternal(base, slippage, baseReserve, quoteReserve, lpFeeBp
   const quoteAmountIn = ceilDiv(numerator, denominator);
   const lpFee = fee(quoteAmountIn, lpFeeBps);
   const protocolFee = fee(quoteAmountIn, protocolFeeBps);
-  const totalQuote = quoteAmountIn.add(lpFee).add(protocolFee);
+  const coinCreatorFee = import_web32.PublicKey.default.equals(coinCreator) ? new import_bn2.default(0) : fee(quoteAmountIn, coinCreatorFeeBps);
+  const totalQuote = quoteAmountIn.add(lpFee).add(protocolFee).add(coinCreatorFee);
   const precision = new import_bn2.default(1e9);
   const slippageFactorFloat = (1 + slippage / 100) * 1e9;
   const slippageFactor = new import_bn2.default(Math.floor(slippageFactorFloat));
@@ -4763,7 +4762,7 @@ function buyBaseInputInternal(base, slippage, baseReserve, quoteReserve, lpFeeBp
     maxQuote
   };
 }
-function buyQuoteInputInternal(quote, slippage, baseReserve, quoteReserve, lpFeeBps, protocolFeeBps) {
+function buyQuoteInputInternal(quote, slippage, baseReserve, quoteReserve, lpFeeBps, protocolFeeBps, coinCreatorFeeBps, coinCreator) {
   if (quote.isZero()) {
     throw new Error("Invalid input: 'quote' cannot be zero.");
   }
@@ -4772,10 +4771,7 @@ function buyQuoteInputInternal(quote, slippage, baseReserve, quoteReserve, lpFee
       "Invalid input: 'baseReserve' or 'quoteReserve' cannot be zero."
     );
   }
-  if (lpFeeBps.isNeg() || protocolFeeBps.isNeg()) {
-    throw new Error("Fee basis points cannot be negative.");
-  }
-  const totalFeeBps = lpFeeBps.add(protocolFeeBps);
+  const totalFeeBps = lpFeeBps.add(protocolFeeBps).add(import_web32.PublicKey.default.equals(coinCreator) ? new import_bn2.default(0) : coinCreatorFeeBps);
   const denominator = new import_bn2.default(1e4).add(totalFeeBps);
   const effectiveQuote = quote.mul(new import_bn2.default(1e4)).div(denominator);
   const numerator = baseReserve.mul(effectiveQuote);

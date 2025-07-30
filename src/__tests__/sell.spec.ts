@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import BN from "bn.js";
 import { sellBaseInputInternal } from "../sdk/sell";
+import { PublicKey } from "@solana/web3.js";
 
 describe("sellBaseInput", () => {
   it("should compute final quote and minQuote correctly with typical inputs", () => {
@@ -18,6 +19,7 @@ describe("sellBaseInput", () => {
     // e.g. 30 => 0.30%, 20 => 0.20%
     const lpFeeBps = new BN(30);
     const protocolFeeBps = new BN(20);
+    const coinCreatorFeeBps = new BN(0);
 
     const result = sellBaseInputInternal(
       base,
@@ -26,6 +28,8 @@ describe("sellBaseInput", () => {
       quoteReserve,
       lpFeeBps,
       protocolFeeBps,
+      coinCreatorFeeBps,
+      PublicKey.default,
     );
 
     console.log("Final quote received:", result.uiQuote.toString());
@@ -53,6 +57,7 @@ describe("sellBaseInput", () => {
     const slippage = 1;
     const lpFeeBps = new BN(30);
     const protocolFeeBps = new BN(20);
+    const coinCreatorFeeBps = new BN(0);
 
     expect(() =>
       sellBaseInputInternal(
@@ -62,6 +67,8 @@ describe("sellBaseInput", () => {
         quoteReserve,
         lpFeeBps,
         protocolFeeBps,
+        coinCreatorFeeBps,
+        PublicKey.default,
       ),
     ).to.throw("Invalid input: 'base' (base_amount_in) cannot be zero.");
   });
@@ -70,6 +77,7 @@ describe("sellBaseInput", () => {
     const slippage = 1;
     const lpFeeBps = new BN(30);
     const protocolFeeBps = new BN(20);
+    const coinCreatorFeeBps = new BN(0);
 
     // baseReserve = 0
     expect(() =>
@@ -80,6 +88,8 @@ describe("sellBaseInput", () => {
         new BN(2_000_000),
         lpFeeBps,
         protocolFeeBps,
+        coinCreatorFeeBps,
+        PublicKey.default,
       ),
     ).to.throw(
       "Invalid input: 'baseReserve' or 'quoteReserve' cannot be zero.",
@@ -94,39 +104,12 @@ describe("sellBaseInput", () => {
         new BN(0),
         lpFeeBps,
         protocolFeeBps,
+        coinCreatorFeeBps,
+        PublicKey.default,
       ),
     ).to.throw(
       "Invalid input: 'baseReserve' or 'quoteReserve' cannot be zero.",
     );
-  });
-
-  it("should throw an error if lpFeeBps or protocolFeeBps is negative", () => {
-    const base = new BN(10_000);
-    const baseReserve = new BN(1_000_000);
-    const quoteReserve = new BN(2_000_000);
-    const slippage = 1;
-
-    expect(() =>
-      sellBaseInputInternal(
-        base,
-        slippage,
-        baseReserve,
-        quoteReserve,
-        new BN(-1),
-        new BN(20),
-      ),
-    ).to.throw("Fee basis points cannot be negative.");
-
-    expect(() =>
-      sellBaseInputInternal(
-        base,
-        slippage,
-        baseReserve,
-        quoteReserve,
-        new BN(30),
-        new BN(-5),
-      ),
-    ).to.throw("Fee basis points cannot be negative.");
   });
 
   it("should throw an error if fees exceed total output (finalQuote negative)", () => {
@@ -139,6 +122,7 @@ describe("sellBaseInput", () => {
     // Large fees (90% + 20% = 110% total) will exceed quoteAmountOut=1
     const lpFeeBps = new BN(9000); // 90%
     const protocolFeeBps = new BN(2000); // 20%
+    const coinCreatorFeeBps = new BN(0);
 
     expect(() =>
       sellBaseInputInternal(
@@ -148,6 +132,8 @@ describe("sellBaseInput", () => {
         quoteReserve,
         lpFeeBps,
         protocolFeeBps,
+        coinCreatorFeeBps,
+        PublicKey.default,
       ),
     ).to.throw("Fees exceed total output; final quote is negative.");
   });

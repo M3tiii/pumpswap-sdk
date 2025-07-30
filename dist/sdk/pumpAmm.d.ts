@@ -1,6 +1,6 @@
 import { BN } from '@coral-xyz/anchor';
 import { Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { a as DepositQuoteAndLpTokenFromBaseResult, c as DepositBaseAndLpTokenFromQuoteResult, f as WithdrawAutocompleteResult, i as Direction } from '../sdk-CG0vdPWZ.js';
+import { a as DepositQuoteAndLpTokenFromBaseResult, c as DepositBaseAndLpTokenFromQuoteResult, f as WithdrawAutocompleteResult, i as Direction } from '../sdk-BELsphs6.js';
 import 'bn.js';
 
 declare class PumpAmmSdk {
@@ -16,6 +16,7 @@ declare class PumpAmmSdk {
         protocolFeeBasisPoints: BN;
         disableFlags: number;
         protocolFeeRecipients: PublicKey[];
+        coinCreatorFeeBasisPoints: BN;
     }>;
     fetchPool(pool: PublicKey): Promise<{
         poolBump: number;
@@ -27,6 +28,7 @@ declare class PumpAmmSdk {
         poolBaseTokenAccount: PublicKey;
         poolQuoteTokenAccount: PublicKey;
         lpSupply: BN;
+        coinCreator: PublicKey;
     }>;
     createPoolInstructions(index: number, creator: PublicKey, baseMint: PublicKey, quoteMint: PublicKey, baseIn: BN, quoteIn: BN, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
     createAutocompleteInitialPoolPrice(initialBase: BN, initialQuote: BN): Promise<BN>;
@@ -40,6 +42,10 @@ declare class PumpAmmSdk {
     swapAutocompleteQuoteFromBase(pool: PublicKey, base: BN, slippage: number, direction: Direction): Promise<BN>;
     swapAutocompleteBaseFromQuote(pool: PublicKey, quote: BN, slippage: number, direction: Direction): Promise<BN>;
     extendAccount(account: PublicKey, user: PublicKey): Promise<TransactionInstruction>;
+    collectCoinCreatorFee(coinCreator: PublicKey, coinCreatorTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
+    coinCreatorVaultAuthorityPda(coinCreator: PublicKey): PublicKey;
+    coinCreatorVaultAta(coinCreatorVaultAuthority: PublicKey, quoteMint: PublicKey, quoteTokenProgram: PublicKey): PublicKey;
+    setCoinCreator(pool: PublicKey): Promise<TransactionInstruction>;
 }
 
 export { PumpAmmSdk };

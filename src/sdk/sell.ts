@@ -1,14 +1,17 @@
 import BN from "bn.js";
 import { ceilDiv, fee } from "./util";
 import { SellBaseInputResult, SellQuoteInputResult } from "../types/sdk";
+import { PublicKey } from "@solana/web3.js";
 
 export function sellBaseInputInternal(
-  base: BN, // The amount of base tokens the user wants to sell
+  base: BN,
   slippage: number, // e.g. 1 => 1% slippage tolerance
-  baseReserve: BN, // Current reserve of base tokens in the pool
-  quoteReserve: BN, // Current reserve of quote tokens in the pool
-  lpFeeBps: BN, // LP fee in basis points (e.g., 30 => 0.30%)
-  protocolFeeBps: BN, // Protocol fee in basis points (e.g., 20 => 0.20%)
+  baseReserve: BN,
+  quoteReserve: BN,
+  lpFeeBps: BN,
+  protocolFeeBps: BN,
+  coinCreatorFeeBps: BN,
+  coinCreator: PublicKey,
 ): SellBaseInputResult {
   // -----------------------------------------
   // 1) Basic validations
@@ -20,9 +23,6 @@ export function sellBaseInputInternal(
     throw new Error(
       "Invalid input: 'baseReserve' or 'quoteReserve' cannot be zero.",
     );
-  }
-  if (lpFeeBps.isNeg() || protocolFeeBps.isNeg()) {
-    throw new Error("Fee basis points cannot be negative.");
   }
 
   // -----------------------------------------
@@ -38,9 +38,15 @@ export function sellBaseInputInternal(
   // -----------------------------------------
   const lpFee = fee(quoteAmountOut, lpFeeBps);
   const protocolFee = fee(quoteAmountOut, protocolFeeBps);
+  const coinCreatorFee = PublicKey.default.equals(coinCreator)
+    ? new BN(0)
+    : fee(quoteAmountOut, coinCreatorFeeBps);
 
   // Subtract fees to get the actual user receive
-  const finalQuote = quoteAmountOut.sub(lpFee).sub(protocolFee);
+  const finalQuote = quoteAmountOut
+    .sub(lpFee)
+    .sub(protocolFee)
+    .sub(coinCreatorFee);
   if (finalQuote.isNeg()) {
     // Theoretically shouldn't happen unless fees exceed quoteAmountOut
     throw new Error("Fees exceed total output; final quote is negative.");
@@ -71,9 +77,12 @@ function calculateQuoteAmountOut(
   userQuoteAmountOut: BN,
   lpFeeBasisPoints: BN,
   protocolFeeBasisPoints: BN,
+  coinCreatorFeeBasisPoints: BN,
 ): BN {
   // Calculate the total fee basis points
-  const totalFeeBasisPoints = lpFeeBasisPoints.add(protocolFeeBasisPoints);
+  const totalFeeBasisPoints = lpFeeBasisPoints
+    .add(protocolFeeBasisPoints)
+    .add(coinCreatorFeeBasisPoints);
   // Calculate the denominator
   const denominator = MAX_FEE_BASIS_POINTS.sub(totalFeeBasisPoints);
   // Calculate the quote_amount_out
@@ -81,12 +90,14 @@ function calculateQuoteAmountOut(
 }
 
 export function sellQuoteInputInternal(
-  quote: BN, // Desired quote tokens (including fees)
+  quote: BN,
   slippage: number, // e.g. 1 => 1% slippage tolerance
-  baseReserve: BN, // Current reserve of base tokens in the pool
-  quoteReserve: BN, // Current reserve of quote tokens in the pool
-  lpFeeBps: BN, // LP fee in basis points (e.g., 30 => 0.30%)
-  protocolFeeBps: BN, // Protocol fee in basis points (e.g., 20 => 0.20%)
+  baseReserve: BN,
+  quoteReserve: BN,
+  lpFeeBps: BN,
+  protocolFeeBps: BN,
+  coinCreatorFeeBps: BN,
+  coinCreator: PublicKey,
 ): SellQuoteInputResult {
   // -----------------------------------------
   // 1) Basic validations
@@ -104,14 +115,16 @@ export function sellQuoteInputInternal(
       "Cannot receive more quote tokens than the pool quote reserves.",
     );
   }
-  if (lpFeeBps.isNeg() || protocolFeeBps.isNeg()) {
-    throw new Error("Fee basis points cannot be negative.");
-  }
 
   // -----------------------------------------
   // 2) Calculate the fees included in the quote
   // -----------------------------------------
-  const rawQuote = calculateQuoteAmountOut(quote, lpFeeBps, protocolFeeBps);
+  const rawQuote = calculateQuoteAmountOut(
+    quote,
+    lpFeeBps,
+    protocolFeeBps,
+    PublicKey.default.equals(coinCreator) ? new BN(0) : coinCreatorFeeBps,
+  );
 
   // -----------------------------------------
   // 3) Calculate the base amount needed for the raw quote output

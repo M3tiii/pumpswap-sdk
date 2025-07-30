@@ -103,9 +103,14 @@ export interface SellQuoteInputResult {
 export type Direction = "quoteToBase" | "baseToQuote";
 
 export interface Pool {
+  poolBump: number;
+  index: number;
+  creator: PublicKey;
   baseMint: PublicKey;
   quoteMint: PublicKey;
   lpMint: PublicKey;
   poolBaseTokenAccount: PublicKey;
   poolQuoteTokenAccount: PublicKey;
+  lpSupply: BN;
+  coinCreator: PublicKey;
 }

@@ -1,6 +1,7 @@
 import { BN, Program } from "@coral-xyz/anchor";
 import { PumpAmm } from "../types/pump_amm";
 import {
+  AccountInfo,
   Connection,
   PublicKey,
   SystemProgram,
@@ -39,6 +40,8 @@ import {
 import { SYSTEM_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/native/system";
 import { getPumpAmmProgram } from "./util";
 
+export const POOL_ACCOUNT_NEW_SIZE = 300;
+
 export class PumpAmmInternalSdk {
   private readonly connection: Connection;
   private readonly program: Program<PumpAmm>;
@@ -64,7 +67,7 @@ export class PumpAmmInternalSdk {
     index: number,
     creator: PublicKey,
     baseMint: PublicKey,
-    quoteMint: PublicKey
+    quoteMint: PublicKey,
   ): [PublicKey, number] {
     return poolPda(index, creator, baseMint, quoteMint, this.program.programId);
   }
@@ -89,7 +92,7 @@ export class PumpAmmInternalSdk {
     baseIn: BN,
     quoteIn: BN,
     userBaseTokenAccount: PublicKey | undefined = undefined,
-    userQuoteTokenAccount: PublicKey | undefined = undefined
+    userQuoteTokenAccount: PublicKey | undefined = undefined,
   ): Promise<TransactionInstruction[]> {
     const [baseTokenProgram, quoteTokenProgram] =
       await this.getMintTokenPrograms(baseMint, quoteMint);
@@ -99,7 +102,7 @@ export class PumpAmmInternalSdk {
         baseMint,
         creator,
         true,
-        baseTokenProgram
+        baseTokenProgram,
       );
     }
 
@@ -108,7 +111,7 @@ export class PumpAmmInternalSdk {
         quoteMint,
         creator,
         true,
-        quoteTokenProgram
+        quoteTokenProgram,
       );
     }
 
@@ -126,7 +129,7 @@ export class PumpAmmInternalSdk {
           creator,
           baseMint,
           quoteMint,
-          this.program.programId
+          this.program.programId,
         );
 
         const instructions: TransactionInstruction[] = [];
@@ -135,7 +138,7 @@ export class PumpAmmInternalSdk {
           baseMint,
           pool,
           true,
-          baseTokenProgram
+          baseTokenProgram,
         );
 
         if (!(await this.accountExists(poolBaseTokenAccountPDA))) {
@@ -145,8 +148,8 @@ export class PumpAmmInternalSdk {
               poolBaseTokenAccountPDA,
               pool,
               baseMint,
-              baseTokenProgram
-            )
+              baseTokenProgram,
+            ),
           );
         }
 
@@ -154,7 +157,7 @@ export class PumpAmmInternalSdk {
           quoteMint,
           pool,
           true,
-          quoteTokenProgram
+          quoteTokenProgram,
         );
 
         if (!(await this.accountExists(poolQuoteTokenAccountPDA))) {
@@ -164,14 +167,14 @@ export class PumpAmmInternalSdk {
               poolQuoteTokenAccountPDA,
               pool,
               quoteMint,
-              quoteTokenProgram
-            )
+              quoteTokenProgram,
+            ),
           );
         }
 
         instructions.push(
           await this.program.methods
-            .createPool(index, baseIn, quoteIn)
+            .createPool(index, baseIn, quoteIn, SYSTEM_PROGRAM_ID)
             .accountsPartial({
               globalConfig: this.globalConfig,
               baseMint,
@@ -182,11 +185,11 @@ export class PumpAmmInternalSdk {
               baseTokenProgram,
               quoteTokenProgram,
             })
-            .instruction()
+            .instruction(),
         );
 
         return instructions;
-      }
+      },
     );
   }
 
@@ -198,9 +201,14 @@ export class PumpAmmInternalSdk {
     user: PublicKey,
     userBaseTokenAccount: PublicKey | undefined = undefined,
     userQuoteTokenAccount: PublicKey | undefined = undefined,
-    userPoolTokenAccount: PublicKey | undefined = undefined
+    userPoolTokenAccount: PublicKey | undefined = undefined,
   ): Promise<TransactionInstruction[]> {
-    const poolData = await this.program.account.pool.fetch(pool);
+    const poolAccountInfo = (await this.connection.getAccountInfo(pool))!!;
+
+    const poolData = this.program.coder.accounts.decode<Pool>(
+      "pool",
+      poolAccountInfo.data,
+    );
 
     const { baseMint, quoteMint, lpMint } = poolData;
 
@@ -215,43 +223,52 @@ export class PumpAmmInternalSdk {
       user,
       userBaseTokenAccount,
       userQuoteTokenAccount,
-      userPoolTokenAccount
+      userPoolTokenAccount,
     );
 
-    return await this.withWsolAccounts(
+    return await this.withFixPoolInstructions(
+      pool,
+      poolAccountInfo,
       user,
-      baseMint,
-      liquidityAccounts.userBaseTokenAccount,
-      maxBase,
-      quoteMint,
-      liquidityAccounts.userQuoteTokenAccount,
-      maxQuote,
       async () => {
-        const instructions: TransactionInstruction[] = [];
+        return await this.withWsolAccounts(
+          user,
+          baseMint,
+          liquidityAccounts.userBaseTokenAccount,
+          maxBase,
+          quoteMint,
+          liquidityAccounts.userQuoteTokenAccount,
+          maxQuote,
+          async () => {
+            const instructions: TransactionInstruction[] = [];
 
-        if (
-          !(await this.accountExists(liquidityAccounts.userPoolTokenAccount))
-        ) {
-          instructions.push(
-            createAssociatedTokenAccountIdempotentInstruction(
-              user,
-              liquidityAccounts.userPoolTokenAccount,
-              user,
-              lpMint,
-              TOKEN_2022_PROGRAM_ID
-            )
-          );
-        }
+            if (
+              !(await this.accountExists(
+                liquidityAccounts.userPoolTokenAccount,
+              ))
+            ) {
+              instructions.push(
+                createAssociatedTokenAccountIdempotentInstruction(
+                  user,
+                  liquidityAccounts.userPoolTokenAccount,
+                  user,
+                  lpMint,
+                  TOKEN_2022_PROGRAM_ID,
+                ),
+              );
+            }
 
-        instructions.push(
-          await this.program.methods
-            .deposit(lpToken, maxBase, maxQuote)
-            .accountsPartial(liquidityAccounts)
-            .instruction()
+            instructions.push(
+              await this.program.methods
+                .deposit(lpToken, maxBase, maxQuote)
+                .accountsPartial(liquidityAccounts)
+                .instruction(),
+            );
+
+            return instructions;
+          },
         );
-
-        return instructions;
-      }
+      },
     );
   }
 
@@ -263,7 +280,7 @@ export class PumpAmmInternalSdk {
     quoteMint: PublicKey,
     userQuoteAta: PublicKey,
     quoteAmount: BN,
-    block: () => Promise<TransactionInstruction[]>
+    block: () => Promise<TransactionInstruction[]>,
   ) {
     return await this.withWsolAccount(
       user,
@@ -271,7 +288,7 @@ export class PumpAmmInternalSdk {
       userBaseAta,
       baseAmount,
       () =>
-        this.withWsolAccount(user, quoteMint, userQuoteAta, quoteAmount, block)
+        this.withWsolAccount(user, quoteMint, userQuoteAta, quoteAmount, block),
     );
   }
 
@@ -280,11 +297,9 @@ export class PumpAmmInternalSdk {
     mint: PublicKey,
     ata: PublicKey,
     amount: BN,
-    block: () => Promise<TransactionInstruction[]>
+    block: () => Promise<TransactionInstruction[]>,
   ): Promise<TransactionInstruction[]> {
     const instructions: TransactionInstruction[] = [];
-
-    let wsolAccountCreated = false;
 
     if (mint.equals(NATIVE_MINT)) {
       if (!(await this.accountExists(ata))) {
@@ -293,33 +308,34 @@ export class PumpAmmInternalSdk {
             user,
             ata,
             user,
-            NATIVE_MINT
-          )
+            NATIVE_MINT,
+          ),
         );
-        wsolAccountCreated = true;
       }
-      instructions.push(
-        SystemProgram.transfer({
-          fromPubkey: user,
-          toPubkey: ata,
-          lamports: BigInt(amount.toString()),
-        }),
-        createSyncNativeInstruction(ata)
-      );
+      if (amount.gtn(0)) {
+        instructions.push(
+          SystemProgram.transfer({
+            fromPubkey: user,
+            toPubkey: ata,
+            lamports: BigInt(amount.toString()),
+          }),
+          createSyncNativeInstruction(ata),
+        );
+      }
     }
 
     const blockInstructions = await block();
     instructions.push(...blockInstructions);
 
-    if (wsolAccountCreated) {
+    if (mint.equals(NATIVE_MINT)) {
       instructions.push(
         createCloseAccountInstruction(
           ata,
           user,
           user,
           undefined,
-          TOKEN_PROGRAM_ID
-        )
+          TOKEN_PROGRAM_ID,
+        ),
       );
     }
 
@@ -334,7 +350,7 @@ export class PumpAmmInternalSdk {
   async depositBaseInputInternal(
     pool: PublicKey,
     base: BN,
-    slippage: number
+    slippage: number,
   ): Promise<DepositBaseResult> {
     const { fetchedPool, poolBaseAmount, poolQuoteAmount } =
       await this.getPoolBaseAndQuoteAmounts(pool);
@@ -344,7 +360,7 @@ export class PumpAmmInternalSdk {
       slippage,
       poolBaseAmount,
       poolQuoteAmount,
-      fetchedPool.lpSupply
+      fetchedPool.lpSupply,
     );
 
     return {
@@ -358,7 +374,7 @@ export class PumpAmmInternalSdk {
   async depositQuoteInputInternal(
     pool: PublicKey,
     quote: BN,
-    slippage: number
+    slippage: number,
   ): Promise<DepositQuoteResult> {
     const { fetchedPool, poolBaseAmount, poolQuoteAmount } =
       await this.getPoolBaseAndQuoteAmounts(pool);
@@ -368,7 +384,7 @@ export class PumpAmmInternalSdk {
       slippage,
       poolQuoteAmount,
       poolBaseAmount,
-      fetchedPool.lpSupply
+      fetchedPool.lpSupply,
     );
 
     return {
@@ -387,9 +403,14 @@ export class PumpAmmInternalSdk {
     user: PublicKey,
     userBaseTokenAccount: PublicKey | undefined = undefined,
     userQuoteTokenAccount: PublicKey | undefined = undefined,
-    userPoolTokenAccount: PublicKey | undefined = undefined
+    userPoolTokenAccount: PublicKey | undefined = undefined,
   ): Promise<TransactionInstruction[]> {
-    const poolData = await this.program.account.pool.fetch(pool);
+    const poolAccountInfo = (await this.connection.getAccountInfo(pool))!!;
+
+    const poolData = this.program.coder.accounts.decode<Pool>(
+      "pool",
+      poolAccountInfo.data,
+    );
 
     const { baseMint, quoteMint } = poolData;
 
@@ -404,85 +425,96 @@ export class PumpAmmInternalSdk {
       user,
       userBaseTokenAccount,
       userQuoteTokenAccount,
-      userPoolTokenAccount
+      userPoolTokenAccount,
     );
 
-    const instructions = [];
+    return await this.withFixPoolInstructions(
+      pool,
+      poolAccountInfo,
+      user,
+      async () => {
+        const instructions: TransactionInstruction[] = [];
 
-    let baseWsolAtaCreated = false;
+        let baseWsolAtaCreated = false;
 
-    if (!(await this.accountExists(liquidityAccounts.userBaseTokenAccount))) {
-      instructions.push(
-        createAssociatedTokenAccountIdempotentInstruction(
-          user,
-          liquidityAccounts.userBaseTokenAccount,
-          user,
-          liquidityAccounts.baseMint,
-          baseTokenProgram
-        )
-      );
+        if (
+          !(await this.accountExists(liquidityAccounts.userBaseTokenAccount))
+        ) {
+          instructions.push(
+            createAssociatedTokenAccountIdempotentInstruction(
+              user,
+              liquidityAccounts.userBaseTokenAccount,
+              user,
+              liquidityAccounts.baseMint,
+              baseTokenProgram,
+            ),
+          );
 
-      if (baseMint.equals(NATIVE_MINT)) {
-        baseWsolAtaCreated = true;
-      }
-    }
+          if (baseMint.equals(NATIVE_MINT)) {
+            baseWsolAtaCreated = true;
+          }
+        }
 
-    let quoteWsolAtaCreated = false;
+        let quoteWsolAtaCreated = false;
 
-    if (!(await this.accountExists(liquidityAccounts.userQuoteTokenAccount))) {
-      instructions.push(
-        createAssociatedTokenAccountIdempotentInstruction(
-          user,
-          liquidityAccounts.userQuoteTokenAccount,
-          user,
-          liquidityAccounts.quoteMint,
-          quoteTokenProgram
-        )
-      );
+        if (
+          !(await this.accountExists(liquidityAccounts.userQuoteTokenAccount))
+        ) {
+          instructions.push(
+            createAssociatedTokenAccountIdempotentInstruction(
+              user,
+              liquidityAccounts.userQuoteTokenAccount,
+              user,
+              liquidityAccounts.quoteMint,
+              quoteTokenProgram,
+            ),
+          );
 
-      if (quoteMint.equals(NATIVE_MINT)) {
-        quoteWsolAtaCreated = true;
-      }
-    }
+          if (quoteMint.equals(NATIVE_MINT)) {
+            quoteWsolAtaCreated = true;
+          }
+        }
 
-    instructions.push(
-      await this.program.methods
-        .withdraw(lpTokenAmountIn, minBaseAmountOut, minQuoteAmountOut)
-        .accountsPartial(liquidityAccounts)
-        .instruction()
+        instructions.push(
+          await this.program.methods
+            .withdraw(lpTokenAmountIn, minBaseAmountOut, minQuoteAmountOut)
+            .accountsPartial(liquidityAccounts)
+            .instruction(),
+        );
+
+        if (baseWsolAtaCreated) {
+          instructions.push(
+            createCloseAccountInstruction(
+              liquidityAccounts.userBaseTokenAccount,
+              user,
+              user,
+              undefined,
+              TOKEN_PROGRAM_ID,
+            ),
+          );
+        }
+
+        if (quoteWsolAtaCreated) {
+          instructions.push(
+            createCloseAccountInstruction(
+              liquidityAccounts.userQuoteTokenAccount,
+              user,
+              user,
+              undefined,
+              TOKEN_PROGRAM_ID,
+            ),
+          );
+        }
+
+        return instructions;
+      },
     );
-
-    if (baseWsolAtaCreated) {
-      instructions.push(
-        createCloseAccountInstruction(
-          liquidityAccounts.userBaseTokenAccount,
-          user,
-          user,
-          undefined,
-          TOKEN_PROGRAM_ID
-        )
-      );
-    }
-
-    if (quoteWsolAtaCreated) {
-      instructions.push(
-        createCloseAccountInstruction(
-          liquidityAccounts.userQuoteTokenAccount,
-          user,
-          user,
-          undefined,
-          TOKEN_PROGRAM_ID
-        )
-      );
-    }
-
-    return instructions;
   }
 
   async withdrawInputsInternal(
     pool: PublicKey,
     lpAmount: BN,
-    slippage: number
+    slippage: number,
   ): Promise<WithdrawResult> {
     const { fetchedPool, poolBaseAmount, poolQuoteAmount } =
       await this.getPoolBaseAndQuoteAmounts(pool);
@@ -492,7 +524,7 @@ export class PumpAmmInternalSdk {
       slippage,
       poolBaseAmount,
       poolQuoteAmount,
-      fetchedPool.lpSupply
+      fetchedPool.lpSupply,
     );
   }
 
@@ -502,21 +534,21 @@ export class PumpAmmInternalSdk {
     const [baseTokenProgram, quoteTokenProgram] =
       await this.getMintTokenPrograms(
         fetchedPool.baseMint,
-        fetchedPool.quoteMint
+        fetchedPool.quoteMint,
       );
 
     const poolBaseTokenAccount = await getAccount(
       this.connection,
       fetchedPool.poolBaseTokenAccount,
       undefined,
-      baseTokenProgram
+      baseTokenProgram,
     );
 
     const poolQuoteTokenAccount = await getAccount(
       this.connection,
       fetchedPool.poolQuoteTokenAccount,
       undefined,
-      quoteTokenProgram
+      quoteTokenProgram,
     );
 
     const poolBaseAmount = new BN(poolBaseTokenAccount.amount.toString());
@@ -539,14 +571,14 @@ export class PumpAmmInternalSdk {
     user: PublicKey,
     userBaseTokenAccount: PublicKey | undefined,
     userQuoteTokenAccount: PublicKey | undefined,
-    userPoolTokenAccount: PublicKey | undefined
+    userPoolTokenAccount: PublicKey | undefined,
   ) {
     if (userBaseTokenAccount === undefined) {
       userBaseTokenAccount = getAssociatedTokenAddressSync(
         baseMint,
         user,
         true,
-        baseTokenProgram
+        baseTokenProgram,
       );
     }
 
@@ -555,7 +587,7 @@ export class PumpAmmInternalSdk {
         quoteMint,
         user,
         true,
-        quoteTokenProgram
+        quoteTokenProgram,
       );
     }
 
@@ -564,7 +596,7 @@ export class PumpAmmInternalSdk {
         lpMint,
         user,
         true,
-        TOKEN_2022_PROGRAM_ID
+        TOKEN_2022_PROGRAM_ID,
       );
     }
 
@@ -590,22 +622,36 @@ export class PumpAmmInternalSdk {
     user: PublicKey,
     protocolFeeRecipient: PublicKey | undefined = undefined,
     userBaseTokenAccount: PublicKey | undefined = undefined,
-    userQuoteTokenAccount: PublicKey | undefined = undefined
+    userQuoteTokenAccount: PublicKey | undefined = undefined,
   ): Promise<TransactionInstruction[]> {
-    const { index, creator, baseMint, quoteMint } =
-      await this.program.account.pool.fetch(pool);
+    const poolAccountInfo = (await this.connection.getAccountInfo(pool))!!;
 
-    return await this.buyInstructionsInternalNoPool(
-      index,
-      creator,
-      baseMint,
-      quoteMint,
-      baseOut,
-      maxQuoteIn,
+    const poolData = this.program.coder.accounts.decode<Pool>(
+      "pool",
+      poolAccountInfo.data,
+    );
+
+    const { index, creator, baseMint, quoteMint, coinCreator } = poolData;
+
+    return await this.withFixPoolInstructions(
+      pool,
+      poolAccountInfo,
       user,
-      protocolFeeRecipient,
-      userBaseTokenAccount,
-      userQuoteTokenAccount
+      async () => {
+        return await this.buyInstructionsInternalNoPool(
+          index,
+          creator,
+          baseMint,
+          quoteMint,
+          baseOut,
+          maxQuoteIn,
+          user,
+          coinCreator,
+          protocolFeeRecipient,
+          userBaseTokenAccount,
+          userQuoteTokenAccount,
+        );
+      },
     );
   }
 
@@ -617,9 +663,10 @@ export class PumpAmmInternalSdk {
     baseOut: BN,
     maxQuoteIn: BN,
     user: PublicKey,
+    coinCreator: PublicKey,
     protocolFeeRecipient: PublicKey | undefined = undefined,
     userBaseTokenAccount: PublicKey | undefined = undefined,
-    userQuoteTokenAccount: PublicKey | undefined = undefined
+    userQuoteTokenAccount: PublicKey | undefined = undefined,
   ): Promise<TransactionInstruction[]> {
     const [pool] = this.poolKey(index, creator, baseMint, quoteMint);
 
@@ -628,9 +675,10 @@ export class PumpAmmInternalSdk {
       baseMint,
       quoteMint,
       user,
+      coinCreator,
       protocolFeeRecipient,
       userBaseTokenAccount,
-      userQuoteTokenAccount
+      userQuoteTokenAccount,
     );
 
     return this.withWsolAccount(
@@ -650,8 +698,8 @@ export class PumpAmmInternalSdk {
               swapAccounts.userBaseTokenAccount,
               user,
               swapAccounts.baseMint,
-              swapAccounts.baseTokenProgram
-            )
+              swapAccounts.baseTokenProgram,
+            ),
           );
 
           if (baseMint.equals(NATIVE_MINT)) {
@@ -663,7 +711,7 @@ export class PumpAmmInternalSdk {
           await this.program.methods
             .buy(baseOut, maxQuoteIn)
             .accountsPartial(swapAccounts)
-            .instruction()
+            .instruction(),
         );
 
         if (baseWsolAtaCreated) {
@@ -673,13 +721,13 @@ export class PumpAmmInternalSdk {
               user,
               user,
               undefined,
-              TOKEN_PROGRAM_ID
-            )
+              TOKEN_PROGRAM_ID,
+            ),
           );
         }
 
         return instructions;
-      }
+      },
     );
   }
 
@@ -690,7 +738,7 @@ export class PumpAmmInternalSdk {
     user: PublicKey,
     protocolFeeRecipient: PublicKey | undefined = undefined,
     userBaseTokenAccount: PublicKey | undefined = undefined,
-    userQuoteTokenAccount: PublicKey | undefined = undefined
+    userQuoteTokenAccount: PublicKey | undefined = undefined,
   ): Promise<TransactionInstruction[]> {
     const { maxQuote } = await this.buyBaseInputInternal(pool, base, slippage);
 
@@ -701,7 +749,7 @@ export class PumpAmmInternalSdk {
       user,
       protocolFeeRecipient,
       userBaseTokenAccount,
-      userQuoteTokenAccount
+      userQuoteTokenAccount,
     );
   }
 
@@ -712,12 +760,12 @@ export class PumpAmmInternalSdk {
     user: PublicKey,
     protocolFeeRecipient: PublicKey | undefined = undefined,
     userBaseTokenAccount: PublicKey | undefined = undefined,
-    userQuoteTokenAccount: PublicKey | undefined = undefined
+    userQuoteTokenAccount: PublicKey | undefined = undefined,
   ): Promise<TransactionInstruction[]> {
     const { base, maxQuote } = await this.buyQuoteInputInternal(
       pool,
       quote,
-      slippage
+      slippage,
     );
 
     return this.buyInstructionsInternal(
@@ -727,14 +775,14 @@ export class PumpAmmInternalSdk {
       user,
       protocolFeeRecipient,
       userBaseTokenAccount,
-      userQuoteTokenAccount
+      userQuoteTokenAccount,
     );
   }
 
   async buyAutocompleteQuoteFromBase(
     pool: PublicKey,
     base: BN,
-    slippage: number
+    slippage: number,
   ): Promise<BN> {
     const { uiQuote } = await this.buyBaseInputInternal(pool, base, slippage);
 
@@ -744,7 +792,7 @@ export class PumpAmmInternalSdk {
   async buyAutocompleteBaseFromQuote(
     pool: PublicKey,
     quote: BN,
-    slippage: number
+    slippage: number,
   ): Promise<BN> {
     const { base } = await this.buyQuoteInputInternal(pool, quote, slippage);
 
@@ -754,9 +802,9 @@ export class PumpAmmInternalSdk {
   async buyBaseInputInternal(
     pool: PublicKey,
     base: BN,
-    slippage: number
+    slippage: number,
   ): Promise<BuyBaseInputResult> {
-    const { poolBaseAmount, poolQuoteAmount } =
+    const { fetchedPool, poolBaseAmount, poolQuoteAmount } =
       await this.getPoolBaseAndQuoteAmounts(pool);
     const globalConfig = await this.fetchGlobalConfigAccount();
 
@@ -766,23 +814,26 @@ export class PumpAmmInternalSdk {
       poolBaseAmount,
       poolQuoteAmount,
       globalConfig.lpFeeBasisPoints,
-      globalConfig.protocolFeeBasisPoints
+      globalConfig.protocolFeeBasisPoints,
+      globalConfig.coinCreatorFeeBasisPoints,
+      fetchedPool.coinCreator,
     );
   }
 
   async buyQuoteInputInternal(
     pool: PublicKey,
     quote: BN,
-    slippage: number
+    slippage: number,
   ): Promise<BuyQuoteInputResult> {
-    const { poolBaseAmount, poolQuoteAmount } =
+    const { fetchedPool, poolBaseAmount, poolQuoteAmount } =
       await this.getPoolBaseAndQuoteAmounts(pool);
 
     return this.buyQuoteInputInternalNoPool(
       quote,
       slippage,
       poolBaseAmount,
-      poolQuoteAmount
+      poolQuoteAmount,
+      fetchedPool.coinCreator,
     );
   }
 
@@ -790,7 +841,8 @@ export class PumpAmmInternalSdk {
     quote: BN,
     slippage: number,
     poolBaseAmount: BN,
-    poolQuoteAmount: BN
+    poolQuoteAmount: BN,
+    coinCreator: PublicKey,
   ): Promise<BuyQuoteInputResult> {
     const globalConfig = await this.fetchGlobalConfigAccount();
 
@@ -800,7 +852,9 @@ export class PumpAmmInternalSdk {
       poolBaseAmount,
       poolQuoteAmount,
       globalConfig.lpFeeBasisPoints,
-      globalConfig.protocolFeeBasisPoints
+      globalConfig.protocolFeeBasisPoints,
+      globalConfig.coinCreatorFeeBasisPoints,
+      coinCreator,
     );
   }
 
@@ -811,23 +865,77 @@ export class PumpAmmInternalSdk {
     user: PublicKey,
     protocolFeeRecipient: PublicKey | undefined = undefined,
     userBaseTokenAccount: PublicKey | undefined = undefined,
-    userQuoteTokenAccount: PublicKey | undefined = undefined
+    userQuoteTokenAccount: PublicKey | undefined = undefined,
   ): Promise<TransactionInstruction[]> {
-    const { index, creator, baseMint, quoteMint } =
-      await this.program.account.pool.fetch(pool);
+    const poolAccountInfo = (await this.connection.getAccountInfo(pool))!!;
 
-    return await this.sellInstructionsInternalNoPool(
-      index,
-      creator,
-      baseMint,
-      quoteMint,
-      baseAmountIn,
-      minQuoteAmountOut,
-      user,
-      protocolFeeRecipient,
-      userBaseTokenAccount,
-      userQuoteTokenAccount
+    const poolData = this.program.coder.accounts.decode<Pool>(
+      "pool",
+      poolAccountInfo.data,
     );
+
+    const { index, creator, baseMint, quoteMint, coinCreator } = poolData;
+
+    return await this.withFixPoolInstructions(
+      pool,
+      poolAccountInfo,
+      user,
+      async () => {
+        return await this.sellInstructionsInternalNoPool(
+          index,
+          creator,
+          baseMint,
+          quoteMint,
+          baseAmountIn,
+          minQuoteAmountOut,
+          user,
+          coinCreator,
+          protocolFeeRecipient,
+          userBaseTokenAccount,
+          userQuoteTokenAccount,
+        );
+      },
+    );
+  }
+
+  async fixPoolInstructions(
+    pool: PublicKey,
+    user: PublicKey,
+  ): Promise<TransactionInstruction[]> {
+    const poolAccountInfo = (await this.connection.getAccountInfo(pool))!!;
+
+    return await this.withFixPoolInstructions(
+      pool,
+      poolAccountInfo,
+      user,
+      async () => [],
+    );
+  }
+
+  private async withFixPoolInstructions(
+    pool: PublicKey,
+    poolAccountInfo: AccountInfo<Buffer>,
+    user: PublicKey,
+    block: () => Promise<TransactionInstruction[]>,
+  ): Promise<TransactionInstruction[]> {
+    const instructions: TransactionInstruction[] = [];
+
+    if (
+      poolAccountInfo === null ||
+      poolAccountInfo.data.length < POOL_ACCOUNT_NEW_SIZE
+    ) {
+      instructions.push(
+        await this.program.methods
+          .extendAccount()
+          .accountsPartial({
+            account: pool,
+            user,
+          })
+          .instruction(),
+      );
+    }
+
+    return [...instructions, ...(await block())];
   }
 
   async sellInstructionsInternalNoPool(
@@ -838,9 +946,10 @@ export class PumpAmmInternalSdk {
     baseAmountIn: BN,
     minQuoteAmountOut: BN,
     user: PublicKey,
+    coinCreator: PublicKey,
     protocolFeeRecipient: PublicKey | undefined = undefined,
     userBaseTokenAccount: PublicKey | undefined = undefined,
-    userQuoteTokenAccount: PublicKey | undefined = undefined
+    userQuoteTokenAccount: PublicKey | undefined = undefined,
   ): Promise<TransactionInstruction[]> {
     const [pool] = this.poolKey(index, creator, baseMint, quoteMint);
 
@@ -849,9 +958,10 @@ export class PumpAmmInternalSdk {
       baseMint,
       quoteMint,
       user,
+      coinCreator,
       protocolFeeRecipient,
       userBaseTokenAccount,
-      userQuoteTokenAccount
+      userQuoteTokenAccount,
     );
 
     return this.withWsolAccount(
@@ -871,8 +981,8 @@ export class PumpAmmInternalSdk {
               swapAccounts.userQuoteTokenAccount,
               user,
               swapAccounts.quoteMint,
-              swapAccounts.quoteTokenProgram
-            )
+              swapAccounts.quoteTokenProgram,
+            ),
           );
 
           if (quoteMint.equals(NATIVE_MINT)) {
@@ -884,7 +994,7 @@ export class PumpAmmInternalSdk {
           await this.program.methods
             .sell(baseAmountIn, minQuoteAmountOut)
             .accountsPartial(swapAccounts)
-            .instruction()
+            .instruction(),
         );
 
         if (quoteWsolAtaCreated) {
@@ -894,13 +1004,13 @@ export class PumpAmmInternalSdk {
               user,
               user,
               undefined,
-              TOKEN_PROGRAM_ID
-            )
+              TOKEN_PROGRAM_ID,
+            ),
           );
         }
 
         return instructions;
-      }
+      },
     );
   }
 
@@ -911,7 +1021,7 @@ export class PumpAmmInternalSdk {
     user: PublicKey,
     protocolFeeRecipient: PublicKey | undefined = undefined,
     userBaseTokenAccount: PublicKey | undefined = undefined,
-    userQuoteTokenAccount: PublicKey | undefined = undefined
+    userQuoteTokenAccount: PublicKey | undefined = undefined,
   ): Promise<TransactionInstruction[]> {
     const { minQuote } = await this.sellBaseInputInternal(pool, base, slippage);
 
@@ -922,7 +1032,7 @@ export class PumpAmmInternalSdk {
       user,
       protocolFeeRecipient,
       userBaseTokenAccount,
-      userQuoteTokenAccount
+      userQuoteTokenAccount,
     );
   }
 
@@ -933,12 +1043,12 @@ export class PumpAmmInternalSdk {
     user: PublicKey,
     protocolFeeRecipient: PublicKey | undefined = undefined,
     userBaseTokenAccount: PublicKey | undefined = undefined,
-    userQuoteTokenAccount: PublicKey | undefined = undefined
+    userQuoteTokenAccount: PublicKey | undefined = undefined,
   ): Promise<TransactionInstruction[]> {
     const { base, minQuote } = await this.sellQuoteInputInternal(
       pool,
       quote,
-      slippage
+      slippage,
     );
 
     return this.sellInstructionsInternal(
@@ -948,14 +1058,14 @@ export class PumpAmmInternalSdk {
       user,
       protocolFeeRecipient,
       userBaseTokenAccount,
-      userQuoteTokenAccount
+      userQuoteTokenAccount,
     );
   }
 
   async sellAutocompleteQuoteFromBase(
     pool: PublicKey,
     base: BN,
-    slippage: number
+    slippage: number,
   ): Promise<BN> {
     const { uiQuote } = await this.sellBaseInputInternal(pool, base, slippage);
 
@@ -965,7 +1075,7 @@ export class PumpAmmInternalSdk {
   async sellAutocompleteBaseFromQuote(
     pool: PublicKey,
     quote: BN,
-    slippage: number
+    slippage: number,
   ): Promise<BN> {
     const { base } = await this.sellQuoteInputInternal(pool, quote, slippage);
 
@@ -975,16 +1085,17 @@ export class PumpAmmInternalSdk {
   async sellBaseInputInternal(
     pool: PublicKey,
     base: BN,
-    slippage: number
+    slippage: number,
   ): Promise<SellBaseInputResult> {
-    const { poolBaseAmount, poolQuoteAmount } =
+    const { fetchedPool, poolBaseAmount, poolQuoteAmount } =
       await this.getPoolBaseAndQuoteAmounts(pool);
 
     return this.sellBaseInputInternalNoPool(
       base,
       slippage,
       poolBaseAmount,
-      poolQuoteAmount
+      poolQuoteAmount,
+      fetchedPool.coinCreator,
     );
   }
 
@@ -992,7 +1103,8 @@ export class PumpAmmInternalSdk {
     base: BN,
     slippage: number,
     poolBaseAmount: BN,
-    poolQuoteAmount: BN
+    poolQuoteAmount: BN,
+    coinCreator: PublicKey,
   ): Promise<SellBaseInputResult> {
     const globalConfig = await this.fetchGlobalConfigAccount();
 
@@ -1002,16 +1114,18 @@ export class PumpAmmInternalSdk {
       poolBaseAmount,
       poolQuoteAmount,
       globalConfig.lpFeeBasisPoints,
-      globalConfig.protocolFeeBasisPoints
+      globalConfig.protocolFeeBasisPoints,
+      globalConfig.coinCreatorFeeBasisPoints,
+      coinCreator,
     );
   }
 
   async sellQuoteInputInternal(
     pool: PublicKey,
     quote: BN,
-    slippage: number
+    slippage: number,
   ): Promise<SellQuoteInputResult> {
-    const { poolBaseAmount, poolQuoteAmount } =
+    const { fetchedPool, poolBaseAmount, poolQuoteAmount } =
       await this.getPoolBaseAndQuoteAmounts(pool);
     const globalConfig = await this.fetchGlobalConfigAccount();
 
@@ -1021,13 +1135,15 @@ export class PumpAmmInternalSdk {
       poolBaseAmount,
       poolQuoteAmount,
       globalConfig.lpFeeBasisPoints,
-      globalConfig.protocolFeeBasisPoints
+      globalConfig.protocolFeeBasisPoints,
+      globalConfig.coinCreatorFeeBasisPoints,
+      fetchedPool.coinCreator,
     );
   }
 
   async extendAccount(
     account: PublicKey,
-    user: PublicKey
+    user: PublicKey,
   ): Promise<TransactionInstruction> {
     return this.program.methods
       .extendAccount()
@@ -1038,18 +1154,91 @@ export class PumpAmmInternalSdk {
       .instruction();
   }
 
+  async collectCoinCreatorFee(
+    coinCreator: PublicKey,
+    coinCreatorTokenAccount: PublicKey | undefined = undefined,
+  ): Promise<TransactionInstruction[]> {
+    const quoteMint = NATIVE_MINT;
+    const quoteTokenProgram = TOKEN_PROGRAM_ID;
+
+    if (coinCreatorTokenAccount === undefined) {
+      coinCreatorTokenAccount = getAssociatedTokenAddressSync(
+        quoteMint,
+        coinCreator,
+        true,
+        quoteTokenProgram,
+      );
+    }
+
+    return await this.withWsolAccount(
+      coinCreator,
+      quoteMint,
+      coinCreatorTokenAccount,
+      new BN(0),
+      async () => {
+        return [
+          await this.program.methods
+            .collectCoinCreatorFee()
+            .accountsPartial({
+              coinCreator,
+              coinCreatorTokenAccount,
+              quoteMint,
+              quoteTokenProgram,
+            })
+            .instruction(),
+        ];
+      },
+    );
+  }
+
+  async getCoinCreatorVaultBalance(coinCreator: PublicKey): Promise<BN> {
+    const quoteMint = NATIVE_MINT;
+    const quoteTokenProgram = TOKEN_PROGRAM_ID;
+
+    const coinCreatorVaultAuthority =
+      this.coinCreatorVaultAuthorityPda(coinCreator);
+
+    const coinCreatorVaultAta = this.coinCreatorVaultAta(
+      coinCreatorVaultAuthority,
+      quoteMint,
+      quoteTokenProgram,
+    );
+
+    try {
+      const tokenAccount = await getAccount(
+        this.connection,
+        coinCreatorVaultAta,
+        undefined,
+        quoteTokenProgram,
+      );
+      return new BN(tokenAccount.amount.toString());
+    } catch (e) {
+      console.error(`Error fetching token account ${coinCreatorVaultAta}:`, e);
+      return new BN(0);
+    }
+  }
+
+  async setCoinCreator(pool: PublicKey): Promise<TransactionInstruction> {
+    return this.program.methods
+      .setCoinCreator()
+      .accountsPartial({
+        pool,
+      })
+      .instruction();
+  }
+
   private async swapAccounts(
     pool: PublicKey,
     baseMint: PublicKey,
     quoteMint: PublicKey,
     user: PublicKey,
+    coinCreator: PublicKey,
     protocolFeeRecipient: PublicKey | undefined,
     userBaseTokenAccount: PublicKey | undefined,
-    userQuoteTokenAccount: PublicKey | undefined
+    userQuoteTokenAccount: PublicKey | undefined,
   ) {
     if (protocolFeeRecipient === undefined) {
-      const { protocolFeeRecipients } =
-        await this.program.account.globalConfig.fetch(this.globalConfig);
+      const { protocolFeeRecipients } = await this.fetchGlobalConfigAccount();
       protocolFeeRecipient =
         protocolFeeRecipients[
           Math.floor(Math.random() * protocolFeeRecipients.length)
@@ -1064,7 +1253,7 @@ export class PumpAmmInternalSdk {
         baseMint,
         user,
         true,
-        baseTokenProgram
+        baseTokenProgram,
       );
     }
 
@@ -1073,9 +1262,12 @@ export class PumpAmmInternalSdk {
         quoteMint,
         user,
         true,
-        quoteTokenProgram
+        quoteTokenProgram,
       );
     }
+
+    const coinCreatorVaultAuthority =
+      this.coinCreatorVaultAuthorityPda(coinCreator);
 
     return {
       pool,
@@ -1089,23 +1281,50 @@ export class PumpAmmInternalSdk {
         baseMint,
         pool,
         true,
-        baseTokenProgram
+        baseTokenProgram,
       ),
       poolQuoteTokenAccount: getAssociatedTokenAddressSync(
         quoteMint,
         pool,
         true,
-        quoteTokenProgram
+        quoteTokenProgram,
       ),
       protocolFeeRecipient,
       baseTokenProgram,
       quoteTokenProgram,
+      coinCreatorVaultAta: this.coinCreatorVaultAta(
+        coinCreatorVaultAuthority,
+        quoteMint,
+        quoteTokenProgram,
+      ),
+      coinCreatorVaultAuthority,
     };
+  }
+
+  coinCreatorVaultAuthorityPda(coinCreator: PublicKey) {
+    const [coinCreatorVaultAuthority] = PublicKey.findProgramAddressSync(
+      [Buffer.from("creator_vault"), coinCreator.toBuffer()],
+      this.programId(),
+    );
+    return coinCreatorVaultAuthority;
+  }
+
+  coinCreatorVaultAta(
+    coinCreatorVaultAuthority: PublicKey,
+    quoteMint: PublicKey,
+    quoteTokenProgram: PublicKey,
+  ) {
+    return getAssociatedTokenAddressSync(
+      quoteMint,
+      coinCreatorVaultAuthority,
+      true,
+      quoteTokenProgram,
+    );
   }
 
   private async getMintTokenPrograms(
     baseMint: PublicKey,
-    quoteMint: PublicKey
+    quoteMint: PublicKey,
   ) {
     const baseMintAccountInfo = await this.connection.getAccountInfo(baseMint);
 

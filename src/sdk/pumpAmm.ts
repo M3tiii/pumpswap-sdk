@@ -303,4 +303,34 @@ export class PumpAmmSdk {
   ): Promise<TransactionInstruction> {
     return this.pumpAmmInternalSdk.extendAccount(account, user);
   }
+
+  async collectCoinCreatorFee(
+    coinCreator: PublicKey,
+    coinCreatorTokenAccount: PublicKey | undefined = undefined,
+  ): Promise<TransactionInstruction[]> {
+    return this.pumpAmmInternalSdk.collectCoinCreatorFee(
+      coinCreator,
+      coinCreatorTokenAccount,
+    );
+  }
+
+  coinCreatorVaultAuthorityPda(coinCreator: PublicKey) {
+    return this.pumpAmmInternalSdk.coinCreatorVaultAuthorityPda(coinCreator);
+  }
+
+  coinCreatorVaultAta(
+    coinCreatorVaultAuthority: PublicKey,
+    quoteMint: PublicKey,
+    quoteTokenProgram: PublicKey,
+  ) {
+    return this.pumpAmmInternalSdk.coinCreatorVaultAta(
+      coinCreatorVaultAuthority,
+      quoteMint,
+      quoteTokenProgram,
+    );
+  }
+
+  async setCoinCreator(pool: PublicKey): Promise<TransactionInstruction> {
+    return this.pumpAmmInternalSdk.setCoinCreator(pool);
+  }
 }

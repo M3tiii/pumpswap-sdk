@@ -4697,11 +4697,12 @@ var require_bn = __commonJS({
 // src/sdk/pumpAmmInternal.ts
 var pumpAmmInternal_exports = {};
 __export(pumpAmmInternal_exports, {
+  POOL_ACCOUNT_NEW_SIZE: () => POOL_ACCOUNT_NEW_SIZE,
   PumpAmmInternalSdk: () => PumpAmmInternalSdk
 });
 module.exports = __toCommonJS(pumpAmmInternal_exports);
 var import_anchor3 = require("@coral-xyz/anchor");
-var import_web32 = require("@solana/web3.js");
+var import_web34 = require("@solana/web3.js");
 
 // src/sdk/pda.ts
 var import_web3 = require("@solana/web3.js");
@@ -4941,6 +4942,93 @@ var pump_amm_default = {
         },
         {
           name: "program"
+        },
+        {
+          name: "coin_creator_vault_ata",
+          writable: true,
+          pda: {
+            seeds: [
+              {
+                kind: "account",
+                path: "coin_creator_vault_authority"
+              },
+              {
+                kind: "account",
+                path: "quote_token_program"
+              },
+              {
+                kind: "account",
+                path: "quote_mint"
+              }
+            ],
+            program: {
+              kind: "const",
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          name: "coin_creator_vault_authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  99,
+                  114,
+                  101,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                kind: "account",
+                path: "pool.coin_creator",
+                account: "Pool"
+              }
+            ]
+          }
         }
       ],
       args: [
@@ -4953,6 +5041,145 @@ var pump_amm_default = {
           type: "u64"
         }
       ]
+    },
+    {
+      name: "collect_coin_creator_fee",
+      discriminator: [160, 57, 89, 42, 181, 139, 43, 66],
+      accounts: [
+        {
+          name: "quote_mint"
+        },
+        {
+          name: "quote_token_program"
+        },
+        {
+          name: "coin_creator",
+          signer: true
+        },
+        {
+          name: "coin_creator_vault_authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  99,
+                  114,
+                  101,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                kind: "account",
+                path: "coin_creator"
+              }
+            ]
+          }
+        },
+        {
+          name: "coin_creator_vault_ata",
+          writable: true,
+          pda: {
+            seeds: [
+              {
+                kind: "account",
+                path: "coin_creator_vault_authority"
+              },
+              {
+                kind: "account",
+                path: "quote_token_program"
+              },
+              {
+                kind: "account",
+                path: "quote_mint"
+              }
+            ],
+            program: {
+              kind: "const",
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          name: "coin_creator_token_account",
+          writable: true
+        },
+        {
+          name: "event_authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          name: "program"
+        }
+      ],
+      args: []
     },
     {
       name: "create_config",
@@ -5041,6 +5268,10 @@ var pump_amm_default = {
           type: {
             array: ["pubkey", 8]
           }
+        },
+        {
+          name: "coin_creator_fee_basis_points",
+          type: "u64"
         }
       ]
     },
@@ -5361,6 +5592,10 @@ var pump_amm_default = {
         {
           name: "quote_amount_in",
           type: "u64"
+        },
+        {
+          name: "coin_creator",
+          type: "pubkey"
         }
       ]
     },
@@ -5736,6 +5971,93 @@ var pump_amm_default = {
         },
         {
           name: "program"
+        },
+        {
+          name: "coin_creator_vault_ata",
+          writable: true,
+          pda: {
+            seeds: [
+              {
+                kind: "account",
+                path: "coin_creator_vault_authority"
+              },
+              {
+                kind: "account",
+                path: "quote_token_program"
+              },
+              {
+                kind: "account",
+                path: "quote_mint"
+              }
+            ],
+            program: {
+              kind: "const",
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          name: "coin_creator_vault_authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  99,
+                  114,
+                  101,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                kind: "account",
+                path: "pool.coin_creator",
+                account: "Pool"
+              }
+            ]
+          }
         }
       ],
       args: [
@@ -5748,6 +6070,209 @@ var pump_amm_default = {
           type: "u64"
         }
       ]
+    },
+    {
+      name: "set_coin_creator",
+      docs: [
+        "Sets Pool::coin_creator from Metaplex metadata creator or BondingCurve::creator"
+      ],
+      discriminator: [210, 149, 128, 45, 188, 58, 78, 175],
+      accounts: [
+        {
+          name: "pool",
+          writable: true
+        },
+        {
+          name: "metadata",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [109, 101, 116, 97, 100, 97, 116, 97]
+              },
+              {
+                kind: "const",
+                value: [
+                  11,
+                  112,
+                  101,
+                  177,
+                  227,
+                  209,
+                  124,
+                  69,
+                  56,
+                  157,
+                  82,
+                  127,
+                  107,
+                  4,
+                  195,
+                  205,
+                  88,
+                  184,
+                  108,
+                  115,
+                  26,
+                  160,
+                  253,
+                  181,
+                  73,
+                  182,
+                  209,
+                  188,
+                  3,
+                  248,
+                  41,
+                  70
+                ]
+              },
+              {
+                kind: "account",
+                path: "pool.base_mint",
+                account: "Pool"
+              }
+            ],
+            program: {
+              kind: "const",
+              value: [
+                11,
+                112,
+                101,
+                177,
+                227,
+                209,
+                124,
+                69,
+                56,
+                157,
+                82,
+                127,
+                107,
+                4,
+                195,
+                205,
+                88,
+                184,
+                108,
+                115,
+                26,
+                160,
+                253,
+                181,
+                73,
+                182,
+                209,
+                188,
+                3,
+                248,
+                41,
+                70
+              ]
+            }
+          }
+        },
+        {
+          name: "bonding_curve",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  45,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                kind: "account",
+                path: "pool.base_mint",
+                account: "Pool"
+              }
+            ],
+            program: {
+              kind: "const",
+              value: [
+                1,
+                86,
+                224,
+                246,
+                147,
+                102,
+                90,
+                207,
+                68,
+                219,
+                21,
+                104,
+                191,
+                23,
+                91,
+                170,
+                81,
+                137,
+                203,
+                151,
+                245,
+                210,
+                255,
+                59,
+                101,
+                93,
+                43,
+                182,
+                253,
+                109,
+                24,
+                176
+              ]
+            }
+          }
+        },
+        {
+          name: "event_authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          name: "program"
+        }
+      ],
+      args: []
     },
     {
       name: "update_admin",
@@ -5860,6 +6385,10 @@ var pump_amm_default = {
           type: {
             array: ["pubkey", 8]
           }
+        },
+        {
+          name: "coin_creator_fee_basis_points",
+          type: "u64"
         }
       ]
     },
@@ -5972,6 +6501,10 @@ var pump_amm_default = {
   ],
   accounts: [
     {
+      name: "BondingCurve",
+      discriminator: [23, 183, 248, 55, 96, 216, 172, 96]
+    },
+    {
       name: "GlobalConfig",
       discriminator: [149, 8, 156, 202, 160, 252, 176, 217]
     },
@@ -5984,6 +6517,10 @@ var pump_amm_default = {
     {
       name: "BuyEvent",
       discriminator: [103, 244, 82, 31, 44, 245, 119, 119]
+    },
+    {
+      name: "CollectCoinCreatorFeeEvent",
+      discriminator: [232, 245, 194, 238, 234, 218, 58, 89]
     },
     {
       name: "CreateConfigEvent",
@@ -6008,6 +6545,14 @@ var pump_amm_default = {
     {
       name: "SellEvent",
       discriminator: [62, 47, 55, 10, 165, 3, 220, 42]
+    },
+    {
+      name: "SetBondingCurveCoinCreatorEvent",
+      discriminator: [242, 231, 235, 102, 65, 99, 189, 211]
+    },
+    {
+      name: "SetMetaplexCoinCreatorEvent",
+      discriminator: [150, 107, 199, 123, 124, 207, 102, 228]
     },
     {
       name: "UpdateAdminEvent",
@@ -6134,9 +6679,49 @@ var pump_amm_default = {
     {
       code: 6027,
       name: "AccountTypeNotSupported"
+    },
+    {
+      code: 6028,
+      name: "OnlyCanonicalPumpPoolsCanHaveCoinCreator"
     }
   ],
   types: [
+    {
+      name: "BondingCurve",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "virtual_token_reserves",
+            type: "u64"
+          },
+          {
+            name: "virtual_sol_reserves",
+            type: "u64"
+          },
+          {
+            name: "real_token_reserves",
+            type: "u64"
+          },
+          {
+            name: "real_sol_reserves",
+            type: "u64"
+          },
+          {
+            name: "token_total_supply",
+            type: "u64"
+          },
+          {
+            name: "complete",
+            type: "bool"
+          },
+          {
+            name: "creator",
+            type: "pubkey"
+          }
+        ]
+      }
+    },
     {
       name: "BuyEvent",
       type: {
@@ -6221,6 +6806,46 @@ var pump_amm_default = {
           {
             name: "protocol_fee_recipient_token_account",
             type: "pubkey"
+          },
+          {
+            name: "coin_creator",
+            type: "pubkey"
+          },
+          {
+            name: "coin_creator_fee_basis_points",
+            type: "u64"
+          },
+          {
+            name: "coin_creator_fee",
+            type: "u64"
+          }
+        ]
+      }
+    },
+    {
+      name: "CollectCoinCreatorFeeEvent",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "timestamp",
+            type: "i64"
+          },
+          {
+            name: "coin_creator",
+            type: "pubkey"
+          },
+          {
+            name: "coin_creator_fee",
+            type: "u64"
+          },
+          {
+            name: "coin_creator_vault_ata",
+            type: "pubkey"
+          },
+          {
+            name: "coin_creator_token_account",
+            type: "pubkey"
           }
         ]
       }
@@ -6251,6 +6876,10 @@ var pump_amm_default = {
             type: {
               array: ["pubkey", 8]
             }
+          },
+          {
+            name: "coin_creator_fee_basis_points",
+            type: "u64"
           }
         ]
       }
@@ -6334,6 +6963,10 @@ var pump_amm_default = {
           },
           {
             name: "user_quote_token_account",
+            type: "pubkey"
+          },
+          {
+            name: "coin_creator",
             type: "pubkey"
           }
         ]
@@ -6513,6 +7146,11 @@ var pump_amm_default = {
             type: {
               array: ["pubkey", 8]
             }
+          },
+          {
+            name: "coin_creator_fee_basis_points",
+            docs: ["The coin creator fee in basis points (0.01%)"],
+            type: "u64"
           }
         ]
       }
@@ -6558,6 +7196,10 @@ var pump_amm_default = {
             name: "lp_supply",
             docs: ["True circulating supply without burns and lock-ups"],
             type: "u64"
+          },
+          {
+            name: "coin_creator",
+            type: "pubkey"
           }
         ]
       }
@@ -6646,6 +7288,74 @@ var pump_amm_default = {
           {
             name: "protocol_fee_recipient_token_account",
             type: "pubkey"
+          },
+          {
+            name: "coin_creator",
+            type: "pubkey"
+          },
+          {
+            name: "coin_creator_fee_basis_points",
+            type: "u64"
+          },
+          {
+            name: "coin_creator_fee",
+            type: "u64"
+          }
+        ]
+      }
+    },
+    {
+      name: "SetBondingCurveCoinCreatorEvent",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "timestamp",
+            type: "i64"
+          },
+          {
+            name: "base_mint",
+            type: "pubkey"
+          },
+          {
+            name: "pool",
+            type: "pubkey"
+          },
+          {
+            name: "bonding_curve",
+            type: "pubkey"
+          },
+          {
+            name: "coin_creator",
+            type: "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      name: "SetMetaplexCoinCreatorEvent",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "timestamp",
+            type: "i64"
+          },
+          {
+            name: "base_mint",
+            type: "pubkey"
+          },
+          {
+            name: "pool",
+            type: "pubkey"
+          },
+          {
+            name: "metadata",
+            type: "pubkey"
+          },
+          {
+            name: "coin_creator",
+            type: "pubkey"
           }
         ]
       }
@@ -6696,6 +7406,10 @@ var pump_amm_default = {
             type: {
               array: ["pubkey", 8]
             }
+          },
+          {
+            name: "coin_creator_fee_basis_points",
+            type: "u64"
           }
         ]
       }
@@ -6795,7 +7509,8 @@ function getPumpAmmProgram(connection, programId = PUMP_AMM_PROGRAM_ID) {
 }
 
 // src/sdk/buy.ts
-function buyBaseInputInternal(base, slippage, baseReserve, quoteReserve, lpFeeBps, protocolFeeBps) {
+var import_web32 = require("@solana/web3.js");
+function buyBaseInputInternal(base, slippage, baseReserve, quoteReserve, lpFeeBps, protocolFeeBps, coinCreatorFeeBps, coinCreator) {
   if (base.isZero()) {
     throw new Error("Invalid input: 'base' cannot be zero.");
   }
@@ -6807,9 +7522,6 @@ function buyBaseInputInternal(base, slippage, baseReserve, quoteReserve, lpFeeBp
   if (base.gt(baseReserve)) {
     throw new Error("Cannot buy more base tokens than the pool reserves.");
   }
-  if (lpFeeBps.isNeg() || protocolFeeBps.isNeg()) {
-    throw new Error("Fee basis points cannot be negative.");
-  }
   const numerator = quoteReserve.mul(base);
   const denominator = baseReserve.sub(base);
   if (denominator.isZero()) {
@@ -6818,7 +7530,8 @@ function buyBaseInputInternal(base, slippage, baseReserve, quoteReserve, lpFeeBp
   const quoteAmountIn = ceilDiv(numerator, denominator);
   const lpFee = fee(quoteAmountIn, lpFeeBps);
   const protocolFee = fee(quoteAmountIn, protocolFeeBps);
-  const totalQuote = quoteAmountIn.add(lpFee).add(protocolFee);
+  const coinCreatorFee = import_web32.PublicKey.default.equals(coinCreator) ? new import_bn4.default(0) : fee(quoteAmountIn, coinCreatorFeeBps);
+  const totalQuote = quoteAmountIn.add(lpFee).add(protocolFee).add(coinCreatorFee);
   const precision = new import_bn4.default(1e9);
   const slippageFactorFloat = (1 + slippage / 100) * 1e9;
   const slippageFactor = new import_bn4.default(Math.floor(slippageFactorFloat));
@@ -6830,7 +7543,7 @@ function buyBaseInputInternal(base, slippage, baseReserve, quoteReserve, lpFeeBp
     maxQuote
   };
 }
-function buyQuoteInputInternal(quote, slippage, baseReserve, quoteReserve, lpFeeBps, protocolFeeBps) {
+function buyQuoteInputInternal(quote, slippage, baseReserve, quoteReserve, lpFeeBps, protocolFeeBps, coinCreatorFeeBps, coinCreator) {
   if (quote.isZero()) {
     throw new Error("Invalid input: 'quote' cannot be zero.");
   }
@@ -6839,10 +7552,7 @@ function buyQuoteInputInternal(quote, slippage, baseReserve, quoteReserve, lpFee
       "Invalid input: 'baseReserve' or 'quoteReserve' cannot be zero."
     );
   }
-  if (lpFeeBps.isNeg() || protocolFeeBps.isNeg()) {
-    throw new Error("Fee basis points cannot be negative.");
-  }
-  const totalFeeBps = lpFeeBps.add(protocolFeeBps);
+  const totalFeeBps = lpFeeBps.add(protocolFeeBps).add(import_web32.PublicKey.default.equals(coinCreator) ? new import_bn4.default(0) : coinCreatorFeeBps);
   const denominator = new import_bn4.default(1e4).add(totalFeeBps);
   const effectiveQuote = quote.mul(new import_bn4.default(1e4)).div(denominator);
   const numerator = baseReserve.mul(effectiveQuote);
@@ -6866,7 +7576,8 @@ function buyQuoteInputInternal(quote, slippage, baseReserve, quoteReserve, lpFee
 
 // src/sdk/sell.ts
 var import_bn5 = __toESM(require_bn());
-function sellBaseInputInternal(base, slippage, baseReserve, quoteReserve, lpFeeBps, protocolFeeBps) {
+var import_web33 = require("@solana/web3.js");
+function sellBaseInputInternal(base, slippage, baseReserve, quoteReserve, lpFeeBps, protocolFeeBps, coinCreatorFeeBps, coinCreator) {
   if (base.isZero()) {
     throw new Error("Invalid input: 'base' (base_amount_in) cannot be zero.");
   }
@@ -6875,13 +7586,11 @@ function sellBaseInputInternal(base, slippage, baseReserve, quoteReserve, lpFeeB
       "Invalid input: 'baseReserve' or 'quoteReserve' cannot be zero."
     );
   }
-  if (lpFeeBps.isNeg() || protocolFeeBps.isNeg()) {
-    throw new Error("Fee basis points cannot be negative.");
-  }
   const quoteAmountOut = quoteReserve.mul(base).div(baseReserve.add(base));
   const lpFee = fee(quoteAmountOut, lpFeeBps);
   const protocolFee = fee(quoteAmountOut, protocolFeeBps);
-  const finalQuote = quoteAmountOut.sub(lpFee).sub(protocolFee);
+  const coinCreatorFee = import_web33.PublicKey.default.equals(coinCreator) ? new import_bn5.default(0) : fee(quoteAmountOut, coinCreatorFeeBps);
+  const finalQuote = quoteAmountOut.sub(lpFee).sub(protocolFee).sub(coinCreatorFee);
   if (finalQuote.isNeg()) {
     throw new Error("Fees exceed total output; final quote is negative.");
   }
@@ -6898,12 +7607,12 @@ function sellBaseInputInternal(base, slippage, baseReserve, quoteReserve, lpFeeB
   };
 }
 var MAX_FEE_BASIS_POINTS = new import_bn5.default(1e4);
-function calculateQuoteAmountOut(userQuoteAmountOut, lpFeeBasisPoints, protocolFeeBasisPoints) {
-  const totalFeeBasisPoints = lpFeeBasisPoints.add(protocolFeeBasisPoints);
+function calculateQuoteAmountOut(userQuoteAmountOut, lpFeeBasisPoints, protocolFeeBasisPoints, coinCreatorFeeBasisPoints) {
+  const totalFeeBasisPoints = lpFeeBasisPoints.add(protocolFeeBasisPoints).add(coinCreatorFeeBasisPoints);
   const denominator = MAX_FEE_BASIS_POINTS.sub(totalFeeBasisPoints);
   return ceilDiv(userQuoteAmountOut.mul(MAX_FEE_BASIS_POINTS), denominator);
 }
-function sellQuoteInputInternal(quote, slippage, baseReserve, quoteReserve, lpFeeBps, protocolFeeBps) {
+function sellQuoteInputInternal(quote, slippage, baseReserve, quoteReserve, lpFeeBps, protocolFeeBps, coinCreatorFeeBps, coinCreator) {
   if (quote.isZero()) {
     throw new Error("Invalid input: 'quote' cannot be zero.");
   }
@@ -6917,10 +7626,12 @@ function sellQuoteInputInternal(quote, slippage, baseReserve, quoteReserve, lpFe
       "Cannot receive more quote tokens than the pool quote reserves."
     );
   }
-  if (lpFeeBps.isNeg() || protocolFeeBps.isNeg()) {
-    throw new Error("Fee basis points cannot be negative.");
-  }
-  const rawQuote = calculateQuoteAmountOut(quote, lpFeeBps, protocolFeeBps);
+  const rawQuote = calculateQuoteAmountOut(
+    quote,
+    lpFeeBps,
+    protocolFeeBps,
+    import_web33.PublicKey.default.equals(coinCreator) ? new import_bn5.default(0) : coinCreatorFeeBps
+  );
   if (rawQuote.gte(quoteReserve)) {
     throw new Error(
       "Invalid input: Desired quote amount exceeds available reserve."
@@ -6945,6 +7656,7 @@ function sellQuoteInputInternal(quote, slippage, baseReserve, quoteReserve, lpFe
 
 // src/sdk/pumpAmmInternal.ts
 var import_system = require("@coral-xyz/anchor/dist/cjs/native/system");
+var POOL_ACCOUNT_NEW_SIZE = 300;
 var PumpAmmInternalSdk = class {
   constructor(connection, programId = PUMP_AMM_PROGRAM_ID) {
     this.connection = connection;
@@ -7039,7 +7751,7 @@ var PumpAmmInternalSdk = class {
           );
         }
         instructions.push(
-          await this.program.methods.createPool(index, baseIn, quoteIn).accountsPartial({
+          await this.program.methods.createPool(index, baseIn, quoteIn, import_system.SYSTEM_PROGRAM_ID).accountsPartial({
             globalConfig: this.globalConfig,
             baseMint,
             quoteMint,
@@ -7055,7 +7767,11 @@ var PumpAmmInternalSdk = class {
     );
   }
   async depositInstructionsInternal(pool, lpToken, maxBase, maxQuote, user, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0, userPoolTokenAccount = void 0) {
-    const poolData = await this.program.account.pool.fetch(pool);
+    const poolAccountInfo = await this.connection.getAccountInfo(pool);
+    const poolData = this.program.coder.accounts.decode(
+      "pool",
+      poolAccountInfo.data
+    );
     const { baseMint, quoteMint, lpMint } = poolData;
     const [baseTokenProgram, quoteTokenProgram] = await this.getMintTokenPrograms(baseMint, quoteMint);
     const liquidityAccounts = await this.liquidityAccounts(
@@ -7068,31 +7784,40 @@ var PumpAmmInternalSdk = class {
       userQuoteTokenAccount,
       userPoolTokenAccount
     );
-    return await this.withWsolAccounts(
+    return await this.withFixPoolInstructions(
+      pool,
+      poolAccountInfo,
       user,
-      baseMint,
-      liquidityAccounts.userBaseTokenAccount,
-      maxBase,
-      quoteMint,
-      liquidityAccounts.userQuoteTokenAccount,
-      maxQuote,
       async () => {
-        const instructions = [];
-        if (!await this.accountExists(liquidityAccounts.userPoolTokenAccount)) {
-          instructions.push(
-            (0, import_spl_token2.createAssociatedTokenAccountIdempotentInstruction)(
-              user,
-              liquidityAccounts.userPoolTokenAccount,
-              user,
-              lpMint,
-              import_spl_token2.TOKEN_2022_PROGRAM_ID
-            )
-          );
-        }
-        instructions.push(
-          await this.program.methods.deposit(lpToken, maxBase, maxQuote).accountsPartial(liquidityAccounts).instruction()
+        return await this.withWsolAccounts(
+          user,
+          baseMint,
+          liquidityAccounts.userBaseTokenAccount,
+          maxBase,
+          quoteMint,
+          liquidityAccounts.userQuoteTokenAccount,
+          maxQuote,
+          async () => {
+            const instructions = [];
+            if (!await this.accountExists(
+              liquidityAccounts.userPoolTokenAccount
+            )) {
+              instructions.push(
+                (0, import_spl_token2.createAssociatedTokenAccountIdempotentInstruction)(
+                  user,
+                  liquidityAccounts.userPoolTokenAccount,
+                  user,
+                  lpMint,
+                  import_spl_token2.TOKEN_2022_PROGRAM_ID
+                )
+              );
+            }
+            instructions.push(
+              await this.program.methods.deposit(lpToken, maxBase, maxQuote).accountsPartial(liquidityAccounts).instruction()
+            );
+            return instructions;
+          }
         );
-        return instructions;
       }
     );
   }
@@ -7107,7 +7832,6 @@ var PumpAmmInternalSdk = class {
   }
   async withWsolAccount(user, mint, ata, amount, block) {
     const instructions = [];
-    let wsolAccountCreated = false;
     if (mint.equals(import_spl_token2.NATIVE_MINT)) {
       if (!await this.accountExists(ata)) {
         instructions.push(
@@ -7118,20 +7842,21 @@ var PumpAmmInternalSdk = class {
             import_spl_token2.NATIVE_MINT
           )
         );
-        wsolAccountCreated = true;
       }
-      instructions.push(
-        import_web32.SystemProgram.transfer({
-          fromPubkey: user,
-          toPubkey: ata,
-          lamports: BigInt(amount.toString())
-        }),
-        (0, import_spl_token2.createSyncNativeInstruction)(ata)
-      );
+      if (amount.gtn(0)) {
+        instructions.push(
+          import_web34.SystemProgram.transfer({
+            fromPubkey: user,
+            toPubkey: ata,
+            lamports: BigInt(amount.toString())
+          }),
+          (0, import_spl_token2.createSyncNativeInstruction)(ata)
+        );
+      }
     }
     const blockInstructions = await block();
     instructions.push(...blockInstructions);
-    if (wsolAccountCreated) {
+    if (mint.equals(import_spl_token2.NATIVE_MINT)) {
       instructions.push(
         (0, import_spl_token2.createCloseAccountInstruction)(
           ata,
@@ -7181,7 +7906,11 @@ var PumpAmmInternalSdk = class {
     };
   }
   async withdrawInstructionsInternal(pool, lpTokenAmountIn, minBaseAmountOut, minQuoteAmountOut, user, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0, userPoolTokenAccount = void 0) {
-    const poolData = await this.program.account.pool.fetch(pool);
+    const poolAccountInfo = await this.connection.getAccountInfo(pool);
+    const poolData = this.program.coder.accounts.decode(
+      "pool",
+      poolAccountInfo.data
+    );
     const { baseMint, quoteMint } = poolData;
     const [baseTokenProgram, quoteTokenProgram] = await this.getMintTokenPrograms(baseMint, quoteMint);
     const liquidityAccounts = await this.liquidityAccounts(
@@ -7194,63 +7923,70 @@ var PumpAmmInternalSdk = class {
       userQuoteTokenAccount,
       userPoolTokenAccount
     );
-    const instructions = [];
-    let baseWsolAtaCreated = false;
-    if (!await this.accountExists(liquidityAccounts.userBaseTokenAccount)) {
-      instructions.push(
-        (0, import_spl_token2.createAssociatedTokenAccountIdempotentInstruction)(
-          user,
-          liquidityAccounts.userBaseTokenAccount,
-          user,
-          liquidityAccounts.baseMint,
-          baseTokenProgram
-        )
-      );
-      if (baseMint.equals(import_spl_token2.NATIVE_MINT)) {
-        baseWsolAtaCreated = true;
+    return await this.withFixPoolInstructions(
+      pool,
+      poolAccountInfo,
+      user,
+      async () => {
+        const instructions = [];
+        let baseWsolAtaCreated = false;
+        if (!await this.accountExists(liquidityAccounts.userBaseTokenAccount)) {
+          instructions.push(
+            (0, import_spl_token2.createAssociatedTokenAccountIdempotentInstruction)(
+              user,
+              liquidityAccounts.userBaseTokenAccount,
+              user,
+              liquidityAccounts.baseMint,
+              baseTokenProgram
+            )
+          );
+          if (baseMint.equals(import_spl_token2.NATIVE_MINT)) {
+            baseWsolAtaCreated = true;
+          }
+        }
+        let quoteWsolAtaCreated = false;
+        if (!await this.accountExists(liquidityAccounts.userQuoteTokenAccount)) {
+          instructions.push(
+            (0, import_spl_token2.createAssociatedTokenAccountIdempotentInstruction)(
+              user,
+              liquidityAccounts.userQuoteTokenAccount,
+              user,
+              liquidityAccounts.quoteMint,
+              quoteTokenProgram
+            )
+          );
+          if (quoteMint.equals(import_spl_token2.NATIVE_MINT)) {
+            quoteWsolAtaCreated = true;
+          }
+        }
+        instructions.push(
+          await this.program.methods.withdraw(lpTokenAmountIn, minBaseAmountOut, minQuoteAmountOut).accountsPartial(liquidityAccounts).instruction()
+        );
+        if (baseWsolAtaCreated) {
+          instructions.push(
+            (0, import_spl_token2.createCloseAccountInstruction)(
+              liquidityAccounts.userBaseTokenAccount,
+              user,
+              user,
+              void 0,
+              import_spl_token2.TOKEN_PROGRAM_ID
+            )
+          );
+        }
+        if (quoteWsolAtaCreated) {
+          instructions.push(
+            (0, import_spl_token2.createCloseAccountInstruction)(
+              liquidityAccounts.userQuoteTokenAccount,
+              user,
+              user,
+              void 0,
+              import_spl_token2.TOKEN_PROGRAM_ID
+            )
+          );
+        }
+        return instructions;
       }
-    }
-    let quoteWsolAtaCreated = false;
-    if (!await this.accountExists(liquidityAccounts.userQuoteTokenAccount)) {
-      instructions.push(
-        (0, import_spl_token2.createAssociatedTokenAccountIdempotentInstruction)(
-          user,
-          liquidityAccounts.userQuoteTokenAccount,
-          user,
-          liquidityAccounts.quoteMint,
-          quoteTokenProgram
-        )
-      );
-      if (quoteMint.equals(import_spl_token2.NATIVE_MINT)) {
-        quoteWsolAtaCreated = true;
-      }
-    }
-    instructions.push(
-      await this.program.methods.withdraw(lpTokenAmountIn, minBaseAmountOut, minQuoteAmountOut).accountsPartial(liquidityAccounts).instruction()
     );
-    if (baseWsolAtaCreated) {
-      instructions.push(
-        (0, import_spl_token2.createCloseAccountInstruction)(
-          liquidityAccounts.userBaseTokenAccount,
-          user,
-          user,
-          void 0,
-          import_spl_token2.TOKEN_PROGRAM_ID
-        )
-      );
-    }
-    if (quoteWsolAtaCreated) {
-      instructions.push(
-        (0, import_spl_token2.createCloseAccountInstruction)(
-          liquidityAccounts.userQuoteTokenAccount,
-          user,
-          user,
-          void 0,
-          import_spl_token2.TOKEN_PROGRAM_ID
-        )
-      );
-    }
-    return instructions;
   }
   async withdrawInputsInternal(pool, lpAmount, slippage) {
     const { fetchedPool, poolBaseAmount, poolQuoteAmount } = await this.getPoolBaseAndQuoteAmounts(pool);
@@ -7330,27 +8066,41 @@ var PumpAmmInternalSdk = class {
     };
   }
   async buyInstructionsInternal(pool, baseOut, maxQuoteIn, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
-    const { index, creator, baseMint, quoteMint } = await this.program.account.pool.fetch(pool);
-    return await this.buyInstructionsInternalNoPool(
-      index,
-      creator,
-      baseMint,
-      quoteMint,
-      baseOut,
-      maxQuoteIn,
+    const poolAccountInfo = await this.connection.getAccountInfo(pool);
+    const poolData = this.program.coder.accounts.decode(
+      "pool",
+      poolAccountInfo.data
+    );
+    const { index, creator, baseMint, quoteMint, coinCreator } = poolData;
+    return await this.withFixPoolInstructions(
+      pool,
+      poolAccountInfo,
       user,
-      protocolFeeRecipient,
-      userBaseTokenAccount,
-      userQuoteTokenAccount
+      async () => {
+        return await this.buyInstructionsInternalNoPool(
+          index,
+          creator,
+          baseMint,
+          quoteMint,
+          baseOut,
+          maxQuoteIn,
+          user,
+          coinCreator,
+          protocolFeeRecipient,
+          userBaseTokenAccount,
+          userQuoteTokenAccount
+        );
+      }
     );
   }
-  async buyInstructionsInternalNoPool(index, creator, baseMint, quoteMint, baseOut, maxQuoteIn, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
+  async buyInstructionsInternalNoPool(index, creator, baseMint, quoteMint, baseOut, maxQuoteIn, user, coinCreator, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
     const [pool] = this.poolKey(index, creator, baseMint, quoteMint);
     const swapAccounts = await this.swapAccounts(
       pool,
       baseMint,
       quoteMint,
       user,
+      coinCreator,
       protocolFeeRecipient,
       userBaseTokenAccount,
       userQuoteTokenAccount
@@ -7432,7 +8182,7 @@ var PumpAmmInternalSdk = class {
     return base;
   }
   async buyBaseInputInternal(pool, base, slippage) {
-    const { poolBaseAmount, poolQuoteAmount } = await this.getPoolBaseAndQuoteAmounts(pool);
+    const { fetchedPool, poolBaseAmount, poolQuoteAmount } = await this.getPoolBaseAndQuoteAmounts(pool);
     const globalConfig = await this.fetchGlobalConfigAccount();
     return buyBaseInputInternal(
       base,
@@ -7440,19 +8190,22 @@ var PumpAmmInternalSdk = class {
       poolBaseAmount,
       poolQuoteAmount,
       globalConfig.lpFeeBasisPoints,
-      globalConfig.protocolFeeBasisPoints
+      globalConfig.protocolFeeBasisPoints,
+      globalConfig.coinCreatorFeeBasisPoints,
+      fetchedPool.coinCreator
     );
   }
   async buyQuoteInputInternal(pool, quote, slippage) {
-    const { poolBaseAmount, poolQuoteAmount } = await this.getPoolBaseAndQuoteAmounts(pool);
+    const { fetchedPool, poolBaseAmount, poolQuoteAmount } = await this.getPoolBaseAndQuoteAmounts(pool);
     return this.buyQuoteInputInternalNoPool(
       quote,
       slippage,
       poolBaseAmount,
-      poolQuoteAmount
+      poolQuoteAmount,
+      fetchedPool.coinCreator
     );
   }
-  async buyQuoteInputInternalNoPool(quote, slippage, poolBaseAmount, poolQuoteAmount) {
+  async buyQuoteInputInternalNoPool(quote, slippage, poolBaseAmount, poolQuoteAmount, coinCreator) {
     const globalConfig = await this.fetchGlobalConfigAccount();
     return buyQuoteInputInternal(
       quote,
@@ -7460,31 +8213,68 @@ var PumpAmmInternalSdk = class {
       poolBaseAmount,
       poolQuoteAmount,
       globalConfig.lpFeeBasisPoints,
-      globalConfig.protocolFeeBasisPoints
+      globalConfig.protocolFeeBasisPoints,
+      globalConfig.coinCreatorFeeBasisPoints,
+      coinCreator
     );
   }
   async sellInstructionsInternal(pool, baseAmountIn, minQuoteAmountOut, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
-    const { index, creator, baseMint, quoteMint } = await this.program.account.pool.fetch(pool);
-    return await this.sellInstructionsInternalNoPool(
-      index,
-      creator,
-      baseMint,
-      quoteMint,
-      baseAmountIn,
-      minQuoteAmountOut,
+    const poolAccountInfo = await this.connection.getAccountInfo(pool);
+    const poolData = this.program.coder.accounts.decode(
+      "pool",
+      poolAccountInfo.data
+    );
+    const { index, creator, baseMint, quoteMint, coinCreator } = poolData;
+    return await this.withFixPoolInstructions(
+      pool,
+      poolAccountInfo,
       user,
-      protocolFeeRecipient,
-      userBaseTokenAccount,
-      userQuoteTokenAccount
+      async () => {
+        return await this.sellInstructionsInternalNoPool(
+          index,
+          creator,
+          baseMint,
+          quoteMint,
+          baseAmountIn,
+          minQuoteAmountOut,
+          user,
+          coinCreator,
+          protocolFeeRecipient,
+          userBaseTokenAccount,
+          userQuoteTokenAccount
+        );
+      }
     );
   }
-  async sellInstructionsInternalNoPool(index, creator, baseMint, quoteMint, baseAmountIn, minQuoteAmountOut, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
+  async fixPoolInstructions(pool, user) {
+    const poolAccountInfo = await this.connection.getAccountInfo(pool);
+    return await this.withFixPoolInstructions(
+      pool,
+      poolAccountInfo,
+      user,
+      async () => []
+    );
+  }
+  async withFixPoolInstructions(pool, poolAccountInfo, user, block) {
+    const instructions = [];
+    if (poolAccountInfo === null || poolAccountInfo.data.length < POOL_ACCOUNT_NEW_SIZE) {
+      instructions.push(
+        await this.program.methods.extendAccount().accountsPartial({
+          account: pool,
+          user
+        }).instruction()
+      );
+    }
+    return [...instructions, ...await block()];
+  }
+  async sellInstructionsInternalNoPool(index, creator, baseMint, quoteMint, baseAmountIn, minQuoteAmountOut, user, coinCreator, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
     const [pool] = this.poolKey(index, creator, baseMint, quoteMint);
     const swapAccounts = await this.swapAccounts(
       pool,
       baseMint,
       quoteMint,
       user,
+      coinCreator,
       protocolFeeRecipient,
       userBaseTokenAccount,
       userQuoteTokenAccount
@@ -7566,15 +8356,16 @@ var PumpAmmInternalSdk = class {
     return base;
   }
   async sellBaseInputInternal(pool, base, slippage) {
-    const { poolBaseAmount, poolQuoteAmount } = await this.getPoolBaseAndQuoteAmounts(pool);
+    const { fetchedPool, poolBaseAmount, poolQuoteAmount } = await this.getPoolBaseAndQuoteAmounts(pool);
     return this.sellBaseInputInternalNoPool(
       base,
       slippage,
       poolBaseAmount,
-      poolQuoteAmount
+      poolQuoteAmount,
+      fetchedPool.coinCreator
     );
   }
-  async sellBaseInputInternalNoPool(base, slippage, poolBaseAmount, poolQuoteAmount) {
+  async sellBaseInputInternalNoPool(base, slippage, poolBaseAmount, poolQuoteAmount, coinCreator) {
     const globalConfig = await this.fetchGlobalConfigAccount();
     return sellBaseInputInternal(
       base,
@@ -7582,11 +8373,13 @@ var PumpAmmInternalSdk = class {
       poolBaseAmount,
       poolQuoteAmount,
       globalConfig.lpFeeBasisPoints,
-      globalConfig.protocolFeeBasisPoints
+      globalConfig.protocolFeeBasisPoints,
+      globalConfig.coinCreatorFeeBasisPoints,
+      coinCreator
     );
   }
   async sellQuoteInputInternal(pool, quote, slippage) {
-    const { poolBaseAmount, poolQuoteAmount } = await this.getPoolBaseAndQuoteAmounts(pool);
+    const { fetchedPool, poolBaseAmount, poolQuoteAmount } = await this.getPoolBaseAndQuoteAmounts(pool);
     const globalConfig = await this.fetchGlobalConfigAccount();
     return sellQuoteInputInternal(
       quote,
@@ -7594,7 +8387,9 @@ var PumpAmmInternalSdk = class {
       poolBaseAmount,
       poolQuoteAmount,
       globalConfig.lpFeeBasisPoints,
-      globalConfig.protocolFeeBasisPoints
+      globalConfig.protocolFeeBasisPoints,
+      globalConfig.coinCreatorFeeBasisPoints,
+      fetchedPool.coinCreator
     );
   }
   async extendAccount(account, user) {
@@ -7603,9 +8398,64 @@ var PumpAmmInternalSdk = class {
       user
     }).instruction();
   }
-  async swapAccounts(pool, baseMint, quoteMint, user, protocolFeeRecipient, userBaseTokenAccount, userQuoteTokenAccount) {
+  async collectCoinCreatorFee(coinCreator, coinCreatorTokenAccount = void 0) {
+    const quoteMint = import_spl_token2.NATIVE_MINT;
+    const quoteTokenProgram = import_spl_token2.TOKEN_PROGRAM_ID;
+    if (coinCreatorTokenAccount === void 0) {
+      coinCreatorTokenAccount = (0, import_spl_token2.getAssociatedTokenAddressSync)(
+        quoteMint,
+        coinCreator,
+        true,
+        quoteTokenProgram
+      );
+    }
+    return await this.withWsolAccount(
+      coinCreator,
+      quoteMint,
+      coinCreatorTokenAccount,
+      new import_anchor3.BN(0),
+      async () => {
+        return [
+          await this.program.methods.collectCoinCreatorFee().accountsPartial({
+            coinCreator,
+            coinCreatorTokenAccount,
+            quoteMint,
+            quoteTokenProgram
+          }).instruction()
+        ];
+      }
+    );
+  }
+  async getCoinCreatorVaultBalance(coinCreator) {
+    const quoteMint = import_spl_token2.NATIVE_MINT;
+    const quoteTokenProgram = import_spl_token2.TOKEN_PROGRAM_ID;
+    const coinCreatorVaultAuthority = this.coinCreatorVaultAuthorityPda(coinCreator);
+    const coinCreatorVaultAta = this.coinCreatorVaultAta(
+      coinCreatorVaultAuthority,
+      quoteMint,
+      quoteTokenProgram
+    );
+    try {
+      const tokenAccount = await (0, import_spl_token2.getAccount)(
+        this.connection,
+        coinCreatorVaultAta,
+        void 0,
+        quoteTokenProgram
+      );
+      return new import_anchor3.BN(tokenAccount.amount.toString());
+    } catch (e) {
+      console.error(`Error fetching token account ${coinCreatorVaultAta}:`, e);
+      return new import_anchor3.BN(0);
+    }
+  }
+  async setCoinCreator(pool) {
+    return this.program.methods.setCoinCreator().accountsPartial({
+      pool
+    }).instruction();
+  }
+  async swapAccounts(pool, baseMint, quoteMint, user, coinCreator, protocolFeeRecipient, userBaseTokenAccount, userQuoteTokenAccount) {
     if (protocolFeeRecipient === void 0) {
-      const { protocolFeeRecipients } = await this.program.account.globalConfig.fetch(this.globalConfig);
+      const { protocolFeeRecipients } = await this.fetchGlobalConfigAccount();
       protocolFeeRecipient = protocolFeeRecipients[Math.floor(Math.random() * protocolFeeRecipients.length)];
     }
     const [baseTokenProgram, quoteTokenProgram] = await this.getMintTokenPrograms(baseMint, quoteMint);
@@ -7625,6 +8475,7 @@ var PumpAmmInternalSdk = class {
         quoteTokenProgram
       );
     }
+    const coinCreatorVaultAuthority = this.coinCreatorVaultAuthorityPda(coinCreator);
     return {
       pool,
       globalConfig: this.globalConfig,
@@ -7647,8 +8498,29 @@ var PumpAmmInternalSdk = class {
       ),
       protocolFeeRecipient,
       baseTokenProgram,
-      quoteTokenProgram
+      quoteTokenProgram,
+      coinCreatorVaultAta: this.coinCreatorVaultAta(
+        coinCreatorVaultAuthority,
+        quoteMint,
+        quoteTokenProgram
+      ),
+      coinCreatorVaultAuthority
     };
+  }
+  coinCreatorVaultAuthorityPda(coinCreator) {
+    const [coinCreatorVaultAuthority] = import_web34.PublicKey.findProgramAddressSync(
+      [Buffer.from("creator_vault"), coinCreator.toBuffer()],
+      this.programId()
+    );
+    return coinCreatorVaultAuthority;
+  }
+  coinCreatorVaultAta(coinCreatorVaultAuthority, quoteMint, quoteTokenProgram) {
+    return (0, import_spl_token2.getAssociatedTokenAddressSync)(
+      quoteMint,
+      coinCreatorVaultAuthority,
+      true,
+      quoteTokenProgram
+    );
   }
   async getMintTokenPrograms(baseMint, quoteMint) {
     const baseMintAccountInfo = await this.connection.getAccountInfo(baseMint);

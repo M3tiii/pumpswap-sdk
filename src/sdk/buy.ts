@@ -1,25 +1,17 @@
 import BN from "bn.js";
 import { ceilDiv, fee } from "./util";
 import { BuyBaseInputResult, BuyQuoteInputResult } from "../types/sdk";
+import { PublicKey } from "@solana/web3.js";
 
-/**
- * Calculates a "buy" in a constant-product AMM with fees.
- * Slippage is handled as a percentage where slippage=1 => 1%.
- *
- * @param base - Base tokens requested (out).
- * @param slippage - Slippage tolerance in % (1 => 1%).
- * @param baseReserve - Reserve of base token in the pool.
- * @param quoteReserve - Reserve of quote token in the pool.
- * @param lpFeeBps - LP fee in basis points (BN).
- * @param protocolFeeBps - Protocol fee in basis points (BN).
- */
 export function buyBaseInputInternal(
   base: BN,
   slippage: number, // 1 => 1%
   baseReserve: BN,
   quoteReserve: BN,
-  lpFeeBps: BN, // LP fee in basis points (BN)
-  protocolFeeBps: BN, // Protocol fee in basis points (BN)
+  lpFeeBps: BN,
+  protocolFeeBps: BN,
+  coinCreatorFeeBps: BN,
+  coinCreator: PublicKey,
 ): BuyBaseInputResult {
   // -----------------------------------------------------
   // 1) Basic validations
@@ -34,9 +26,6 @@ export function buyBaseInputInternal(
   }
   if (base.gt(baseReserve)) {
     throw new Error("Cannot buy more base tokens than the pool reserves.");
-  }
-  if (lpFeeBps.isNeg() || protocolFeeBps.isNeg()) {
-    throw new Error("Fee basis points cannot be negative.");
   }
 
   // -----------------------------------------------------
@@ -59,7 +48,13 @@ export function buyBaseInputInternal(
   // -----------------------------------------------------
   const lpFee = fee(quoteAmountIn, lpFeeBps);
   const protocolFee = fee(quoteAmountIn, protocolFeeBps);
-  const totalQuote = quoteAmountIn.add(lpFee).add(protocolFee);
+  const coinCreatorFee = PublicKey.default.equals(coinCreator)
+    ? new BN(0)
+    : fee(quoteAmountIn, coinCreatorFeeBps);
+  const totalQuote = quoteAmountIn
+    .add(lpFee)
+    .add(protocolFee)
+    .add(coinCreatorFee);
 
   // -----------------------------------------------------
   // 4) Calculate maxQuote with slippage
@@ -79,24 +74,15 @@ export function buyBaseInputInternal(
   };
 }
 
-/**
- * Calculates a "buy" in a constant-product AMM with fees, where the input is quote tokens.
- * Slippage is handled as a percentage where slippage=1 => 1%.
- *
- * @param quote - Quote tokens provided (in), including fees.
- * @param slippage - Slippage tolerance in % (1 => 1%).
- * @param baseReserve - Reserve of base token in the pool.
- * @param quoteReserve - Reserve of quote token in the pool.
- * @param lpFeeBps - LP fee in basis points (BN).
- * @param protocolFeeBps - Protocol fee in basis points (BN).
- */
 export function buyQuoteInputInternal(
   quote: BN,
   slippage: number, // 1 => 1%
   baseReserve: BN,
   quoteReserve: BN,
-  lpFeeBps: BN, // LP fee in basis points (BN)
-  protocolFeeBps: BN, // Protocol fee in basis points (BN)
+  lpFeeBps: BN,
+  protocolFeeBps: BN,
+  coinCreatorFeeBps: BN,
+  coinCreator: PublicKey,
 ): BuyQuoteInputResult {
   // -----------------------------------------------------
   // 1) Basic validations
@@ -109,14 +95,13 @@ export function buyQuoteInputInternal(
       "Invalid input: 'baseReserve' or 'quoteReserve' cannot be zero.",
     );
   }
-  if (lpFeeBps.isNeg() || protocolFeeBps.isNeg()) {
-    throw new Error("Fee basis points cannot be negative.");
-  }
 
   // -----------------------------------------------------
   // 2) Calculate total fee basis points and denominator
   // -----------------------------------------------------
-  const totalFeeBps = lpFeeBps.add(protocolFeeBps);
+  const totalFeeBps = lpFeeBps
+    .add(protocolFeeBps)
+    .add(PublicKey.default.equals(coinCreator) ? new BN(0) : coinCreatorFeeBps);
   const denominator = new BN(10_000).add(totalFeeBps);
 
   // -----------------------------------------------------

@@ -9,3 +9,5 @@ export {
 } from "./sdk/transaction";
 export { getPumpAmmProgram } from "./sdk/util";
 export * from "./types/sdk";
+export * from "./types/pump_amm";
+export { default as pumpAmmJson } from "./idl/pump_amm.json";

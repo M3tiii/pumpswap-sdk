@@ -12,11 +12,12 @@ declare class PumpAmmAdminSdk {
         protocolFeeBasisPoints: BN;
         disableFlags: number;
         protocolFeeRecipients: PublicKey[];
+        coinCreatorFeeBasisPoints: BN;
     }>;
-    createConfig(lpFeeBasisPoints: BN, protocolFeeBasisPoints: BN, protocolFeeRecipients: PublicKey[], admin: PublicKey): Promise<TransactionInstruction>;
+    createConfig(lpFeeBasisPoints: BN, protocolFeeBasisPoints: BN, protocolFeeRecipients: PublicKey[], coinCreatorFeeBasisPoints: BN, admin: PublicKey): Promise<TransactionInstruction>;
     disable(disableCreatePool: boolean, disableDeposit: boolean, disableWithdraw: boolean, disableBuy: boolean, disableSell: boolean, admin: PublicKey): Promise<TransactionInstruction>;
     updateAdmin(admin: PublicKey, newAdmin: PublicKey): Promise<TransactionInstruction>;
-    updateFeeConfig(lpFeeBasisPoints: BN, protocolFeeBasisPoints: BN, protocolFeeRecipients: PublicKey[], admin: PublicKey): Promise<TransactionInstruction>;
+    updateFeeConfig(lpFeeBasisPoints: BN, protocolFeeBasisPoints: BN, protocolFeeRecipients: PublicKey[], coinCreatorFeeBasisPoints: BN, admin: PublicKey): Promise<TransactionInstruction>;
 }
 
 export { PumpAmmAdminSdk };

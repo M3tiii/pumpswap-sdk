@@ -4867,6 +4867,93 @@ var pump_amm_default = {
         },
         {
           name: "program"
+        },
+        {
+          name: "coin_creator_vault_ata",
+          writable: true,
+          pda: {
+            seeds: [
+              {
+                kind: "account",
+                path: "coin_creator_vault_authority"
+              },
+              {
+                kind: "account",
+                path: "quote_token_program"
+              },
+              {
+                kind: "account",
+                path: "quote_mint"
+              }
+            ],
+            program: {
+              kind: "const",
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          name: "coin_creator_vault_authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  99,
+                  114,
+                  101,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                kind: "account",
+                path: "pool.coin_creator",
+                account: "Pool"
+              }
+            ]
+          }
         }
       ],
       args: [
@@ -4879,6 +4966,145 @@ var pump_amm_default = {
           type: "u64"
         }
       ]
+    },
+    {
+      name: "collect_coin_creator_fee",
+      discriminator: [160, 57, 89, 42, 181, 139, 43, 66],
+      accounts: [
+        {
+          name: "quote_mint"
+        },
+        {
+          name: "quote_token_program"
+        },
+        {
+          name: "coin_creator",
+          signer: true
+        },
+        {
+          name: "coin_creator_vault_authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  99,
+                  114,
+                  101,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                kind: "account",
+                path: "coin_creator"
+              }
+            ]
+          }
+        },
+        {
+          name: "coin_creator_vault_ata",
+          writable: true,
+          pda: {
+            seeds: [
+              {
+                kind: "account",
+                path: "coin_creator_vault_authority"
+              },
+              {
+                kind: "account",
+                path: "quote_token_program"
+              },
+              {
+                kind: "account",
+                path: "quote_mint"
+              }
+            ],
+            program: {
+              kind: "const",
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          name: "coin_creator_token_account",
+          writable: true
+        },
+        {
+          name: "event_authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          name: "program"
+        }
+      ],
+      args: []
     },
     {
       name: "create_config",
@@ -4967,6 +5193,10 @@ var pump_amm_default = {
           type: {
             array: ["pubkey", 8]
           }
+        },
+        {
+          name: "coin_creator_fee_basis_points",
+          type: "u64"
         }
       ]
     },
@@ -5287,6 +5517,10 @@ var pump_amm_default = {
         {
           name: "quote_amount_in",
           type: "u64"
+        },
+        {
+          name: "coin_creator",
+          type: "pubkey"
         }
       ]
     },
@@ -5662,6 +5896,93 @@ var pump_amm_default = {
         },
         {
           name: "program"
+        },
+        {
+          name: "coin_creator_vault_ata",
+          writable: true,
+          pda: {
+            seeds: [
+              {
+                kind: "account",
+                path: "coin_creator_vault_authority"
+              },
+              {
+                kind: "account",
+                path: "quote_token_program"
+              },
+              {
+                kind: "account",
+                path: "quote_mint"
+              }
+            ],
+            program: {
+              kind: "const",
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          name: "coin_creator_vault_authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  99,
+                  114,
+                  101,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                kind: "account",
+                path: "pool.coin_creator",
+                account: "Pool"
+              }
+            ]
+          }
         }
       ],
       args: [
@@ -5674,6 +5995,209 @@ var pump_amm_default = {
           type: "u64"
         }
       ]
+    },
+    {
+      name: "set_coin_creator",
+      docs: [
+        "Sets Pool::coin_creator from Metaplex metadata creator or BondingCurve::creator"
+      ],
+      discriminator: [210, 149, 128, 45, 188, 58, 78, 175],
+      accounts: [
+        {
+          name: "pool",
+          writable: true
+        },
+        {
+          name: "metadata",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [109, 101, 116, 97, 100, 97, 116, 97]
+              },
+              {
+                kind: "const",
+                value: [
+                  11,
+                  112,
+                  101,
+                  177,
+                  227,
+                  209,
+                  124,
+                  69,
+                  56,
+                  157,
+                  82,
+                  127,
+                  107,
+                  4,
+                  195,
+                  205,
+                  88,
+                  184,
+                  108,
+                  115,
+                  26,
+                  160,
+                  253,
+                  181,
+                  73,
+                  182,
+                  209,
+                  188,
+                  3,
+                  248,
+                  41,
+                  70
+                ]
+              },
+              {
+                kind: "account",
+                path: "pool.base_mint",
+                account: "Pool"
+              }
+            ],
+            program: {
+              kind: "const",
+              value: [
+                11,
+                112,
+                101,
+                177,
+                227,
+                209,
+                124,
+                69,
+                56,
+                157,
+                82,
+                127,
+                107,
+                4,
+                195,
+                205,
+                88,
+                184,
+                108,
+                115,
+                26,
+                160,
+                253,
+                181,
+                73,
+                182,
+                209,
+                188,
+                3,
+                248,
+                41,
+                70
+              ]
+            }
+          }
+        },
+        {
+          name: "bonding_curve",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  45,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
+              },
+              {
+                kind: "account",
+                path: "pool.base_mint",
+                account: "Pool"
+              }
+            ],
+            program: {
+              kind: "const",
+              value: [
+                1,
+                86,
+                224,
+                246,
+                147,
+                102,
+                90,
+                207,
+                68,
+                219,
+                21,
+                104,
+                191,
+                23,
+                91,
+                170,
+                81,
+                137,
+                203,
+                151,
+                245,
+                210,
+                255,
+                59,
+                101,
+                93,
+                43,
+                182,
+                253,
+                109,
+                24,
+                176
+              ]
+            }
+          }
+        },
+        {
+          name: "event_authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          name: "program"
+        }
+      ],
+      args: []
     },
     {
       name: "update_admin",
@@ -5786,6 +6310,10 @@ var pump_amm_default = {
           type: {
             array: ["pubkey", 8]
           }
+        },
+        {
+          name: "coin_creator_fee_basis_points",
+          type: "u64"
         }
       ]
     },
@@ -5898,6 +6426,10 @@ var pump_amm_default = {
   ],
   accounts: [
     {
+      name: "BondingCurve",
+      discriminator: [23, 183, 248, 55, 96, 216, 172, 96]
+    },
+    {
       name: "GlobalConfig",
       discriminator: [149, 8, 156, 202, 160, 252, 176, 217]
     },
@@ -5910,6 +6442,10 @@ var pump_amm_default = {
     {
       name: "BuyEvent",
       discriminator: [103, 244, 82, 31, 44, 245, 119, 119]
+    },
+    {
+      name: "CollectCoinCreatorFeeEvent",
+      discriminator: [232, 245, 194, 238, 234, 218, 58, 89]
     },
     {
       name: "CreateConfigEvent",
@@ -5934,6 +6470,14 @@ var pump_amm_default = {
     {
       name: "SellEvent",
       discriminator: [62, 47, 55, 10, 165, 3, 220, 42]
+    },
+    {
+      name: "SetBondingCurveCoinCreatorEvent",
+      discriminator: [242, 231, 235, 102, 65, 99, 189, 211]
+    },
+    {
+      name: "SetMetaplexCoinCreatorEvent",
+      discriminator: [150, 107, 199, 123, 124, 207, 102, 228]
     },
     {
       name: "UpdateAdminEvent",
@@ -6060,9 +6604,49 @@ var pump_amm_default = {
     {
       code: 6027,
       name: "AccountTypeNotSupported"
+    },
+    {
+      code: 6028,
+      name: "OnlyCanonicalPumpPoolsCanHaveCoinCreator"
     }
   ],
   types: [
+    {
+      name: "BondingCurve",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "virtual_token_reserves",
+            type: "u64"
+          },
+          {
+            name: "virtual_sol_reserves",
+            type: "u64"
+          },
+          {
+            name: "real_token_reserves",
+            type: "u64"
+          },
+          {
+            name: "real_sol_reserves",
+            type: "u64"
+          },
+          {
+            name: "token_total_supply",
+            type: "u64"
+          },
+          {
+            name: "complete",
+            type: "bool"
+          },
+          {
+            name: "creator",
+            type: "pubkey"
+          }
+        ]
+      }
+    },
     {
       name: "BuyEvent",
       type: {
@@ -6147,6 +6731,46 @@ var pump_amm_default = {
           {
             name: "protocol_fee_recipient_token_account",
             type: "pubkey"
+          },
+          {
+            name: "coin_creator",
+            type: "pubkey"
+          },
+          {
+            name: "coin_creator_fee_basis_points",
+            type: "u64"
+          },
+          {
+            name: "coin_creator_fee",
+            type: "u64"
+          }
+        ]
+      }
+    },
+    {
+      name: "CollectCoinCreatorFeeEvent",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "timestamp",
+            type: "i64"
+          },
+          {
+            name: "coin_creator",
+            type: "pubkey"
+          },
+          {
+            name: "coin_creator_fee",
+            type: "u64"
+          },
+          {
+            name: "coin_creator_vault_ata",
+            type: "pubkey"
+          },
+          {
+            name: "coin_creator_token_account",
+            type: "pubkey"
           }
         ]
       }
@@ -6177,6 +6801,10 @@ var pump_amm_default = {
             type: {
               array: ["pubkey", 8]
             }
+          },
+          {
+            name: "coin_creator_fee_basis_points",
+            type: "u64"
           }
         ]
       }
@@ -6260,6 +6888,10 @@ var pump_amm_default = {
           },
           {
             name: "user_quote_token_account",
+            type: "pubkey"
+          },
+          {
+            name: "coin_creator",
             type: "pubkey"
           }
         ]
@@ -6439,6 +7071,11 @@ var pump_amm_default = {
             type: {
               array: ["pubkey", 8]
             }
+          },
+          {
+            name: "coin_creator_fee_basis_points",
+            docs: ["The coin creator fee in basis points (0.01%)"],
+            type: "u64"
           }
         ]
       }
@@ -6484,6 +7121,10 @@ var pump_amm_default = {
             name: "lp_supply",
             docs: ["True circulating supply without burns and lock-ups"],
             type: "u64"
+          },
+          {
+            name: "coin_creator",
+            type: "pubkey"
           }
         ]
       }
@@ -6572,6 +7213,74 @@ var pump_amm_default = {
           {
             name: "protocol_fee_recipient_token_account",
             type: "pubkey"
+          },
+          {
+            name: "coin_creator",
+            type: "pubkey"
+          },
+          {
+            name: "coin_creator_fee_basis_points",
+            type: "u64"
+          },
+          {
+            name: "coin_creator_fee",
+            type: "u64"
+          }
+        ]
+      }
+    },
+    {
+      name: "SetBondingCurveCoinCreatorEvent",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "timestamp",
+            type: "i64"
+          },
+          {
+            name: "base_mint",
+            type: "pubkey"
+          },
+          {
+            name: "pool",
+            type: "pubkey"
+          },
+          {
+            name: "bonding_curve",
+            type: "pubkey"
+          },
+          {
+            name: "coin_creator",
+            type: "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      name: "SetMetaplexCoinCreatorEvent",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "timestamp",
+            type: "i64"
+          },
+          {
+            name: "base_mint",
+            type: "pubkey"
+          },
+          {
+            name: "pool",
+            type: "pubkey"
+          },
+          {
+            name: "metadata",
+            type: "pubkey"
+          },
+          {
+            name: "coin_creator",
+            type: "pubkey"
           }
         ]
       }
@@ -6622,6 +7331,10 @@ var pump_amm_default = {
             type: {
               array: ["pubkey", 8]
             }
+          },
+          {
+            name: "coin_creator_fee_basis_points",
+            type: "u64"
           }
         ]
       }
@@ -6723,11 +7436,12 @@ var PumpAmmAdminSdk = class {
   fetchGlobalConfigAccount() {
     return this.program.account.globalConfig.fetch(this.globalConfig);
   }
-  createConfig(lpFeeBasisPoints, protocolFeeBasisPoints, protocolFeeRecipients, admin) {
+  createConfig(lpFeeBasisPoints, protocolFeeBasisPoints, protocolFeeRecipients, coinCreatorFeeBasisPoints, admin) {
     return this.program.methods.createConfig(
       lpFeeBasisPoints,
       protocolFeeBasisPoints,
-      protocolFeeRecipients
+      protocolFeeRecipients,
+      coinCreatorFeeBasisPoints
     ).accountsPartial({
       admin
     }).instruction();
@@ -6751,11 +7465,12 @@ var PumpAmmAdminSdk = class {
       globalConfig: this.globalConfig
     }).instruction();
   }
-  updateFeeConfig(lpFeeBasisPoints, protocolFeeBasisPoints, protocolFeeRecipients, admin) {
+  updateFeeConfig(lpFeeBasisPoints, protocolFeeBasisPoints, protocolFeeRecipients, coinCreatorFeeBasisPoints, admin) {
     return this.program.methods.updateFeeConfig(
       lpFeeBasisPoints,
       protocolFeeBasisPoints,
-      protocolFeeRecipients
+      protocolFeeRecipients,
+      coinCreatorFeeBasisPoints
     ).accountsPartial({
       admin,
       globalConfig: this.globalConfig
