@@ -1245,15 +1245,15 @@ export class PumpAmmInternalSdk {
         ];
     }
 
-    const [baseTokenProgram, quoteTokenProgram] =
-      await this.getMintTokenPrograms(baseMint, quoteMint);
+    // const [baseTokenProgram, quoteTokenProgram] =
+    //   await this.getMintTokenPrograms(baseMint, quoteMint);
 
     if (userBaseTokenAccount === undefined) {
       userBaseTokenAccount = getAssociatedTokenAddressSync(
         baseMint,
         user,
         true,
-        baseTokenProgram,
+        TOKEN_PROGRAM_ID, // was baseTokenProgram
       );
     }
 
@@ -1262,7 +1262,7 @@ export class PumpAmmInternalSdk {
         quoteMint,
         user,
         true,
-        quoteTokenProgram,
+        TOKEN_PROGRAM_ID, // was quoteTokenProgram
       );
     }
 
@@ -1281,21 +1281,21 @@ export class PumpAmmInternalSdk {
         baseMint,
         pool,
         true,
-        baseTokenProgram,
+        TOKEN_PROGRAM_ID, // was baseTokenProgram
       ),
       poolQuoteTokenAccount: getAssociatedTokenAddressSync(
         quoteMint,
         pool,
         true,
-        quoteTokenProgram,
+        TOKEN_PROGRAM_ID, // was quoteTokenProgram
       ),
       protocolFeeRecipient,
-      baseTokenProgram,
-      quoteTokenProgram,
+      baseTokenProgram: TOKEN_PROGRAM_ID, // was baseTokenProgram
+      quoteTokenProgram: TOKEN_PROGRAM_ID, // was quoteTokenProgram
       coinCreatorVaultAta: this.coinCreatorVaultAta(
         coinCreatorVaultAuthority,
         quoteMint,
-        quoteTokenProgram,
+        TOKEN_PROGRAM_ID, // was quoteTokenProgram
       ),
       coinCreatorVaultAuthority,
     };
