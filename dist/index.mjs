@@ -8120,13 +8120,13 @@ var PumpAmmInternalSdk = class {
       const { protocolFeeRecipients } = await this.fetchGlobalConfigAccount();
       protocolFeeRecipient = protocolFeeRecipients[Math.floor(Math.random() * protocolFeeRecipients.length)];
     }
-    const [baseTokenProgram, quoteTokenProgram] = await this.getMintTokenPrograms(baseMint, quoteMint);
     if (userBaseTokenAccount === void 0) {
       userBaseTokenAccount = getAssociatedTokenAddressSync2(
         baseMint,
         user,
         true,
-        baseTokenProgram
+        TOKEN_PROGRAM_ID
+        // was baseTokenProgram
       );
     }
     if (userQuoteTokenAccount === void 0) {
@@ -8134,7 +8134,8 @@ var PumpAmmInternalSdk = class {
         quoteMint,
         user,
         true,
-        quoteTokenProgram
+        TOKEN_PROGRAM_ID
+        // was quoteTokenProgram
       );
     }
     const coinCreatorVaultAuthority = this.coinCreatorVaultAuthorityPda(coinCreator);
@@ -8150,21 +8151,26 @@ var PumpAmmInternalSdk = class {
         baseMint,
         pool,
         true,
-        baseTokenProgram
+        TOKEN_PROGRAM_ID
+        // was baseTokenProgram
       ),
       poolQuoteTokenAccount: getAssociatedTokenAddressSync2(
         quoteMint,
         pool,
         true,
-        quoteTokenProgram
+        TOKEN_PROGRAM_ID
+        // was quoteTokenProgram
       ),
       protocolFeeRecipient,
-      baseTokenProgram,
-      quoteTokenProgram,
+      baseTokenProgram: TOKEN_PROGRAM_ID,
+      // was baseTokenProgram
+      quoteTokenProgram: TOKEN_PROGRAM_ID,
+      // was quoteTokenProgram
       coinCreatorVaultAta: this.coinCreatorVaultAta(
         coinCreatorVaultAuthority,
         quoteMint,
-        quoteTokenProgram
+        TOKEN_PROGRAM_ID
+        // was quoteTokenProgram
       ),
       coinCreatorVaultAuthority
     };
@@ -8497,7 +8503,7 @@ async function sendAndConfirmTransaction(connection, payerKey, instructions, sig
 }
 
 // src/index.ts
-console.log("You are using custom pumpswap sdk v2");
+console.log("You are using custom pumpswap sdk v2.1");
 export {
   CANONICAL_POOL_INDEX,
   PUMP_AMM_PROGRAM_ID,
