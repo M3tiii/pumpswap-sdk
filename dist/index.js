@@ -3179,7 +3179,29 @@ var pump_amm_default = {
           ]
         },
         {
-          name: "global_config"
+          name: "global_config",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
         },
         {
           name: "global_volume_accumulator",
@@ -3508,7 +3530,8 @@ var pump_amm_default = {
           }
         },
         {
-          name: "program"
+          name: "program",
+          address: "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"
         },
         {
           name: "coin_creator_vault_ata",
@@ -3674,6 +3697,75 @@ var pump_amm_default = {
               }
             ]
           }
+        },
+        {
+          name: "fee_config",
+          optional: true,
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  102,
+                  101,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                kind: "const",
+                value: [
+                  12,
+                  20,
+                  222,
+                  252,
+                  130,
+                  94,
+                  198,
+                  118,
+                  148,
+                  37,
+                  8,
+                  24,
+                  187,
+                  101,
+                  64,
+                  101,
+                  244,
+                  41,
+                  141,
+                  49,
+                  86,
+                  213,
+                  113,
+                  180,
+                  212,
+                  248,
+                  9,
+                  12,
+                  24,
+                  233,
+                  168,
+                  99
+                ]
+              }
+            ],
+            program: {
+              kind: "account",
+              path: "fee_program"
+            }
+          }
+        },
+        {
+          name: "fee_program",
+          optional: true,
+          address: "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ"
         }
       ],
       args: [
@@ -3684,6 +3776,14 @@ var pump_amm_default = {
         {
           name: "max_quote_amount_in",
           type: "u64"
+        },
+        {
+          name: "track_volume",
+          type: {
+            defined: {
+              name: "OptionBool"
+            }
+          }
         }
       ]
     },
@@ -3941,12 +4041,106 @@ var pump_amm_default = {
           }
         },
         {
-          name: "program"
+          name: "program",
+          address: "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"
         },
         {
           name: "payer",
           writable: true,
           signer: true
+        }
+      ],
+      args: []
+    },
+    {
+      name: "close_user_volume_accumulator",
+      discriminator: [
+        249,
+        69,
+        164,
+        218,
+        150,
+        103,
+        84,
+        138
+      ],
+      accounts: [
+        {
+          name: "user",
+          writable: true,
+          signer: true
+        },
+        {
+          name: "user_volume_accumulator",
+          writable: true,
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  118,
+                  111,
+                  108,
+                  117,
+                  109,
+                  101,
+                  95,
+                  97,
+                  99,
+                  99,
+                  117,
+                  109,
+                  117,
+                  108,
+                  97,
+                  116,
+                  111,
+                  114
+                ]
+              },
+              {
+                kind: "account",
+                path: "user"
+              }
+            ]
+          }
+        },
+        {
+          name: "event_authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          name: "program"
         }
       ],
       args: []
@@ -4812,6 +5006,106 @@ var pump_amm_default = {
       args: []
     },
     {
+      name: "init_user_volume_accumulator",
+      discriminator: [
+        94,
+        6,
+        202,
+        115,
+        255,
+        96,
+        232,
+        183
+      ],
+      accounts: [
+        {
+          name: "payer",
+          writable: true,
+          signer: true
+        },
+        {
+          name: "user"
+        },
+        {
+          name: "user_volume_accumulator",
+          writable: true,
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  118,
+                  111,
+                  108,
+                  117,
+                  109,
+                  101,
+                  95,
+                  97,
+                  99,
+                  99,
+                  117,
+                  109,
+                  117,
+                  108,
+                  97,
+                  116,
+                  111,
+                  114
+                ]
+              },
+              {
+                kind: "account",
+                path: "user"
+              }
+            ]
+          }
+        },
+        {
+          name: "system_program",
+          address: "11111111111111111111111111111111"
+        },
+        {
+          name: "event_authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          name: "program"
+        }
+      ],
+      args: []
+    },
+    {
       name: "sell",
       discriminator: [
         51,
@@ -4973,7 +5267,8 @@ var pump_amm_default = {
           }
         },
         {
-          name: "program"
+          name: "program",
+          address: "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"
         },
         {
           name: "coin_creator_vault_ata",
@@ -5061,6 +5356,75 @@ var pump_amm_default = {
               }
             ]
           }
+        },
+        {
+          name: "fee_config",
+          optional: true,
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  102,
+                  101,
+                  101,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                kind: "const",
+                value: [
+                  12,
+                  20,
+                  222,
+                  252,
+                  130,
+                  94,
+                  198,
+                  118,
+                  148,
+                  37,
+                  8,
+                  24,
+                  187,
+                  101,
+                  64,
+                  101,
+                  244,
+                  41,
+                  141,
+                  49,
+                  86,
+                  213,
+                  113,
+                  180,
+                  212,
+                  248,
+                  9,
+                  12,
+                  24,
+                  233,
+                  168,
+                  99
+                ]
+              }
+            ],
+            program: {
+              kind: "account",
+              path: "fee_program"
+            }
+          }
+        },
+        {
+          name: "fee_program",
+          optional: true,
+          address: "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ"
         }
       ],
       args: [
@@ -5711,6 +6075,19 @@ var pump_amm_default = {
       ]
     },
     {
+      name: "FeeConfig",
+      discriminator: [
+        143,
+        52,
+        146,
+        187,
+        219,
+        123,
+        76,
+        155
+      ]
+    },
+    {
       name: "GlobalConfig",
       discriminator: [
         149,
@@ -5817,6 +6194,19 @@ var pump_amm_default = {
       ]
     },
     {
+      name: "CloseUserVolumeAccumulatorEvent",
+      discriminator: [
+        146,
+        159,
+        189,
+        172,
+        146,
+        88,
+        56,
+        244
+      ]
+    },
+    {
       name: "CollectCoinCreatorFeeEvent",
       discriminator: [
         232,
@@ -5892,6 +6282,19 @@ var pump_amm_default = {
         146,
         22,
         124
+      ]
+    },
+    {
+      name: "InitUserVolumeAccumulatorEvent",
+      discriminator: [
+        134,
+        36,
+        13,
+        72,
+        232,
+        101,
+        130,
+        216
       ]
     },
     {
@@ -6197,6 +6600,18 @@ var pump_amm_default = {
           {
             name: "token_supply_per_day",
             type: "u64"
+          },
+          {
+            name: "mint",
+            type: "pubkey"
+          },
+          {
+            name: "seconds_in_a_day",
+            type: "i64"
+          },
+          {
+            name: "timestamp",
+            type: "i64"
           }
         ]
       }
@@ -6333,6 +6748,26 @@ var pump_amm_default = {
           {
             name: "coin_creator_fee",
             type: "u64"
+          },
+          {
+            name: "track_volume",
+            type: "bool"
+          },
+          {
+            name: "total_unclaimed_tokens",
+            type: "u64"
+          },
+          {
+            name: "total_claimed_tokens",
+            type: "u64"
+          },
+          {
+            name: "current_sol_volume",
+            type: "u64"
+          },
+          {
+            name: "last_update_timestamp",
+            type: "i64"
           }
         ]
       }
@@ -6353,6 +6788,50 @@ var pump_amm_default = {
           {
             name: "amount",
             type: "u64"
+          },
+          {
+            name: "timestamp",
+            type: "i64"
+          },
+          {
+            name: "total_claimed_tokens",
+            type: "u64"
+          },
+          {
+            name: "current_sol_volume",
+            type: "u64"
+          }
+        ]
+      }
+    },
+    {
+      name: "CloseUserVolumeAccumulatorEvent",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "user",
+            type: "pubkey"
+          },
+          {
+            name: "timestamp",
+            type: "i64"
+          },
+          {
+            name: "total_unclaimed_tokens",
+            type: "u64"
+          },
+          {
+            name: "total_claimed_tokens",
+            type: "u64"
+          },
+          {
+            name: "current_sol_volume",
+            type: "u64"
+          },
+          {
+            name: "last_update_timestamp",
+            type: "i64"
           }
         ]
       }
@@ -6651,6 +7130,80 @@ var pump_amm_default = {
       }
     },
     {
+      name: "FeeConfig",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "bump",
+            type: "u8"
+          },
+          {
+            name: "admin",
+            type: "pubkey"
+          },
+          {
+            name: "flat_fees",
+            type: {
+              defined: {
+                name: "Fees"
+              }
+            }
+          },
+          {
+            name: "fee_tiers",
+            type: {
+              vec: {
+                defined: {
+                  name: "FeeTier"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      name: "FeeTier",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "market_cap_lamports_threshold",
+            type: "u128"
+          },
+          {
+            name: "fees",
+            type: {
+              defined: {
+                name: "Fees"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      name: "Fees",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "lp_fee_bps",
+            type: "u64"
+          },
+          {
+            name: "protocol_fee_bps",
+            type: "u64"
+          },
+          {
+            name: "creator_fee_bps",
+            type: "u64"
+          }
+        ]
+      }
+    },
+    {
       name: "GlobalConfig",
       type: {
         kind: "struct",
@@ -6664,16 +7217,10 @@ var pump_amm_default = {
           },
           {
             name: "lp_fee_basis_points",
-            docs: [
-              "The lp fee in basis points (0.01%)"
-            ],
             type: "u64"
           },
           {
             name: "protocol_fee_basis_points",
-            docs: [
-              "The protocol fee in basis points (0.01%)"
-            ],
             type: "u64"
           },
           {
@@ -6702,9 +7249,6 @@ var pump_amm_default = {
           },
           {
             name: "coin_creator_fee_basis_points",
-            docs: [
-              "The coin creator fee in basis points (0.01%)"
-            ],
             type: "u64"
           },
           {
@@ -6756,6 +7300,35 @@ var pump_amm_default = {
               ]
             }
           }
+        ]
+      }
+    },
+    {
+      name: "InitUserVolumeAccumulatorEvent",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "payer",
+            type: "pubkey"
+          },
+          {
+            name: "user",
+            type: "pubkey"
+          },
+          {
+            name: "timestamp",
+            type: "i64"
+          }
+        ]
+      }
+    },
+    {
+      name: "OptionBool",
+      type: {
+        kind: "struct",
+        fields: [
+          "bool"
         ]
       }
     },
@@ -6982,6 +7555,10 @@ var pump_amm_default = {
           {
             name: "total_claimed_tokens_after",
             type: "u64"
+          },
+          {
+            name: "timestamp",
+            type: "i64"
           }
         ]
       }
@@ -7800,7 +8377,7 @@ var PumpAmmInternalSdk = class {
           }
         }
         instructions.push(
-          await this.program.methods.buy(baseOut, maxQuoteIn).accountsPartial(swapAccounts).instruction()
+          await this.program.methods.buy(baseOut, maxQuoteIn, { 0: true }).accountsPartial(swapAccounts).instruction()
         );
         if (baseWsolAtaCreated) {
           instructions.push(
@@ -8432,12 +9009,13 @@ var PumpAmmAdminSdk = class {
   fetchGlobalConfigAccount() {
     return this.program.account.globalConfig.fetch(this.globalConfig);
   }
-  createConfig(lpFeeBasisPoints, protocolFeeBasisPoints, protocolFeeRecipients, coinCreatorFeeBasisPoints, admin) {
+  createConfig(lpFeeBasisPoints, protocolFeeBasisPoints, protocolFeeRecipients, coinCreatorFeeBasisPoints, admin, adminSetCoinCreatorAuthority) {
     return this.program.methods.createConfig(
       lpFeeBasisPoints,
       protocolFeeBasisPoints,
       protocolFeeRecipients,
-      coinCreatorFeeBasisPoints
+      coinCreatorFeeBasisPoints,
+      adminSetCoinCreatorAuthority
     ).accountsPartial({
       admin
     }).instruction();
@@ -8461,12 +9039,13 @@ var PumpAmmAdminSdk = class {
       globalConfig: this.globalConfig
     }).instruction();
   }
-  updateFeeConfig(lpFeeBasisPoints, protocolFeeBasisPoints, protocolFeeRecipients, coinCreatorFeeBasisPoints, admin) {
+  updateFeeConfig(lpFeeBasisPoints, protocolFeeBasisPoints, protocolFeeRecipients, coinCreatorFeeBasisPoints, admin, adminSetCoinCreatorAuthority) {
     return this.program.methods.updateFeeConfig(
       lpFeeBasisPoints,
       protocolFeeBasisPoints,
       protocolFeeRecipients,
-      coinCreatorFeeBasisPoints
+      coinCreatorFeeBasisPoints,
+      adminSetCoinCreatorAuthority
     ).accountsPartial({
       admin,
       globalConfig: this.globalConfig
@@ -8510,7 +9089,7 @@ async function sendAndConfirmTransaction(connection, payerKey, instructions, sig
 }
 
 // src/index.ts
-console.log("You are using custom pumpswap sdk v2.1");
+console.log("You are using custom pumpswap sdk v3.1");
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   CANONICAL_POOL_INDEX,

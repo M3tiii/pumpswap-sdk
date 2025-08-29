@@ -27,6 +27,7 @@ export class PumpAmmAdminSdk {
     protocolFeeRecipients: PublicKey[],
     coinCreatorFeeBasisPoints: BN,
     admin: PublicKey,
+    adminSetCoinCreatorAuthority: PublicKey
   ): Promise<TransactionInstruction> {
     return this.program.methods
       .createConfig(
@@ -34,6 +35,7 @@ export class PumpAmmAdminSdk {
         protocolFeeBasisPoints,
         protocolFeeRecipients,
         coinCreatorFeeBasisPoints,
+        adminSetCoinCreatorAuthority
       )
       .accountsPartial({
         admin,
@@ -47,7 +49,7 @@ export class PumpAmmAdminSdk {
     disableWithdraw: boolean,
     disableBuy: boolean,
     disableSell: boolean,
-    admin: PublicKey,
+    admin: PublicKey
   ): Promise<TransactionInstruction> {
     return this.program.methods
       .disable(
@@ -55,7 +57,7 @@ export class PumpAmmAdminSdk {
         disableDeposit,
         disableWithdraw,
         disableBuy,
-        disableSell,
+        disableSell
       )
       .accountsPartial({
         admin,
@@ -66,7 +68,7 @@ export class PumpAmmAdminSdk {
 
   updateAdmin(
     admin: PublicKey,
-    newAdmin: PublicKey,
+    newAdmin: PublicKey
   ): Promise<TransactionInstruction> {
     return this.program.methods
       .updateAdmin()
@@ -84,6 +86,7 @@ export class PumpAmmAdminSdk {
     protocolFeeRecipients: PublicKey[],
     coinCreatorFeeBasisPoints: BN,
     admin: PublicKey,
+    adminSetCoinCreatorAuthority: PublicKey
   ): Promise<TransactionInstruction> {
     return this.program.methods
       .updateFeeConfig(
@@ -91,6 +94,7 @@ export class PumpAmmAdminSdk {
         protocolFeeBasisPoints,
         protocolFeeRecipients,
         coinCreatorFeeBasisPoints,
+        adminSetCoinCreatorAuthority
       )
       .accountsPartial({
         admin,

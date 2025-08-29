@@ -709,7 +709,7 @@ export class PumpAmmInternalSdk {
 
         instructions.push(
           await this.program.methods
-            .buy(baseOut, maxQuoteIn)
+            .buy(baseOut, maxQuoteIn, { 0: true })
             .accountsPartial(swapAccounts)
             .instruction(),
         );
