@@ -3690,7 +3690,6 @@ var pump_amm_default = {
         },
         {
           name: "fee_config",
-          optional: true,
           pda: {
             seeds: [
               {
@@ -3754,7 +3753,6 @@ var pump_amm_default = {
         },
         {
           name: "fee_program",
-          optional: true,
           address: "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ"
         }
       ],
@@ -5349,7 +5347,6 @@ var pump_amm_default = {
         },
         {
           name: "fee_config",
-          optional: true,
           pda: {
             seeds: [
               {
@@ -5413,7 +5410,6 @@ var pump_amm_default = {
         },
         {
           name: "fee_program",
-          optional: true,
           address: "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ"
         }
       ],
@@ -9082,7 +9078,7 @@ async function sendAndConfirmTransaction(connection, payerKey, instructions, sig
 }
 
 // src/index.ts
-console.log("You are using custom pumpswap sdk v3.1");
+console.log("You are using custom pumpswap sdk v3.2");
 export {
   CANONICAL_POOL_INDEX,
   PUMP_AMM_PROGRAM_ID,

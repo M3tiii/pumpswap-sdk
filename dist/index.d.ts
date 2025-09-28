@@ -895,7 +895,6 @@ type PumpAmm = {
                 },
                 {
                     "name": "feeConfig";
-                    "optional": true;
                     "pda": {
                         "seeds": [
                             {
@@ -959,7 +958,6 @@ type PumpAmm = {
                 },
                 {
                     "name": "feeProgram";
-                    "optional": true;
                     "address": "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ";
                 }
             ];
@@ -2554,7 +2552,6 @@ type PumpAmm = {
                 },
                 {
                     "name": "feeConfig";
-                    "optional": true;
                     "pda": {
                         "seeds": [
                             {
@@ -2618,7 +2615,6 @@ type PumpAmm = {
                 },
                 {
                     "name": "feeProgram";
-                    "optional": true;
                     "address": "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ";
                 }
             ];
@@ -5553,7 +5549,6 @@ var instructions = [
 			},
 			{
 				name: "fee_config",
-				optional: true,
 				pda: {
 					seeds: [
 						{
@@ -5617,7 +5612,6 @@ var instructions = [
 			},
 			{
 				name: "fee_program",
-				optional: true,
 				address: "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ"
 			}
 		],
@@ -7217,7 +7211,6 @@ var instructions = [
 			},
 			{
 				name: "fee_config",
-				optional: true,
 				pda: {
 					seeds: [
 						{
@@ -7281,7 +7274,6 @@ var instructions = [
 			},
 			{
 				name: "fee_program",
-				optional: true,
 				address: "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ"
 			}
 		],
