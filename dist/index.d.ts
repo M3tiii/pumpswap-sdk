@@ -235,6 +235,7 @@ declare class PumpAmmInternalSdk {
     private liquidityAccounts;
     buyInstructionsInternal(pool: PublicKey, baseOut: BN$1, maxQuoteIn: BN$1, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
     buyInstructionsInternalNoPool(index: number, creator: PublicKey, baseMint: PublicKey, quoteMint: PublicKey, baseOut: BN$1, maxQuoteIn: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
+    buyInstructionsSync(baseMint: PublicKey, quoteMint: PublicKey, baseOut: BN$1, maxQuoteIn: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient: PublicKey, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey, pool: PublicKey): Promise<TransactionInstruction[]>;
     buyBaseInput(pool: PublicKey, base: BN$1, slippage: number, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
     buyQuoteInput(pool: PublicKey, quote: BN$1, slippage: number, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
     buyAutocompleteQuoteFromBase(pool: PublicKey, base: BN$1, slippage: number): Promise<BN$1>;
@@ -246,6 +247,7 @@ declare class PumpAmmInternalSdk {
     fixPoolInstructions(pool: PublicKey, user: PublicKey): Promise<TransactionInstruction[]>;
     private withFixPoolInstructions;
     sellInstructionsInternalNoPool(index: number, creator: PublicKey, baseMint: PublicKey, quoteMint: PublicKey, baseAmountIn: BN$1, minQuoteAmountOut: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
+    sellInstructionsSync(baseMint: PublicKey, quoteMint: PublicKey, baseAmountIn: BN$1, minQuoteAmountOut: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient: PublicKey, userBaseTokenAccount: PublicKey, userQuoteTokenAccount: PublicKey, pool: PublicKey): Promise<TransactionInstruction[]>;
     sellBaseInput(pool: PublicKey, base: BN$1, slippage: number, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
     sellQuoteInput(pool: PublicKey, quote: BN$1, slippage: number, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
     sellAutocompleteQuoteFromBase(pool: PublicKey, base: BN$1, slippage: number): Promise<BN$1>;

@@ -8390,6 +8390,61 @@ var PumpAmmInternalSdk = class {
       }
     );
   }
+  async buyInstructionsSync(baseMint, quoteMint, baseOut, maxQuoteIn, user, coinCreator, protocolFeeRecipient, userBaseTokenAccount = void 0, userQuoteTokenAccount, pool) {
+    const coinCreatorVaultAuthority = this.coinCreatorVaultAuthorityPda(coinCreator);
+    const swapAccounts = {
+      pool,
+      globalConfig: this.globalConfig,
+      user,
+      baseMint,
+      quoteMint,
+      userBaseTokenAccount,
+      userQuoteTokenAccount,
+      poolBaseTokenAccount: (0, import_spl_token2.getAssociatedTokenAddressSync)(
+        baseMint,
+        pool,
+        true,
+        import_spl_token2.TOKEN_PROGRAM_ID
+      ),
+      poolQuoteTokenAccount: (0, import_spl_token2.getAssociatedTokenAddressSync)(
+        quoteMint,
+        pool,
+        true,
+        import_spl_token2.TOKEN_PROGRAM_ID
+      ),
+      protocolFeeRecipient,
+      baseTokenProgram: import_spl_token2.TOKEN_PROGRAM_ID,
+      quoteTokenProgram: import_spl_token2.TOKEN_PROGRAM_ID,
+      coinCreatorVaultAta: this.coinCreatorVaultAta(
+        coinCreatorVaultAuthority,
+        quoteMint,
+        import_spl_token2.TOKEN_PROGRAM_ID
+      ),
+      coinCreatorVaultAuthority
+    };
+    const instructions = [];
+    if (!userBaseTokenAccount) {
+      userBaseTokenAccount = (0, import_spl_token2.getAssociatedTokenAddressSync)(
+        baseMint,
+        user,
+        true,
+        import_spl_token2.TOKEN_PROGRAM_ID
+      );
+      instructions.push(
+        (0, import_spl_token2.createAssociatedTokenAccountIdempotentInstruction)(
+          user,
+          userBaseTokenAccount,
+          user,
+          swapAccounts.baseMint,
+          swapAccounts.baseTokenProgram
+        )
+      );
+    }
+    instructions.push(
+      await this.program.methods.buy(baseOut, maxQuoteIn, { 0: true }).accountsPartial(swapAccounts).instruction()
+    );
+    return instructions;
+  }
   async buyBaseInput(pool, base, slippage, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
     const { maxQuote } = await this.buyBaseInputInternal(pool, base, slippage);
     return this.buyInstructionsInternal(
@@ -8563,6 +8618,44 @@ var PumpAmmInternalSdk = class {
         return instructions;
       }
     );
+  }
+  async sellInstructionsSync(baseMint, quoteMint, baseAmountIn, minQuoteAmountOut, user, coinCreator, protocolFeeRecipient, userBaseTokenAccount, userQuoteTokenAccount, pool) {
+    const coinCreatorVaultAuthority = this.coinCreatorVaultAuthorityPda(coinCreator);
+    const swapAccounts = {
+      pool,
+      globalConfig: this.globalConfig,
+      user,
+      baseMint,
+      quoteMint,
+      userBaseTokenAccount,
+      userQuoteTokenAccount,
+      poolBaseTokenAccount: (0, import_spl_token2.getAssociatedTokenAddressSync)(
+        baseMint,
+        pool,
+        true,
+        import_spl_token2.TOKEN_PROGRAM_ID
+      ),
+      poolQuoteTokenAccount: (0, import_spl_token2.getAssociatedTokenAddressSync)(
+        quoteMint,
+        pool,
+        true,
+        import_spl_token2.TOKEN_PROGRAM_ID
+      ),
+      protocolFeeRecipient,
+      baseTokenProgram: import_spl_token2.TOKEN_PROGRAM_ID,
+      quoteTokenProgram: import_spl_token2.TOKEN_PROGRAM_ID,
+      coinCreatorVaultAta: this.coinCreatorVaultAta(
+        coinCreatorVaultAuthority,
+        quoteMint,
+        import_spl_token2.TOKEN_PROGRAM_ID
+      ),
+      coinCreatorVaultAuthority
+    };
+    const instructions = [];
+    instructions.push(
+      await this.program.methods.sell(baseAmountIn, minQuoteAmountOut).accountsPartial(swapAccounts).instruction()
+    );
+    return instructions;
   }
   async sellBaseInput(pool, base, slippage, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
     const { minQuote } = await this.sellBaseInputInternal(pool, base, slippage);
@@ -9085,7 +9178,7 @@ async function sendAndConfirmTransaction(connection, payerKey, instructions, sig
 }
 
 // src/index.ts
-console.log("You are using custom pumpswap sdk v3.2");
+console.log("You are using custom pumpswap sdk v3.3");
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   CANONICAL_POOL_INDEX,
