@@ -741,10 +741,30 @@ export class PumpAmmInternalSdk {
     protocolFeeRecipient: PublicKey,
     userBaseTokenAccount: PublicKey | undefined = undefined,
     userQuoteTokenAccount: PublicKey,
-    pool: PublicKey,
+    pool: PublicKey
   ): Promise<TransactionInstruction[]> {
     const coinCreatorVaultAuthority =
       this.coinCreatorVaultAuthorityPda(coinCreator);
+
+    const instructions = [];
+
+    if (!userBaseTokenAccount) {
+      userBaseTokenAccount = getAssociatedTokenAddressSync(
+        baseMint,
+        user,
+        true,
+        TOKEN_PROGRAM_ID
+      );
+      instructions.push(
+        createAssociatedTokenAccountIdempotentInstruction(
+          user,
+          userBaseTokenAccount,
+          user,
+          baseMint,
+          TOKEN_PROGRAM_ID
+        )
+      );
+    }
 
     const swapAccounts = {
       pool,
@@ -776,26 +796,6 @@ export class PumpAmmInternalSdk {
       ),
       coinCreatorVaultAuthority,
     };
-
-    const instructions = [];
-
-    if (!userBaseTokenAccount) {
-      userBaseTokenAccount = getAssociatedTokenAddressSync(
-        baseMint,
-        user,
-        true,
-        TOKEN_PROGRAM_ID
-      );
-      instructions.push(
-        createAssociatedTokenAccountIdempotentInstruction(
-          user,
-          userBaseTokenAccount,
-          user,
-          swapAccounts.baseMint,
-          swapAccounts.baseTokenProgram
-        )
-      );
-    }
 
     instructions.push(
       await this.program.methods
@@ -1142,7 +1142,7 @@ export class PumpAmmInternalSdk {
       await this.program.methods
         .sell(baseAmountIn, minQuoteAmountOut)
         .accountsPartial(swapAccounts)
-        .instruction(),
+        .instruction()
     );
 
     return instructions;

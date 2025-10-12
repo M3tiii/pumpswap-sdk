@@ -8392,6 +8392,24 @@ var PumpAmmInternalSdk = class {
   }
   async buyInstructionsSync(baseMint, quoteMint, baseOut, maxQuoteIn, user, coinCreator, protocolFeeRecipient, userBaseTokenAccount = void 0, userQuoteTokenAccount, pool) {
     const coinCreatorVaultAuthority = this.coinCreatorVaultAuthorityPda(coinCreator);
+    const instructions = [];
+    if (!userBaseTokenAccount) {
+      userBaseTokenAccount = (0, import_spl_token2.getAssociatedTokenAddressSync)(
+        baseMint,
+        user,
+        true,
+        import_spl_token2.TOKEN_PROGRAM_ID
+      );
+      instructions.push(
+        (0, import_spl_token2.createAssociatedTokenAccountIdempotentInstruction)(
+          user,
+          userBaseTokenAccount,
+          user,
+          baseMint,
+          import_spl_token2.TOKEN_PROGRAM_ID
+        )
+      );
+    }
     const swapAccounts = {
       pool,
       globalConfig: this.globalConfig,
@@ -8422,24 +8440,6 @@ var PumpAmmInternalSdk = class {
       ),
       coinCreatorVaultAuthority
     };
-    const instructions = [];
-    if (!userBaseTokenAccount) {
-      userBaseTokenAccount = (0, import_spl_token2.getAssociatedTokenAddressSync)(
-        baseMint,
-        user,
-        true,
-        import_spl_token2.TOKEN_PROGRAM_ID
-      );
-      instructions.push(
-        (0, import_spl_token2.createAssociatedTokenAccountIdempotentInstruction)(
-          user,
-          userBaseTokenAccount,
-          user,
-          swapAccounts.baseMint,
-          swapAccounts.baseTokenProgram
-        )
-      );
-    }
     instructions.push(
       await this.program.methods.buy(baseOut, maxQuoteIn, { 0: true }).accountsPartial(swapAccounts).instruction()
     );
@@ -9178,7 +9178,7 @@ async function sendAndConfirmTransaction(connection, payerKey, instructions, sig
 }
 
 // src/index.ts
-console.log("You are using custom pumpswap sdk v3.3");
+console.log("You are using custom pumpswap sdk v3.4");
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   CANONICAL_POOL_INDEX,
