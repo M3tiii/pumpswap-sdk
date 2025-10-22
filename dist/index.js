@@ -7899,6 +7899,58 @@ function sellQuoteInputInternal(quote, slippage, baseReserve, quoteReserve, lpFe
 // src/sdk/pumpAmmInternal.ts
 var import_system = require("@coral-xyz/anchor/dist/cjs/native/system");
 var POOL_ACCOUNT_NEW_SIZE = 300;
+var staticAccounts = {
+  systemProgram: new import_web34.PublicKey("11111111111111111111111111111111"),
+  associatedTokenProgram: new import_web34.PublicKey(
+    "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+  ),
+  program: new import_web34.PublicKey("pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"),
+  feeProgram: new import_web34.PublicKey("pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ"),
+  feeConfig: new import_web34.PublicKey("5PHirr8joyTMp9JMm6nW7hNDVyEYdkzDqazxPD7RaTjx"),
+  globalVolumeAccumulator: new import_web34.PublicKey(
+    "C2aFPdENg4A2HQsmrd5rTw5TaYBX5Ku887cWjbFKtZpw"
+  ),
+  eventAuthority: new import_web34.PublicKey("GS4CU59F31iL7aR2Q8zVS8DRrcRnXX1yjQ66TqNVQnaR"),
+  pdaProgram: new import_web34.PublicKey([
+    140,
+    151,
+    37,
+    143,
+    78,
+    36,
+    137,
+    241,
+    187,
+    61,
+    16,
+    41,
+    20,
+    142,
+    13,
+    131,
+    11,
+    90,
+    19,
+    153,
+    218,
+    255,
+    16,
+    132,
+    4,
+    142,
+    123,
+    216,
+    219,
+    233,
+    248,
+    89
+  ])
+};
+var staticBuffers = {
+  creatorVault: Buffer.from("creator_vault"),
+  userVolumeAccumulator: Buffer.from("user_volume_accumulator"),
+  tokenProgram: import_spl_token2.TOKEN_PROGRAM_ID.toBuffer()
+};
 var PumpAmmInternalSdk = class {
   connection;
   program;
@@ -8390,9 +8442,8 @@ var PumpAmmInternalSdk = class {
       }
     );
   }
-  async buyInstructionsSync(baseMint, quoteMint, baseOut, maxQuoteIn, user, coinCreator, protocolFeeRecipient, userBaseTokenAccount = void 0, userQuoteTokenAccount, pool) {
-    const coinCreatorVaultAuthority = this.coinCreatorVaultAuthorityPda(coinCreator);
-    const instructions = [];
+  buyInstructionsSync(baseMint, quoteMint, baseOut, maxQuoteIn, user, coinCreator, protocolFeeRecipient, userBaseTokenAccount = void 0, userQuoteTokenAccount, pool) {
+    let ataIns = null;
     if (!userBaseTokenAccount) {
       userBaseTokenAccount = (0, import_spl_token2.getAssociatedTokenAddressSync)(
         baseMint,
@@ -8400,50 +8451,176 @@ var PumpAmmInternalSdk = class {
         true,
         import_spl_token2.TOKEN_PROGRAM_ID
       );
-      instructions.push(
-        (0, import_spl_token2.createAssociatedTokenAccountIdempotentInstruction)(
-          user,
-          userBaseTokenAccount,
-          user,
-          baseMint,
-          import_spl_token2.TOKEN_PROGRAM_ID
-        )
+      ataIns = (0, import_spl_token2.createAssociatedTokenAccountIdempotentInstruction)(
+        user,
+        userBaseTokenAccount,
+        user,
+        baseMint,
+        import_spl_token2.TOKEN_PROGRAM_ID
       );
     }
-    const swapAccounts = {
-      pool,
-      globalConfig: this.globalConfig,
-      user,
-      baseMint,
-      quoteMint,
-      userBaseTokenAccount,
-      userQuoteTokenAccount,
-      poolBaseTokenAccount: (0, import_spl_token2.getAssociatedTokenAddressSync)(
-        baseMint,
-        pool,
-        true,
-        import_spl_token2.TOKEN_PROGRAM_ID
-      ),
-      poolQuoteTokenAccount: (0, import_spl_token2.getAssociatedTokenAddressSync)(
-        quoteMint,
-        pool,
-        true,
-        import_spl_token2.TOKEN_PROGRAM_ID
-      ),
-      protocolFeeRecipient,
-      baseTokenProgram: import_spl_token2.TOKEN_PROGRAM_ID,
-      quoteTokenProgram: import_spl_token2.TOKEN_PROGRAM_ID,
-      coinCreatorVaultAta: this.coinCreatorVaultAta(
-        coinCreatorVaultAuthority,
-        quoteMint,
-        import_spl_token2.TOKEN_PROGRAM_ID
-      ),
-      coinCreatorVaultAuthority
-    };
-    instructions.push(
-      await this.program.methods.buy(baseOut, maxQuoteIn, { 0: true }).accountsPartial(swapAccounts).instruction()
+    const [coinCreatorVaultAuthority] = import_web34.PublicKey.findProgramAddressSync(
+      [staticBuffers.creatorVault, coinCreator.toBuffer()],
+      this.program.programId
     );
-    return instructions;
+    const [coinCreatorVaultAta] = import_web34.PublicKey.findProgramAddressSync(
+      [
+        coinCreatorVaultAuthority.toBuffer(),
+        staticBuffers.tokenProgram,
+        quoteMint.toBuffer()
+      ],
+      staticAccounts.pdaProgram
+    );
+    const [userVolumeAccumulator] = import_web34.PublicKey.findProgramAddressSync(
+      [staticBuffers.userVolumeAccumulator, user.toBuffer()],
+      this.program.programId
+    );
+    const [protocolFeeRecipientTokenAccount] = import_web34.PublicKey.findProgramAddressSync(
+      [
+        protocolFeeRecipient.toBuffer(),
+        staticBuffers.tokenProgram,
+        quoteMint.toBuffer()
+      ],
+      staticAccounts.pdaProgram
+    );
+    const [poolBaseTokenAccount] = import_web34.PublicKey.findProgramAddressSync(
+      [pool.toBuffer(), staticBuffers.tokenProgram, baseMint.toBuffer()],
+      staticAccounts.associatedTokenProgram
+    );
+    const [poolQuoteTokenAccount] = import_web34.PublicKey.findProgramAddressSync(
+      [pool.toBuffer(), staticBuffers.tokenProgram, quoteMint.toBuffer()],
+      staticAccounts.associatedTokenProgram
+    );
+    const keys = [
+      {
+        pubkey: pool,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: user,
+        isSigner: true,
+        isWritable: true
+      },
+      {
+        pubkey: this.globalConfig,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: baseMint,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: quoteMint,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: userBaseTokenAccount,
+        isSigner: false,
+        isWritable: true
+      },
+      {
+        pubkey: userQuoteTokenAccount,
+        isSigner: false,
+        isWritable: true
+      },
+      {
+        pubkey: poolBaseTokenAccount,
+        isSigner: false,
+        isWritable: true
+      },
+      {
+        pubkey: poolQuoteTokenAccount,
+        isSigner: false,
+        isWritable: true
+      },
+      {
+        pubkey: protocolFeeRecipient,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: protocolFeeRecipientTokenAccount,
+        isSigner: false,
+        isWritable: true
+      },
+      {
+        pubkey: import_spl_token2.TOKEN_PROGRAM_ID,
+        // baseTokenProgram,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: import_spl_token2.TOKEN_PROGRAM_ID,
+        // quoteTokenProgram,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: staticAccounts.systemProgram,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: staticAccounts.associatedTokenProgram,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: staticAccounts.eventAuthority,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: staticAccounts.program,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: coinCreatorVaultAta,
+        isSigner: false,
+        isWritable: true
+      },
+      {
+        pubkey: coinCreatorVaultAuthority,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: staticAccounts.globalVolumeAccumulator,
+        isSigner: false,
+        isWritable: true
+      },
+      {
+        pubkey: userVolumeAccumulator,
+        isSigner: false,
+        isWritable: true
+      },
+      {
+        pubkey: staticAccounts.feeConfig,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: staticAccounts.feeProgram,
+        isSigner: false,
+        isWritable: false
+      }
+    ];
+    const data = this.program.coder.instruction.encode("buy", {
+      base_amount_out: baseOut,
+      max_quote_amount_in: maxQuoteIn,
+      track_volume: { some: true }
+    });
+    const buyIns = new import_web34.TransactionInstruction({
+      programId: this.program.programId,
+      keys,
+      data
+    });
+    return ataIns ? [ataIns, buyIns] : [buyIns];
   }
   async buyBaseInput(pool, base, slippage, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
     const { maxQuote } = await this.buyBaseInputInternal(pool, base, slippage);
@@ -8619,43 +8796,154 @@ var PumpAmmInternalSdk = class {
       }
     );
   }
-  async sellInstructionsSync(baseMint, quoteMint, baseAmountIn, minQuoteAmountOut, user, coinCreator, protocolFeeRecipient, userBaseTokenAccount, userQuoteTokenAccount, pool) {
-    const coinCreatorVaultAuthority = this.coinCreatorVaultAuthorityPda(coinCreator);
-    const swapAccounts = {
-      pool,
-      globalConfig: this.globalConfig,
-      user,
-      baseMint,
-      quoteMint,
-      userBaseTokenAccount,
-      userQuoteTokenAccount,
-      poolBaseTokenAccount: (0, import_spl_token2.getAssociatedTokenAddressSync)(
-        baseMint,
-        pool,
-        true,
-        import_spl_token2.TOKEN_PROGRAM_ID
-      ),
-      poolQuoteTokenAccount: (0, import_spl_token2.getAssociatedTokenAddressSync)(
-        quoteMint,
-        pool,
-        true,
-        import_spl_token2.TOKEN_PROGRAM_ID
-      ),
-      protocolFeeRecipient,
-      baseTokenProgram: import_spl_token2.TOKEN_PROGRAM_ID,
-      quoteTokenProgram: import_spl_token2.TOKEN_PROGRAM_ID,
-      coinCreatorVaultAta: this.coinCreatorVaultAta(
-        coinCreatorVaultAuthority,
-        quoteMint,
-        import_spl_token2.TOKEN_PROGRAM_ID
-      ),
-      coinCreatorVaultAuthority
-    };
-    const instructions = [];
-    instructions.push(
-      await this.program.methods.sell(baseAmountIn, minQuoteAmountOut).accountsPartial(swapAccounts).instruction()
+  sellInstructionsSync(baseMint, quoteMint, baseAmountIn, minQuoteAmountOut, user, coinCreator, protocolFeeRecipient, userBaseTokenAccount, userQuoteTokenAccount, pool) {
+    const [coinCreatorVaultAuthority] = import_web34.PublicKey.findProgramAddressSync(
+      [staticBuffers.creatorVault, coinCreator.toBuffer()],
+      this.program.programId
     );
-    return instructions;
+    const [coinCreatorVaultAta] = import_web34.PublicKey.findProgramAddressSync(
+      [
+        coinCreatorVaultAuthority.toBuffer(),
+        staticBuffers.tokenProgram,
+        quoteMint.toBuffer()
+      ],
+      staticAccounts.pdaProgram
+    );
+    const [protocolFeeRecipientTokenAccount] = import_web34.PublicKey.findProgramAddressSync(
+      [
+        protocolFeeRecipient.toBuffer(),
+        staticBuffers.tokenProgram,
+        quoteMint.toBuffer()
+      ],
+      staticAccounts.pdaProgram
+    );
+    const [poolBaseTokenAccount] = import_web34.PublicKey.findProgramAddressSync(
+      [pool.toBuffer(), staticBuffers.tokenProgram, baseMint.toBuffer()],
+      staticAccounts.associatedTokenProgram
+    );
+    const [poolQuoteTokenAccount] = import_web34.PublicKey.findProgramAddressSync(
+      [pool.toBuffer(), staticBuffers.tokenProgram, quoteMint.toBuffer()],
+      staticAccounts.associatedTokenProgram
+    );
+    const keys = [
+      {
+        pubkey: pool,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: user,
+        isSigner: true,
+        isWritable: true
+      },
+      {
+        pubkey: this.globalConfig,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: baseMint,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: quoteMint,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: userBaseTokenAccount,
+        isSigner: false,
+        isWritable: true
+      },
+      {
+        pubkey: userQuoteTokenAccount,
+        isSigner: false,
+        isWritable: true
+      },
+      {
+        pubkey: poolBaseTokenAccount,
+        isSigner: false,
+        isWritable: true
+      },
+      {
+        pubkey: poolQuoteTokenAccount,
+        isSigner: false,
+        isWritable: true
+      },
+      {
+        pubkey: protocolFeeRecipient,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: protocolFeeRecipientTokenAccount,
+        isSigner: false,
+        isWritable: true
+      },
+      {
+        pubkey: import_spl_token2.TOKEN_PROGRAM_ID,
+        // baseTokenProgram,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: import_spl_token2.TOKEN_PROGRAM_ID,
+        // quoteTokenProgram,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: staticAccounts.systemProgram,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: staticAccounts.associatedTokenProgram,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: staticAccounts.eventAuthority,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: staticAccounts.program,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: coinCreatorVaultAta,
+        isSigner: false,
+        isWritable: true
+      },
+      {
+        pubkey: coinCreatorVaultAuthority,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: staticAccounts.feeConfig,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: staticAccounts.feeProgram,
+        isSigner: false,
+        isWritable: false
+      }
+    ];
+    const data = this.program.coder.instruction.encode("sell", {
+      base_amount_in: baseAmountIn,
+      min_quote_amount_out: minQuoteAmountOut
+    });
+    const sellIns = new import_web34.TransactionInstruction({
+      programId: this.program.programId,
+      keys,
+      data
+    });
+    return [sellIns];
   }
   async sellBaseInput(pool, base, slippage, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
     const { minQuote } = await this.sellBaseInputInternal(pool, base, slippage);
@@ -8853,7 +9141,7 @@ var PumpAmmInternalSdk = class {
   }
   coinCreatorVaultAuthorityPda(coinCreator) {
     const [coinCreatorVaultAuthority] = import_web34.PublicKey.findProgramAddressSync(
-      [Buffer.from("creator_vault"), coinCreator.toBuffer()],
+      [staticBuffers.creatorVault, coinCreator.toBuffer()],
       this.programId()
     );
     return coinCreatorVaultAuthority;
@@ -9178,7 +9466,7 @@ async function sendAndConfirmTransaction(connection, payerKey, instructions, sig
 }
 
 // src/index.ts
-console.log("You are using custom pumpswap sdk v3.4");
+console.log("You are using custom pumpswap sdk v3.5");
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   CANONICAL_POOL_INDEX,
