@@ -8602,9 +8602,9 @@ var PumpAmmInternalSdk = class {
       }
     ];
     const data = this.program.coder.instruction.encode("buy", {
-      base_amount_out: baseOut,
-      max_quote_amount_in: maxQuoteIn,
-      track_volume: { some: true }
+      baseAmountOut: baseOut,
+      maxQuoteAmountIn: maxQuoteIn,
+      trackVolume: { some: true }
     });
     const buyIns = new TransactionInstruction({
       programId: this.program.programId,
@@ -8926,8 +8926,8 @@ var PumpAmmInternalSdk = class {
       }
     ];
     const data = this.program.coder.instruction.encode("sell", {
-      base_amount_in: baseAmountIn,
-      min_quote_amount_out: minQuoteAmountOut
+      baseAmountIn,
+      minQuoteAmountOut
     });
     const sellIns = new TransactionInstruction({
       programId: this.program.programId,
@@ -9460,7 +9460,7 @@ async function sendAndConfirmTransaction(connection, payerKey, instructions, sig
 }
 
 // src/index.ts
-console.log("You are using custom pumpswap sdk v3.5");
+console.log("You are using custom pumpswap sdk v3.6");
 export {
   CANONICAL_POOL_INDEX,
   PUMP_AMM_PROGRAM_ID,

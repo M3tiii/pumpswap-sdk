@@ -942,9 +942,9 @@ export class PumpAmmInternalSdk {
     ];
 
     const data = this.program.coder.instruction.encode("buy", {
-      base_amount_out: baseOut,
-      max_quote_amount_in: maxQuoteIn,
-      track_volume: { some: true },
+      baseAmountOut: baseOut,
+      maxQuoteAmountIn: maxQuoteIn,
+      trackVolume: { some: true },
     });
 
     const buyIns = new TransactionInstruction({
@@ -1393,8 +1393,8 @@ export class PumpAmmInternalSdk {
     ];
 
     const data = this.program.coder.instruction.encode("sell", {
-      base_amount_in: baseAmountIn,
-      min_quote_amount_out: minQuoteAmountOut,
+      baseAmountIn: baseAmountIn,
+      minQuoteAmountOut: minQuoteAmountOut,
     });
 
     const sellIns = new TransactionInstruction({
