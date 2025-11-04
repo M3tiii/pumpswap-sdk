@@ -9912,7 +9912,7 @@ async function sendAndConfirmTransaction(connection, payerKey, instructions, sig
 }
 
 // src/index.ts
-console.log("You are using custom pumpswap sdk v3.7");
+console.log("You are using custom pumpswap sdk v3.8");
 export {
   CANONICAL_POOL_INDEX,
   PUMP_AMM_PROGRAM_ID,

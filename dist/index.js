@@ -9918,7 +9918,7 @@ async function sendAndConfirmTransaction(connection, payerKey, instructions, sig
 }
 
 // src/index.ts
-console.log("You are using custom pumpswap sdk v3.7");
+console.log("You are using custom pumpswap sdk v3.8");
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   CANONICAL_POOL_INDEX,
