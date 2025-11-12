@@ -11,7 +11,7 @@ import { PumpAmmInternalSdk } from "./pumpAmmInternal";
 import { PUMP_AMM_PROGRAM_ID } from "./pda";
 
 const staticAccounts = {
-  mayhemFeeRecipientWSol: new PublicKey('C93K8DX4YsABYJtHX9awzgZW3LWzBqBVezEbbLJH4yet'),
+  mayhemFeeRecipient: new PublicKey('GesfTA3X2arioaHp8bbKdjG9vJtskViWACZoYvxp4twS'),
 };
 
 export class PumpAmmSdk {
@@ -212,7 +212,7 @@ export class PumpAmmSdk {
         base,
         slippage,
         user,
-        isMayhemMode ? staticAccounts.mayhemFeeRecipientWSol : protocolFeeRecipient,
+        isMayhemMode ? staticAccounts.mayhemFeeRecipient : protocolFeeRecipient,
         userBaseTokenAccount,
         userQuoteTokenAccount,
       );
@@ -223,7 +223,7 @@ export class PumpAmmSdk {
       base,
       slippage,
       user,
-      isMayhemMode ? staticAccounts.mayhemFeeRecipientWSol : protocolFeeRecipient,
+      isMayhemMode ? staticAccounts.mayhemFeeRecipient : protocolFeeRecipient,
       userBaseTokenAccount,
       userQuoteTokenAccount,
     );
@@ -246,7 +246,7 @@ export class PumpAmmSdk {
         quote,
         slippage,
         user,
-        isMayhemMode ? staticAccounts.mayhemFeeRecipientWSol : protocolFeeRecipient,
+        isMayhemMode ? staticAccounts.mayhemFeeRecipient : protocolFeeRecipient,
         userBaseTokenAccount,
         userQuoteTokenAccount,
       );
@@ -257,7 +257,7 @@ export class PumpAmmSdk {
       quote,
       slippage,
       user,
-      isMayhemMode ? staticAccounts.mayhemFeeRecipientWSol : protocolFeeRecipient,
+      isMayhemMode ? staticAccounts.mayhemFeeRecipient : protocolFeeRecipient,
       userBaseTokenAccount,
       userQuoteTokenAccount,
     );

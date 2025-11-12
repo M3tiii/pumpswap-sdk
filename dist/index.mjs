@@ -9810,7 +9810,7 @@ var PumpAmmInternalSdk = class {
 
 // src/sdk/pumpAmm.ts
 var staticAccounts2 = {
-  mayhemFeeRecipientWSol: new PublicKey5("C93K8DX4YsABYJtHX9awzgZW3LWzBqBVezEbbLJH4yet")
+  mayhemFeeRecipient: new PublicKey5("GesfTA3X2arioaHp8bbKdjG9vJtskViWACZoYvxp4twS")
 };
 var PumpAmmSdk = class {
   pumpAmmInternalSdk;
@@ -9928,7 +9928,7 @@ var PumpAmmSdk = class {
         base,
         slippage,
         user,
-        isMayhemMode ? staticAccounts2.mayhemFeeRecipientWSol : protocolFeeRecipient,
+        isMayhemMode ? staticAccounts2.mayhemFeeRecipient : protocolFeeRecipient,
         userBaseTokenAccount,
         userQuoteTokenAccount
       );
@@ -9938,7 +9938,7 @@ var PumpAmmSdk = class {
       base,
       slippage,
       user,
-      isMayhemMode ? staticAccounts2.mayhemFeeRecipientWSol : protocolFeeRecipient,
+      isMayhemMode ? staticAccounts2.mayhemFeeRecipient : protocolFeeRecipient,
       userBaseTokenAccount,
       userQuoteTokenAccount
     );
@@ -9950,7 +9950,7 @@ var PumpAmmSdk = class {
         quote,
         slippage,
         user,
-        isMayhemMode ? staticAccounts2.mayhemFeeRecipientWSol : protocolFeeRecipient,
+        isMayhemMode ? staticAccounts2.mayhemFeeRecipient : protocolFeeRecipient,
         userBaseTokenAccount,
         userQuoteTokenAccount
       );
@@ -9960,7 +9960,7 @@ var PumpAmmSdk = class {
       quote,
       slippage,
       user,
-      isMayhemMode ? staticAccounts2.mayhemFeeRecipientWSol : protocolFeeRecipient,
+      isMayhemMode ? staticAccounts2.mayhemFeeRecipient : protocolFeeRecipient,
       userBaseTokenAccount,
       userQuoteTokenAccount
     );
@@ -10114,7 +10114,7 @@ async function sendAndConfirmTransaction(connection, payerKey, instructions, sig
 }
 
 // src/index.ts
-console.log("You are using custom pumpswap sdk v3.9");
+console.log("You are using custom pumpswap sdk v4.0");
 export {
   CANONICAL_POOL_INDEX,
   PUMP_AMM_PROGRAM_ID,
