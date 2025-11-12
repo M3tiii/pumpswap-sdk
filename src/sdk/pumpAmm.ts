@@ -10,6 +10,10 @@ import {
 import { PumpAmmInternalSdk } from "./pumpAmmInternal";
 import { PUMP_AMM_PROGRAM_ID } from "./pda";
 
+const staticAccounts = {
+  mayhemFeeRecipientWSol: new PublicKey('C93K8DX4YsABYJtHX9awzgZW3LWzBqBVezEbbLJH4yet'),
+};
+
 export class PumpAmmSdk {
   private readonly pumpAmmInternalSdk: PumpAmmInternalSdk;
 
@@ -55,6 +59,7 @@ export class PumpAmmSdk {
     quoteIn: BN,
     userBaseTokenAccount: PublicKey | undefined = undefined,
     userQuoteTokenAccount: PublicKey | undefined = undefined,
+    isMayhemMode: boolean,
   ): Promise<TransactionInstruction[]> {
     return this.pumpAmmInternalSdk.createPoolInstructionsInternal(
       index,
@@ -65,6 +70,7 @@ export class PumpAmmSdk {
       quoteIn,
       userBaseTokenAccount,
       userQuoteTokenAccount,
+      isMayhemMode,
     );
   }
 
@@ -198,6 +204,7 @@ export class PumpAmmSdk {
     protocolFeeRecipient: PublicKey | undefined = undefined,
     userBaseTokenAccount: PublicKey | undefined = undefined,
     userQuoteTokenAccount: PublicKey | undefined = undefined,
+    isMayhemMode: boolean,
   ): Promise<TransactionInstruction[]> {
     if (direction == "quoteToBase") {
       return await this.pumpAmmInternalSdk.buyBaseInput(
@@ -205,7 +212,7 @@ export class PumpAmmSdk {
         base,
         slippage,
         user,
-        protocolFeeRecipient,
+        isMayhemMode ? staticAccounts.mayhemFeeRecipientWSol : protocolFeeRecipient,
         userBaseTokenAccount,
         userQuoteTokenAccount,
       );
@@ -216,7 +223,7 @@ export class PumpAmmSdk {
       base,
       slippage,
       user,
-      protocolFeeRecipient,
+      isMayhemMode ? staticAccounts.mayhemFeeRecipientWSol : protocolFeeRecipient,
       userBaseTokenAccount,
       userQuoteTokenAccount,
     );
@@ -231,6 +238,7 @@ export class PumpAmmSdk {
     protocolFeeRecipient: PublicKey | undefined = undefined,
     userBaseTokenAccount: PublicKey | undefined = undefined,
     userQuoteTokenAccount: PublicKey | undefined = undefined,
+    isMayhemMode: boolean,
   ): Promise<TransactionInstruction[]> {
     if (direction == "quoteToBase") {
       return await this.pumpAmmInternalSdk.buyQuoteInput(
@@ -238,7 +246,7 @@ export class PumpAmmSdk {
         quote,
         slippage,
         user,
-        protocolFeeRecipient,
+        isMayhemMode ? staticAccounts.mayhemFeeRecipientWSol : protocolFeeRecipient,
         userBaseTokenAccount,
         userQuoteTokenAccount,
       );
@@ -249,7 +257,7 @@ export class PumpAmmSdk {
       quote,
       slippage,
       user,
-      protocolFeeRecipient,
+      isMayhemMode ? staticAccounts.mayhemFeeRecipientWSol : protocolFeeRecipient,
       userBaseTokenAccount,
       userQuoteTokenAccount,
     );

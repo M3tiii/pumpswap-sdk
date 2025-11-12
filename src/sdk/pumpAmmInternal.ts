@@ -58,12 +58,19 @@ const staticAccounts = {
     140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142, 13, 131, 11,
     90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216, 219, 233, 248, 89,
   ]),
+  mayhemFeeRecipient: new PublicKey(
+    "GesfTA3X2arioaHp8bbKdjG9vJtskViWACZoYvxp4twS"
+  ),
+  mayhemFeeRecipientWSol: new PublicKey(
+    "C93K8DX4YsABYJtHX9awzgZW3LWzBqBVezEbbLJH4yet"
+  ),
 };
 
 const staticBuffers = {
   creatorVault: Buffer.from("creator_vault"),
   userVolumeAccumulator: Buffer.from("user_volume_accumulator"),
   tokenProgram: TOKEN_PROGRAM_ID.toBuffer(),
+  tokenProgram2022: TOKEN_2022_PROGRAM_ID.toBuffer(),
 };
 
 export class PumpAmmInternalSdk {
@@ -116,7 +123,8 @@ export class PumpAmmInternalSdk {
     baseIn: BN,
     quoteIn: BN,
     userBaseTokenAccount: PublicKey | undefined = undefined,
-    userQuoteTokenAccount: PublicKey | undefined = undefined
+    userQuoteTokenAccount: PublicKey | undefined = undefined,
+    isMayhemMode: boolean
   ): Promise<TransactionInstruction[]> {
     const [baseTokenProgram, quoteTokenProgram] =
       await this.getMintTokenPrograms(baseMint, quoteMint);
@@ -198,7 +206,7 @@ export class PumpAmmInternalSdk {
 
         instructions.push(
           await this.program.methods
-            .createPool(index, baseIn, quoteIn, SYSTEM_PROGRAM_ID)
+            .createPool(index, baseIn, quoteIn, SYSTEM_PROGRAM_ID, isMayhemMode)
             .accountsPartial({
               globalConfig: this.globalConfig,
               baseMint,
@@ -765,23 +773,35 @@ export class PumpAmmInternalSdk {
     protocolFeeRecipient: PublicKey,
     userBaseTokenAccount: PublicKey | undefined = undefined,
     userQuoteTokenAccount: PublicKey,
-    pool: PublicKey
+    pool: PublicKey,
+    isMayhemMode: boolean
   ): TransactionInstruction[] {
     let ataIns = null;
+
+    let baseTokenProgram = TOKEN_PROGRAM_ID;
+    let baseTokenProgramBuffer = staticBuffers.tokenProgram;
+
+    const quoteTokenProgram = TOKEN_PROGRAM_ID;
+    const quoteTokenProgramBuffer = staticBuffers.tokenProgram;
+
+    if (isMayhemMode) {
+      baseTokenProgram = TOKEN_2022_PROGRAM_ID;
+      baseTokenProgramBuffer = staticBuffers.tokenProgram2022;
+    }
 
     if (!userBaseTokenAccount) {
       userBaseTokenAccount = getAssociatedTokenAddressSync(
         baseMint,
         user,
         true,
-        TOKEN_PROGRAM_ID
+        baseTokenProgram
       );
       ataIns = createAssociatedTokenAccountIdempotentInstruction(
         user,
         userBaseTokenAccount,
         user,
         baseMint,
-        TOKEN_PROGRAM_ID
+        baseTokenProgram
       );
     }
 
@@ -793,7 +813,7 @@ export class PumpAmmInternalSdk {
     const [coinCreatorVaultAta] = PublicKey.findProgramAddressSync(
       [
         coinCreatorVaultAuthority.toBuffer(),
-        staticBuffers.tokenProgram,
+        quoteTokenProgramBuffer,
         quoteMint.toBuffer(),
       ],
       staticAccounts.pdaProgram
@@ -804,24 +824,31 @@ export class PumpAmmInternalSdk {
       this.program.programId
     );
 
-    const [protocolFeeRecipientTokenAccount] = PublicKey.findProgramAddressSync(
-      [
-        protocolFeeRecipient.toBuffer(),
-        staticBuffers.tokenProgram,
-        quoteMint.toBuffer(),
-      ],
-      staticAccounts.pdaProgram
-    );
-
     const [poolBaseTokenAccount] = PublicKey.findProgramAddressSync(
-      [pool.toBuffer(), staticBuffers.tokenProgram, baseMint.toBuffer()],
+      [pool.toBuffer(), baseTokenProgramBuffer, baseMint.toBuffer()],
       staticAccounts.associatedTokenProgram
     );
 
     const [poolQuoteTokenAccount] = PublicKey.findProgramAddressSync(
-      [pool.toBuffer(), staticBuffers.tokenProgram, quoteMint.toBuffer()],
+      [pool.toBuffer(), quoteTokenProgramBuffer, quoteMint.toBuffer()],
       staticAccounts.associatedTokenProgram
     );
+
+    let protocolFeeRecipientTokenAccount;
+    if (isMayhemMode) {
+      protocolFeeRecipient = staticAccounts.mayhemFeeRecipient;
+      protocolFeeRecipientTokenAccount = staticAccounts.mayhemFeeRecipientWSol;
+    } else {
+      protocolFeeRecipient = protocolFeeRecipient;
+      [protocolFeeRecipientTokenAccount] = PublicKey.findProgramAddressSync(
+        [
+          protocolFeeRecipient.toBuffer(),
+          staticBuffers.tokenProgram,
+          quoteMint.toBuffer(),
+        ],
+        staticAccounts.pdaProgram
+      );
+    }
 
     const keys = [
       {
@@ -880,12 +907,12 @@ export class PumpAmmInternalSdk {
         isWritable: true,
       },
       {
-        pubkey: TOKEN_PROGRAM_ID, // baseTokenProgram,
+        pubkey: baseTokenProgram,
         isSigner: false,
         isWritable: false,
       },
       {
-        pubkey: TOKEN_PROGRAM_ID, // quoteTokenProgram,
+        pubkey: quoteTokenProgram,
         isSigner: false,
         isWritable: false,
       },
@@ -1249,8 +1276,20 @@ export class PumpAmmInternalSdk {
     protocolFeeRecipient: PublicKey,
     userBaseTokenAccount: PublicKey,
     userQuoteTokenAccount: PublicKey,
-    pool: PublicKey
+    pool: PublicKey,
+    isMayhemMode: boolean
   ): TransactionInstruction[] {
+    let baseTokenProgram = TOKEN_PROGRAM_ID;
+    let baseTokenProgramBuffer = staticBuffers.tokenProgram;
+
+    const quoteTokenProgram = TOKEN_PROGRAM_ID;
+    const quoteTokenProgramBuffer = staticBuffers.tokenProgram;
+
+    if (isMayhemMode) {
+      baseTokenProgram = TOKEN_2022_PROGRAM_ID;
+      baseTokenProgramBuffer = staticBuffers.tokenProgram2022;
+    }
+
     const [coinCreatorVaultAuthority] = PublicKey.findProgramAddressSync(
       [staticBuffers.creatorVault, coinCreator.toBuffer()],
       this.program.programId
@@ -1259,30 +1298,37 @@ export class PumpAmmInternalSdk {
     const [coinCreatorVaultAta] = PublicKey.findProgramAddressSync(
       [
         coinCreatorVaultAuthority.toBuffer(),
-        staticBuffers.tokenProgram,
-        quoteMint.toBuffer(),
-      ],
-      staticAccounts.pdaProgram
-    );
-
-    const [protocolFeeRecipientTokenAccount] = PublicKey.findProgramAddressSync(
-      [
-        protocolFeeRecipient.toBuffer(),
-        staticBuffers.tokenProgram,
+        quoteTokenProgramBuffer,
         quoteMint.toBuffer(),
       ],
       staticAccounts.pdaProgram
     );
 
     const [poolBaseTokenAccount] = PublicKey.findProgramAddressSync(
-      [pool.toBuffer(), staticBuffers.tokenProgram, baseMint.toBuffer()],
+      [pool.toBuffer(), baseTokenProgramBuffer, baseMint.toBuffer()],
       staticAccounts.associatedTokenProgram
     );
 
     const [poolQuoteTokenAccount] = PublicKey.findProgramAddressSync(
-      [pool.toBuffer(), staticBuffers.tokenProgram, quoteMint.toBuffer()],
+      [pool.toBuffer(), quoteTokenProgramBuffer, quoteMint.toBuffer()],
       staticAccounts.associatedTokenProgram
     );
+
+    let protocolFeeRecipientTokenAccount;
+    if (isMayhemMode) {
+      protocolFeeRecipient = staticAccounts.mayhemFeeRecipient;
+      protocolFeeRecipientTokenAccount = staticAccounts.mayhemFeeRecipientWSol;
+    } else {
+      protocolFeeRecipient = protocolFeeRecipient;
+      [protocolFeeRecipientTokenAccount] = PublicKey.findProgramAddressSync(
+        [
+          protocolFeeRecipient.toBuffer(),
+          staticBuffers.tokenProgram,
+          quoteMint.toBuffer(),
+        ],
+        staticAccounts.pdaProgram
+      );
+    }
 
     const keys = [
       {
@@ -1341,12 +1387,12 @@ export class PumpAmmInternalSdk {
         isWritable: true,
       },
       {
-        pubkey: TOKEN_PROGRAM_ID, // baseTokenProgram,
+        pubkey: baseTokenProgram,
         isSigner: false,
         isWritable: false,
       },
       {
-        pubkey: TOKEN_PROGRAM_ID, // quoteTokenProgram,
+        pubkey: quoteTokenProgram,
         isSigner: false,
         isWritable: false,
       },
@@ -1637,15 +1683,16 @@ export class PumpAmmInternalSdk {
         ];
     }
 
-    // const [baseTokenProgram, quoteTokenProgram] =
-    //   await this.getMintTokenPrograms(baseMint, quoteMint);
+    // TODO back to skip this check
+    const [baseTokenProgram, quoteTokenProgram] =
+      await this.getMintTokenPrograms(baseMint, quoteMint);
 
     if (userBaseTokenAccount === undefined) {
       userBaseTokenAccount = getAssociatedTokenAddressSync(
         baseMint,
         user,
         true,
-        TOKEN_PROGRAM_ID // was baseTokenProgram
+        baseTokenProgram
       );
     }
 
@@ -1654,7 +1701,7 @@ export class PumpAmmInternalSdk {
         quoteMint,
         user,
         true,
-        TOKEN_PROGRAM_ID // was quoteTokenProgram
+        quoteTokenProgram
       );
     }
 
@@ -1673,21 +1720,21 @@ export class PumpAmmInternalSdk {
         baseMint,
         pool,
         true,
-        TOKEN_PROGRAM_ID // was baseTokenProgram
+        baseTokenProgram
       ),
       poolQuoteTokenAccount: getAssociatedTokenAddressSync(
         quoteMint,
         pool,
         true,
-        TOKEN_PROGRAM_ID // was quoteTokenProgram
+        quoteTokenProgram
       ),
       protocolFeeRecipient,
-      baseTokenProgram: TOKEN_PROGRAM_ID, // was baseTokenProgram
-      quoteTokenProgram: TOKEN_PROGRAM_ID, // was quoteTokenProgram
+      baseTokenProgram,
+      quoteTokenProgram,
       coinCreatorVaultAta: this.coinCreatorVaultAta(
         coinCreatorVaultAuthority,
         quoteMint,
-        TOKEN_PROGRAM_ID // was quoteTokenProgram
+        quoteTokenProgram
       ),
       coinCreatorVaultAuthority,
     };

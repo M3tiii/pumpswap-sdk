@@ -126,6 +126,9 @@ declare class PumpAmmSdk {
         protocolFeeRecipients: PublicKey[];
         coinCreatorFeeBasisPoints: BN$1;
         adminSetCoinCreatorAuthority: PublicKey;
+        whitelistPda: PublicKey;
+        reservedFeeRecipient: PublicKey;
+        mayhemModeEnabled: boolean;
     }>;
     fetchPool(pool: PublicKey): Promise<{
         poolBump: number;
@@ -138,16 +141,17 @@ declare class PumpAmmSdk {
         poolQuoteTokenAccount: PublicKey;
         lpSupply: BN$1;
         coinCreator: PublicKey;
+        isMayhemMode: boolean;
     }>;
-    createPoolInstructions(index: number, creator: PublicKey, baseMint: PublicKey, quoteMint: PublicKey, baseIn: BN$1, quoteIn: BN$1, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
+    createPoolInstructions(index: number, creator: PublicKey, baseMint: PublicKey, quoteMint: PublicKey, baseIn: BN$1, quoteIn: BN$1, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isMayhemMode: boolean): Promise<TransactionInstruction[]>;
     createAutocompleteInitialPoolPrice(initialBase: BN$1, initialQuote: BN$1): Promise<BN$1>;
     depositInstructions(pool: PublicKey, lpToken: BN$1, slippage: number, user: PublicKey, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined, userPoolTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
     depositAutocompleteQuoteAndLpTokenFromBase(pool: PublicKey, base: BN$1, slippage: number): Promise<DepositQuoteAndLpTokenFromBaseResult>;
     depositAutocompleteBaseAndLpTokenFromQuote(pool: PublicKey, quote: BN$1, slippage: number): Promise<DepositBaseAndLpTokenFromQuoteResult>;
     withdrawInstructions(pool: PublicKey, lpToken: BN$1, slippage: number, user: PublicKey, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined, userPoolTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
     withdrawAutoCompleteBaseAndQuoteFromLpToken(pool: PublicKey, lpAmount: BN$1, slippage: number): Promise<WithdrawAutocompleteResult>;
-    swapBaseInstructions(pool: PublicKey, base: BN$1, slippage: number, direction: Direction, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
-    swapQuoteInstructions(pool: PublicKey, quote: BN$1, slippage: number, direction: Direction, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
+    swapBaseInstructions(pool: PublicKey, base: BN$1, slippage: number, direction: Direction, user: PublicKey, protocolFeeRecipient: PublicKey | undefined, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isMayhemMode: boolean): Promise<TransactionInstruction[]>;
+    swapQuoteInstructions(pool: PublicKey, quote: BN$1, slippage: number, direction: Direction, user: PublicKey, protocolFeeRecipient: PublicKey | undefined, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isMayhemMode: boolean): Promise<TransactionInstruction[]>;
     swapAutocompleteQuoteFromBase(pool: PublicKey, base: BN$1, slippage: number, direction: Direction): Promise<BN$1>;
     swapAutocompleteBaseFromQuote(pool: PublicKey, quote: BN$1, slippage: number, direction: Direction): Promise<BN$1>;
     extendAccount(account: PublicKey, user: PublicKey): Promise<TransactionInstruction>;
@@ -170,6 +174,9 @@ declare class PumpAmmAdminSdk {
         protocolFeeRecipients: PublicKey[];
         coinCreatorFeeBasisPoints: BN$1;
         adminSetCoinCreatorAuthority: PublicKey;
+        whitelistPda: PublicKey;
+        reservedFeeRecipient: PublicKey;
+        mayhemModeEnabled: boolean;
     }>;
     createConfig(lpFeeBasisPoints: BN$1, protocolFeeBasisPoints: BN$1, protocolFeeRecipients: PublicKey[], coinCreatorFeeBasisPoints: BN$1, admin: PublicKey, adminSetCoinCreatorAuthority: PublicKey): Promise<TransactionInstruction>;
     disable(disableCreatePool: boolean, disableDeposit: boolean, disableWithdraw: boolean, disableBuy: boolean, disableSell: boolean, admin: PublicKey): Promise<TransactionInstruction>;
@@ -194,6 +201,9 @@ declare class PumpAmmInternalSdk {
         protocolFeeRecipients: PublicKey[];
         coinCreatorFeeBasisPoints: BN$1;
         adminSetCoinCreatorAuthority: PublicKey;
+        whitelistPda: PublicKey;
+        reservedFeeRecipient: PublicKey;
+        mayhemModeEnabled: boolean;
     }>;
     fetchPool(pool: PublicKey): Promise<{
         poolBump: number;
@@ -206,8 +216,9 @@ declare class PumpAmmInternalSdk {
         poolQuoteTokenAccount: PublicKey;
         lpSupply: BN$1;
         coinCreator: PublicKey;
+        isMayhemMode: boolean;
     }>;
-    createPoolInstructionsInternal(index: number, creator: PublicKey, baseMint: PublicKey, quoteMint: PublicKey, baseIn: BN$1, quoteIn: BN$1, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
+    createPoolInstructionsInternal(index: number, creator: PublicKey, baseMint: PublicKey, quoteMint: PublicKey, baseIn: BN$1, quoteIn: BN$1, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isMayhemMode: boolean): Promise<TransactionInstruction[]>;
     depositInstructionsInternal(pool: PublicKey, lpToken: BN$1, maxBase: BN$1, maxQuote: BN$1, user: PublicKey, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined, userPoolTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
     private withWsolAccounts;
     private withWsolAccount;
@@ -228,6 +239,7 @@ declare class PumpAmmInternalSdk {
             poolQuoteTokenAccount: PublicKey;
             lpSupply: BN$1;
             coinCreator: PublicKey;
+            isMayhemMode: boolean;
         };
         poolBaseAmount: BN$1;
         poolQuoteAmount: BN$1;
@@ -235,7 +247,7 @@ declare class PumpAmmInternalSdk {
     private liquidityAccounts;
     buyInstructionsInternal(pool: PublicKey, baseOut: BN$1, maxQuoteIn: BN$1, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
     buyInstructionsInternalNoPool(index: number, creator: PublicKey, baseMint: PublicKey, quoteMint: PublicKey, baseOut: BN$1, maxQuoteIn: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
-    buyInstructionsSync(baseMint: PublicKey, quoteMint: PublicKey, baseOut: BN$1, maxQuoteIn: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient: PublicKey, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey, pool: PublicKey): TransactionInstruction[];
+    buyInstructionsSync(baseMint: PublicKey, quoteMint: PublicKey, baseOut: BN$1, maxQuoteIn: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient: PublicKey, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey, pool: PublicKey, isMayhemMode: boolean): TransactionInstruction[];
     buyBaseInput(pool: PublicKey, base: BN$1, slippage: number, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
     buyQuoteInput(pool: PublicKey, quote: BN$1, slippage: number, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
     buyAutocompleteQuoteFromBase(pool: PublicKey, base: BN$1, slippage: number): Promise<BN$1>;
@@ -247,7 +259,7 @@ declare class PumpAmmInternalSdk {
     fixPoolInstructions(pool: PublicKey, user: PublicKey): Promise<TransactionInstruction[]>;
     private withFixPoolInstructions;
     sellInstructionsInternalNoPool(index: number, creator: PublicKey, baseMint: PublicKey, quoteMint: PublicKey, baseAmountIn: BN$1, minQuoteAmountOut: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
-    sellInstructionsSync(baseMint: PublicKey, quoteMint: PublicKey, baseAmountIn: BN$1, minQuoteAmountOut: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient: PublicKey, userBaseTokenAccount: PublicKey, userQuoteTokenAccount: PublicKey, pool: PublicKey): TransactionInstruction[];
+    sellInstructionsSync(baseMint: PublicKey, quoteMint: PublicKey, baseAmountIn: BN$1, minQuoteAmountOut: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient: PublicKey, userBaseTokenAccount: PublicKey, userQuoteTokenAccount: PublicKey, pool: PublicKey, isMayhemMode: boolean): TransactionInstruction[];
     sellBaseInput(pool: PublicKey, base: BN$1, slippage: number, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
     sellQuoteInput(pool: PublicKey, quote: BN$1, slippage: number, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
     sellAutocompleteQuoteFromBase(pool: PublicKey, base: BN$1, slippage: number): Promise<BN$1>;
@@ -2362,6 +2374,10 @@ type PumpAmm = {
                 {
                     "name": "coinCreator";
                     "type": "pubkey";
+                },
+                {
+                    "name": "isMayhemMode";
+                    "type": "bool";
                 }
             ];
         },
@@ -3284,6 +3300,74 @@ type PumpAmm = {
             "args": [];
         },
         {
+            "name": "setReservedFeeRecipient";
+            "discriminator": [
+                207,
+                189,
+                178,
+                71,
+                167,
+                122,
+                68,
+                180
+            ];
+            "accounts": [
+                {
+                    "name": "admin";
+                    "signer": true;
+                    "relations": [
+                        "globalConfig"
+                    ];
+                },
+                {
+                    "name": "globalConfig";
+                    "writable": true;
+                },
+                {
+                    "name": "eventAuthority";
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ];
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "program";
+                }
+            ];
+            "args": [
+                {
+                    "name": "reservedFeeRecipient";
+                    "type": "pubkey";
+                },
+                {
+                    "name": "whitelistPda";
+                    "type": "pubkey";
+                }
+            ];
+        },
+        {
             "name": "syncUserVolumeAccumulator";
             "discriminator": [
                 86,
@@ -3410,6 +3494,70 @@ type PumpAmm = {
                 }
             ];
             "args": [];
+        },
+        {
+            "name": "toggleMayhemMode";
+            "discriminator": [
+                1,
+                9,
+                111,
+                208,
+                100,
+                31,
+                255,
+                163
+            ];
+            "accounts": [
+                {
+                    "name": "admin";
+                    "signer": true;
+                    "relations": [
+                        "globalConfig"
+                    ];
+                },
+                {
+                    "name": "globalConfig";
+                    "writable": true;
+                },
+                {
+                    "name": "eventAuthority";
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ];
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "program";
+                }
+            ];
+            "args": [
+                {
+                    "name": "enabled";
+                    "type": "bool";
+                }
+            ];
         },
         {
             "name": "updateAdmin";
@@ -4179,6 +4327,18 @@ type PumpAmm = {
             "code": 6040;
             "name": "buySlippageBelowMinBaseAmountOut";
             "msg": "buy: slippage - would buy less tokens than expected min_base_amount_out";
+        },
+        {
+            "code": 6041;
+            "name": "mayhemModeDisabled";
+        },
+        {
+            "code": 6042;
+            "name": "onlyPumpPoolsMayhemMode";
+        },
+        {
+            "code": 6043;
+            "name": "mayhemModeInDesiredState";
         }
     ];
     "types": [
@@ -4634,6 +4794,10 @@ type PumpAmm = {
                     {
                         "name": "coinCreator";
                         "type": "pubkey";
+                    },
+                    {
+                        "name": "isMayhemMode";
+                        "type": "bool";
                     }
                 ];
             };
@@ -4902,6 +5066,18 @@ type PumpAmm = {
                             "The admin authority for setting coin creators"
                         ];
                         "type": "pubkey";
+                    },
+                    {
+                        "name": "whitelistPda";
+                        "type": "pubkey";
+                    },
+                    {
+                        "name": "reservedFeeRecipient";
+                        "type": "pubkey";
+                    },
+                    {
+                        "name": "mayhemModeEnabled";
+                        "type": "bool";
                     }
                 ];
             };
@@ -5024,6 +5200,10 @@ type PumpAmm = {
                     {
                         "name": "coinCreator";
                         "type": "pubkey";
+                    },
+                    {
+                        "name": "isMayhemMode";
+                        "type": "bool";
                     }
                 ];
             };
@@ -7471,6 +7651,10 @@ var instructions = [
 			{
 				name: "coin_creator",
 				type: "pubkey"
+			},
+			{
+				name: "is_mayhem_mode",
+				type: "bool"
 			}
 		]
 	},
@@ -8396,6 +8580,74 @@ var instructions = [
 		]
 	},
 	{
+		name: "set_reserved_fee_recipient",
+		discriminator: [
+			207,
+			189,
+			178,
+			71,
+			167,
+			122,
+			68,
+			180
+		],
+		accounts: [
+			{
+				name: "admin",
+				signer: true,
+				relations: [
+					"global_config"
+				]
+			},
+			{
+				name: "global_config",
+				writable: true
+			},
+			{
+				name: "event_authority",
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								95,
+								95,
+								101,
+								118,
+								101,
+								110,
+								116,
+								95,
+								97,
+								117,
+								116,
+								104,
+								111,
+								114,
+								105,
+								116,
+								121
+							]
+						}
+					]
+				}
+			},
+			{
+				name: "program"
+			}
+		],
+		args: [
+			{
+				name: "reserved_fee_recipient",
+				type: "pubkey"
+			},
+			{
+				name: "whitelist_pda",
+				type: "pubkey"
+			}
+		]
+	},
+	{
 		name: "sync_user_volume_accumulator",
 		discriminator: [
 			86,
@@ -8522,6 +8774,70 @@ var instructions = [
 			}
 		],
 		args: [
+		]
+	},
+	{
+		name: "toggle_mayhem_mode",
+		discriminator: [
+			1,
+			9,
+			111,
+			208,
+			100,
+			31,
+			255,
+			163
+		],
+		accounts: [
+			{
+				name: "admin",
+				signer: true,
+				relations: [
+					"global_config"
+				]
+			},
+			{
+				name: "global_config",
+				writable: true
+			},
+			{
+				name: "event_authority",
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								95,
+								95,
+								101,
+								118,
+								101,
+								110,
+								116,
+								95,
+								97,
+								117,
+								116,
+								104,
+								111,
+								114,
+								105,
+								116,
+								121
+							]
+						}
+					]
+				}
+			},
+			{
+				name: "program"
+			}
+		],
+		args: [
+			{
+				name: "enabled",
+				type: "bool"
+			}
 		]
 	},
 	{
@@ -9293,6 +9609,18 @@ var errors = [
 		code: 6040,
 		name: "BuySlippageBelowMinBaseAmountOut",
 		msg: "buy: slippage - would buy less tokens than expected min_base_amount_out"
+	},
+	{
+		code: 6041,
+		name: "MayhemModeDisabled"
+	},
+	{
+		code: 6042,
+		name: "OnlyPumpPoolsMayhemMode"
+	},
+	{
+		code: 6043,
+		name: "MayhemModeInDesiredState"
 	}
 ];
 var types = [
@@ -9748,6 +10076,10 @@ var types = [
 				{
 					name: "coin_creator",
 					type: "pubkey"
+				},
+				{
+					name: "is_mayhem_mode",
+					type: "bool"
 				}
 			]
 		}
@@ -10016,6 +10348,18 @@ var types = [
 						"The admin authority for setting coin creators"
 					],
 					type: "pubkey"
+				},
+				{
+					name: "whitelist_pda",
+					type: "pubkey"
+				},
+				{
+					name: "reserved_fee_recipient",
+					type: "pubkey"
+				},
+				{
+					name: "mayhem_mode_enabled",
+					type: "bool"
 				}
 			]
 		}
@@ -10138,6 +10482,10 @@ var types = [
 				{
 					name: "coin_creator",
 					type: "pubkey"
+				},
+				{
+					name: "is_mayhem_mode",
+					type: "bool"
 				}
 			]
 		}
