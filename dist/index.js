@@ -9072,13 +9072,13 @@ var PumpAmmInternalSdk = class {
       }
     );
   }
-  buyInstructionsSync(baseMint, quoteMint, baseOut, maxQuoteIn, user, coinCreator, protocolFeeRecipient, userBaseTokenAccount = void 0, userQuoteTokenAccount, pool, isMayhemMode) {
+  buyInstructionsSync(baseMint, quoteMint, baseOut, maxQuoteIn, user, coinCreator, protocolFeeRecipient, userBaseTokenAccount = void 0, userQuoteTokenAccount, pool, isMayhemMode, isTokenV2) {
     let ataIns = null;
     let baseTokenProgram = import_spl_token2.TOKEN_PROGRAM_ID;
     let baseTokenProgramBuffer = staticBuffers.tokenProgram;
     const quoteTokenProgram = import_spl_token2.TOKEN_PROGRAM_ID;
     const quoteTokenProgramBuffer = staticBuffers.tokenProgram;
-    if (isMayhemMode) {
+    if (isTokenV2) {
       baseTokenProgram = import_spl_token2.TOKEN_2022_PROGRAM_ID;
       baseTokenProgramBuffer = staticBuffers.tokenProgram2022;
     }
@@ -9130,7 +9130,7 @@ var PumpAmmInternalSdk = class {
       [protocolFeeRecipientTokenAccount] = import_web34.PublicKey.findProgramAddressSync(
         [
           protocolFeeRecipient.toBuffer(),
-          staticBuffers.tokenProgram,
+          baseTokenProgramBuffer,
           quoteMint.toBuffer()
         ],
         staticAccounts.pdaProgram
@@ -9439,12 +9439,12 @@ var PumpAmmInternalSdk = class {
       }
     );
   }
-  sellInstructionsSync(baseMint, quoteMint, baseAmountIn, minQuoteAmountOut, user, coinCreator, protocolFeeRecipient, userBaseTokenAccount, userQuoteTokenAccount, pool, isMayhemMode) {
+  sellInstructionsSync(baseMint, quoteMint, baseAmountIn, minQuoteAmountOut, user, coinCreator, protocolFeeRecipient, userBaseTokenAccount, userQuoteTokenAccount, pool, isMayhemMode, isTokenV2) {
     let baseTokenProgram = import_spl_token2.TOKEN_PROGRAM_ID;
     let baseTokenProgramBuffer = staticBuffers.tokenProgram;
     const quoteTokenProgram = import_spl_token2.TOKEN_PROGRAM_ID;
     const quoteTokenProgramBuffer = staticBuffers.tokenProgram;
-    if (isMayhemMode) {
+    if (isTokenV2) {
       baseTokenProgram = import_spl_token2.TOKEN_2022_PROGRAM_ID;
       baseTokenProgramBuffer = staticBuffers.tokenProgram2022;
     }
@@ -9477,7 +9477,7 @@ var PumpAmmInternalSdk = class {
       [protocolFeeRecipientTokenAccount] = import_web34.PublicKey.findProgramAddressSync(
         [
           protocolFeeRecipient.toBuffer(),
-          staticBuffers.tokenProgram,
+          baseTokenProgramBuffer,
           quoteMint.toBuffer()
         ],
         staticAccounts.pdaProgram
@@ -10120,7 +10120,7 @@ async function sendAndConfirmTransaction(connection, payerKey, instructions, sig
 }
 
 // src/index.ts
-console.log("You are using custom pumpswap sdk v4.0");
+console.log("You are using custom pumpswap sdk v4.1");
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   CANONICAL_POOL_INDEX,

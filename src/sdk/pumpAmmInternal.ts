@@ -774,7 +774,8 @@ export class PumpAmmInternalSdk {
     userBaseTokenAccount: PublicKey | undefined = undefined,
     userQuoteTokenAccount: PublicKey,
     pool: PublicKey,
-    isMayhemMode: boolean
+    isMayhemMode: boolean,
+    isTokenV2: boolean,
   ): TransactionInstruction[] {
     let ataIns = null;
 
@@ -784,7 +785,7 @@ export class PumpAmmInternalSdk {
     const quoteTokenProgram = TOKEN_PROGRAM_ID;
     const quoteTokenProgramBuffer = staticBuffers.tokenProgram;
 
-    if (isMayhemMode) {
+    if (isTokenV2) {
       baseTokenProgram = TOKEN_2022_PROGRAM_ID;
       baseTokenProgramBuffer = staticBuffers.tokenProgram2022;
     }
@@ -843,7 +844,7 @@ export class PumpAmmInternalSdk {
       [protocolFeeRecipientTokenAccount] = PublicKey.findProgramAddressSync(
         [
           protocolFeeRecipient.toBuffer(),
-          staticBuffers.tokenProgram,
+          baseTokenProgramBuffer,
           quoteMint.toBuffer(),
         ],
         staticAccounts.pdaProgram
@@ -1277,7 +1278,8 @@ export class PumpAmmInternalSdk {
     userBaseTokenAccount: PublicKey,
     userQuoteTokenAccount: PublicKey,
     pool: PublicKey,
-    isMayhemMode: boolean
+    isMayhemMode: boolean,
+    isTokenV2: boolean,
   ): TransactionInstruction[] {
     let baseTokenProgram = TOKEN_PROGRAM_ID;
     let baseTokenProgramBuffer = staticBuffers.tokenProgram;
@@ -1285,7 +1287,7 @@ export class PumpAmmInternalSdk {
     const quoteTokenProgram = TOKEN_PROGRAM_ID;
     const quoteTokenProgramBuffer = staticBuffers.tokenProgram;
 
-    if (isMayhemMode) {
+    if (isTokenV2) {
       baseTokenProgram = TOKEN_2022_PROGRAM_ID;
       baseTokenProgramBuffer = staticBuffers.tokenProgram2022;
     }
@@ -1323,7 +1325,7 @@ export class PumpAmmInternalSdk {
       [protocolFeeRecipientTokenAccount] = PublicKey.findProgramAddressSync(
         [
           protocolFeeRecipient.toBuffer(),
-          staticBuffers.tokenProgram,
+          baseTokenProgramBuffer,
           quoteMint.toBuffer(),
         ],
         staticAccounts.pdaProgram

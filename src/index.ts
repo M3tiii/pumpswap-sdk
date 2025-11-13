@@ -12,4 +12,4 @@ export * from "./types/sdk";
 export * from "./types/pump_amm";
 export { default as pumpAmmJson } from "./idl/pump_amm.json";
 
-console.log('You are using custom pumpswap sdk v4.0');
+console.log('You are using custom pumpswap sdk v4.1');
