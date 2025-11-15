@@ -855,7 +855,7 @@ export class PumpAmmInternalSdk {
       {
         pubkey: pool,
         isSigner: false,
-        isWritable: false,
+        isWritable: true,
       },
       {
         pubkey: user,
@@ -1336,7 +1336,7 @@ export class PumpAmmInternalSdk {
       {
         pubkey: pool,
         isSigner: false,
-        isWritable: false,
+        isWritable: true,
       },
       {
         pubkey: user,

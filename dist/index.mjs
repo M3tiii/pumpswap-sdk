@@ -9131,7 +9131,7 @@ var PumpAmmInternalSdk = class {
       {
         pubkey: pool,
         isSigner: false,
-        isWritable: false
+        isWritable: true
       },
       {
         pubkey: user,
@@ -9478,7 +9478,7 @@ var PumpAmmInternalSdk = class {
       {
         pubkey: pool,
         isSigner: false,
-        isWritable: false
+        isWritable: true
       },
       {
         pubkey: user,
@@ -10114,7 +10114,7 @@ async function sendAndConfirmTransaction(connection, payerKey, instructions, sig
 }
 
 // src/index.ts
-console.log("You are using custom pumpswap sdk v4.1");
+console.log("You are using custom pumpswap sdk v4.2");
 export {
   CANONICAL_POOL_INDEX,
   PUMP_AMM_PROGRAM_ID,
