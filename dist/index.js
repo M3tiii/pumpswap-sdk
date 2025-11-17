@@ -9130,7 +9130,7 @@ var PumpAmmInternalSdk = class {
       [protocolFeeRecipientTokenAccount] = import_web34.PublicKey.findProgramAddressSync(
         [
           protocolFeeRecipient.toBuffer(),
-          baseTokenProgramBuffer,
+          quoteTokenProgramBuffer,
           quoteMint.toBuffer()
         ],
         staticAccounts.pdaProgram
@@ -9477,7 +9477,7 @@ var PumpAmmInternalSdk = class {
       [protocolFeeRecipientTokenAccount] = import_web34.PublicKey.findProgramAddressSync(
         [
           protocolFeeRecipient.toBuffer(),
-          baseTokenProgramBuffer,
+          quoteTokenProgramBuffer,
           quoteMint.toBuffer()
         ],
         staticAccounts.pdaProgram
@@ -10120,7 +10120,7 @@ async function sendAndConfirmTransaction(connection, payerKey, instructions, sig
 }
 
 // src/index.ts
-console.log("You are using custom pumpswap sdk v4.2");
+console.log("You are using custom pumpswap sdk v4.3");
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   CANONICAL_POOL_INDEX,

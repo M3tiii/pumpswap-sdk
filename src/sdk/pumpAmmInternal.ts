@@ -844,7 +844,7 @@ export class PumpAmmInternalSdk {
       [protocolFeeRecipientTokenAccount] = PublicKey.findProgramAddressSync(
         [
           protocolFeeRecipient.toBuffer(),
-          baseTokenProgramBuffer,
+          quoteTokenProgramBuffer,
           quoteMint.toBuffer(),
         ],
         staticAccounts.pdaProgram
@@ -1325,7 +1325,7 @@ export class PumpAmmInternalSdk {
       [protocolFeeRecipientTokenAccount] = PublicKey.findProgramAddressSync(
         [
           protocolFeeRecipient.toBuffer(),
-          baseTokenProgramBuffer,
+          quoteTokenProgramBuffer,
           quoteMint.toBuffer(),
         ],
         staticAccounts.pdaProgram

@@ -9121,7 +9121,7 @@ var PumpAmmInternalSdk = class {
       [protocolFeeRecipientTokenAccount] = PublicKey4.findProgramAddressSync(
         [
           protocolFeeRecipient.toBuffer(),
-          baseTokenProgramBuffer,
+          quoteTokenProgramBuffer,
           quoteMint.toBuffer()
         ],
         staticAccounts.pdaProgram
@@ -9468,7 +9468,7 @@ var PumpAmmInternalSdk = class {
       [protocolFeeRecipientTokenAccount] = PublicKey4.findProgramAddressSync(
         [
           protocolFeeRecipient.toBuffer(),
-          baseTokenProgramBuffer,
+          quoteTokenProgramBuffer,
           quoteMint.toBuffer()
         ],
         staticAccounts.pdaProgram
@@ -10114,7 +10114,7 @@ async function sendAndConfirmTransaction(connection, payerKey, instructions, sig
 }
 
 // src/index.ts
-console.log("You are using custom pumpswap sdk v4.2");
+console.log("You are using custom pumpswap sdk v4.3");
 export {
   CANONICAL_POOL_INDEX,
   PUMP_AMM_PROGRAM_ID,
