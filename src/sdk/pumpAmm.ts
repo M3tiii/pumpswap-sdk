@@ -11,7 +11,9 @@ import { PumpAmmInternalSdk } from "./pumpAmmInternal";
 import { PUMP_AMM_PROGRAM_ID } from "./pda";
 
 const staticAccounts = {
-  mayhemFeeRecipient: new PublicKey('GesfTA3X2arioaHp8bbKdjG9vJtskViWACZoYvxp4twS'),
+  mayhemFeeRecipient: new PublicKey(
+    "GesfTA3X2arioaHp8bbKdjG9vJtskViWACZoYvxp4twS",
+  ),
 };
 
 export class PumpAmmSdk {
@@ -205,6 +207,7 @@ export class PumpAmmSdk {
     userBaseTokenAccount: PublicKey | undefined = undefined,
     userQuoteTokenAccount: PublicKey | undefined = undefined,
     isMayhemMode: boolean,
+    isCashbackEnabled: boolean,
   ): Promise<TransactionInstruction[]> {
     if (direction == "quoteToBase") {
       return await this.pumpAmmInternalSdk.buyBaseInput(
@@ -215,6 +218,7 @@ export class PumpAmmSdk {
         isMayhemMode ? staticAccounts.mayhemFeeRecipient : protocolFeeRecipient,
         userBaseTokenAccount,
         userQuoteTokenAccount,
+        isCashbackEnabled,
       );
     }
 
@@ -226,6 +230,7 @@ export class PumpAmmSdk {
       isMayhemMode ? staticAccounts.mayhemFeeRecipient : protocolFeeRecipient,
       userBaseTokenAccount,
       userQuoteTokenAccount,
+      isCashbackEnabled,
     );
   }
 
@@ -239,6 +244,7 @@ export class PumpAmmSdk {
     userBaseTokenAccount: PublicKey | undefined = undefined,
     userQuoteTokenAccount: PublicKey | undefined = undefined,
     isMayhemMode: boolean,
+    isCashbackEnabled: boolean,
   ): Promise<TransactionInstruction[]> {
     if (direction == "quoteToBase") {
       return await this.pumpAmmInternalSdk.buyQuoteInput(
@@ -249,6 +255,7 @@ export class PumpAmmSdk {
         isMayhemMode ? staticAccounts.mayhemFeeRecipient : protocolFeeRecipient,
         userBaseTokenAccount,
         userQuoteTokenAccount,
+        isCashbackEnabled,
       );
     }
 
@@ -260,6 +267,7 @@ export class PumpAmmSdk {
       isMayhemMode ? staticAccounts.mayhemFeeRecipient : protocolFeeRecipient,
       userBaseTokenAccount,
       userQuoteTokenAccount,
+      isCashbackEnabled,
     );
   }
 

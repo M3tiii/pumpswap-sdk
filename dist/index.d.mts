@@ -129,6 +129,8 @@ declare class PumpAmmSdk {
         whitelistPda: PublicKey;
         reservedFeeRecipient: PublicKey;
         mayhemModeEnabled: boolean;
+        reservedFeeRecipients: PublicKey[];
+        isCashbackEnabled: boolean;
     }>;
     fetchPool(pool: PublicKey): Promise<{
         poolBump: number;
@@ -142,6 +144,7 @@ declare class PumpAmmSdk {
         lpSupply: BN$1;
         coinCreator: PublicKey;
         isMayhemMode: boolean;
+        isCashbackCoin: boolean;
     }>;
     createPoolInstructions(index: number, creator: PublicKey, baseMint: PublicKey, quoteMint: PublicKey, baseIn: BN$1, quoteIn: BN$1, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isMayhemMode: boolean): Promise<TransactionInstruction[]>;
     createAutocompleteInitialPoolPrice(initialBase: BN$1, initialQuote: BN$1): Promise<BN$1>;
@@ -150,8 +153,8 @@ declare class PumpAmmSdk {
     depositAutocompleteBaseAndLpTokenFromQuote(pool: PublicKey, quote: BN$1, slippage: number): Promise<DepositBaseAndLpTokenFromQuoteResult>;
     withdrawInstructions(pool: PublicKey, lpToken: BN$1, slippage: number, user: PublicKey, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined, userPoolTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
     withdrawAutoCompleteBaseAndQuoteFromLpToken(pool: PublicKey, lpAmount: BN$1, slippage: number): Promise<WithdrawAutocompleteResult>;
-    swapBaseInstructions(pool: PublicKey, base: BN$1, slippage: number, direction: Direction, user: PublicKey, protocolFeeRecipient: PublicKey | undefined, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isMayhemMode: boolean): Promise<TransactionInstruction[]>;
-    swapQuoteInstructions(pool: PublicKey, quote: BN$1, slippage: number, direction: Direction, user: PublicKey, protocolFeeRecipient: PublicKey | undefined, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isMayhemMode: boolean): Promise<TransactionInstruction[]>;
+    swapBaseInstructions(pool: PublicKey, base: BN$1, slippage: number, direction: Direction, user: PublicKey, protocolFeeRecipient: PublicKey | undefined, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isMayhemMode: boolean, isCashbackEnabled: boolean): Promise<TransactionInstruction[]>;
+    swapQuoteInstructions(pool: PublicKey, quote: BN$1, slippage: number, direction: Direction, user: PublicKey, protocolFeeRecipient: PublicKey | undefined, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isMayhemMode: boolean, isCashbackEnabled: boolean): Promise<TransactionInstruction[]>;
     swapAutocompleteQuoteFromBase(pool: PublicKey, base: BN$1, slippage: number, direction: Direction): Promise<BN$1>;
     swapAutocompleteBaseFromQuote(pool: PublicKey, quote: BN$1, slippage: number, direction: Direction): Promise<BN$1>;
     extendAccount(account: PublicKey, user: PublicKey): Promise<TransactionInstruction>;
@@ -177,6 +180,8 @@ declare class PumpAmmAdminSdk {
         whitelistPda: PublicKey;
         reservedFeeRecipient: PublicKey;
         mayhemModeEnabled: boolean;
+        reservedFeeRecipients: PublicKey[];
+        isCashbackEnabled: boolean;
     }>;
     createConfig(lpFeeBasisPoints: BN$1, protocolFeeBasisPoints: BN$1, protocolFeeRecipients: PublicKey[], coinCreatorFeeBasisPoints: BN$1, admin: PublicKey, adminSetCoinCreatorAuthority: PublicKey): Promise<TransactionInstruction>;
     disable(disableCreatePool: boolean, disableDeposit: boolean, disableWithdraw: boolean, disableBuy: boolean, disableSell: boolean, admin: PublicKey): Promise<TransactionInstruction>;
@@ -204,6 +209,8 @@ declare class PumpAmmInternalSdk {
         whitelistPda: PublicKey;
         reservedFeeRecipient: PublicKey;
         mayhemModeEnabled: boolean;
+        reservedFeeRecipients: PublicKey[];
+        isCashbackEnabled: boolean;
     }>;
     fetchPool(pool: PublicKey): Promise<{
         poolBump: number;
@@ -217,6 +224,7 @@ declare class PumpAmmInternalSdk {
         lpSupply: BN$1;
         coinCreator: PublicKey;
         isMayhemMode: boolean;
+        isCashbackCoin: boolean;
     }>;
     createPoolInstructionsInternal(index: number, creator: PublicKey, baseMint: PublicKey, quoteMint: PublicKey, baseIn: BN$1, quoteIn: BN$1, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isMayhemMode: boolean): Promise<TransactionInstruction[]>;
     depositInstructionsInternal(pool: PublicKey, lpToken: BN$1, maxBase: BN$1, maxQuote: BN$1, user: PublicKey, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined, userPoolTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
@@ -240,28 +248,29 @@ declare class PumpAmmInternalSdk {
             lpSupply: BN$1;
             coinCreator: PublicKey;
             isMayhemMode: boolean;
+            isCashbackCoin: boolean;
         };
         poolBaseAmount: BN$1;
         poolQuoteAmount: BN$1;
     }>;
     private liquidityAccounts;
-    buyInstructionsInternal(pool: PublicKey, baseOut: BN$1, maxQuoteIn: BN$1, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
-    buyInstructionsInternalNoPool(index: number, creator: PublicKey, baseMint: PublicKey, quoteMint: PublicKey, baseOut: BN$1, maxQuoteIn: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
-    buyInstructionsSync(baseMint: PublicKey, quoteMint: PublicKey, baseOut: BN$1, maxQuoteIn: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient: PublicKey, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey, pool: PublicKey, isMayhemMode: boolean, isTokenV2: boolean): TransactionInstruction[];
-    buyBaseInput(pool: PublicKey, base: BN$1, slippage: number, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
-    buyQuoteInput(pool: PublicKey, quote: BN$1, slippage: number, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
+    buyInstructionsInternal(pool: PublicKey, baseOut: BN$1, maxQuoteIn: BN$1, user: PublicKey, protocolFeeRecipient: PublicKey | undefined, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isCashbackEnabled: boolean): Promise<TransactionInstruction[]>;
+    buyInstructionsInternalNoPool(index: number, creator: PublicKey, baseMint: PublicKey, quoteMint: PublicKey, baseOut: BN$1, maxQuoteIn: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient: PublicKey | undefined, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isCashbackEnabled: boolean): Promise<TransactionInstruction[]>;
+    buyInstructionsSync(baseMint: PublicKey, quoteMint: PublicKey, baseOut: BN$1, maxQuoteIn: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient: PublicKey, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey, pool: PublicKey, isMayhemMode: boolean, isCashbackEnabled: boolean, isTokenV2: boolean, createWsolVolAccAta?: boolean): TransactionInstruction[];
+    buyBaseInput(pool: PublicKey, base: BN$1, slippage: number, user: PublicKey, protocolFeeRecipient: PublicKey | undefined, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isCashbackEnabled: boolean): Promise<TransactionInstruction[]>;
+    buyQuoteInput(pool: PublicKey, quote: BN$1, slippage: number, user: PublicKey, protocolFeeRecipient: PublicKey | undefined, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isCashbackEnabled: boolean): Promise<TransactionInstruction[]>;
     buyAutocompleteQuoteFromBase(pool: PublicKey, base: BN$1, slippage: number): Promise<BN$1>;
     buyAutocompleteBaseFromQuote(pool: PublicKey, quote: BN$1, slippage: number): Promise<BN$1>;
     buyBaseInputInternal(pool: PublicKey, base: BN$1, slippage: number): Promise<BuyBaseInputResult>;
     buyQuoteInputInternal(pool: PublicKey, quote: BN$1, slippage: number): Promise<BuyQuoteInputResult>;
     buyQuoteInputInternalNoPool(quote: BN$1, slippage: number, poolBaseAmount: BN$1, poolQuoteAmount: BN$1, coinCreator: PublicKey): Promise<BuyQuoteInputResult>;
-    sellInstructionsInternal(pool: PublicKey, baseAmountIn: BN$1, minQuoteAmountOut: BN$1, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
+    sellInstructionsInternal(pool: PublicKey, baseAmountIn: BN$1, minQuoteAmountOut: BN$1, user: PublicKey, protocolFeeRecipient: PublicKey | undefined, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isCashbackEnabled: boolean): Promise<TransactionInstruction[]>;
     fixPoolInstructions(pool: PublicKey, user: PublicKey): Promise<TransactionInstruction[]>;
     private withFixPoolInstructions;
-    sellInstructionsInternalNoPool(index: number, creator: PublicKey, baseMint: PublicKey, quoteMint: PublicKey, baseAmountIn: BN$1, minQuoteAmountOut: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
-    sellInstructionsSync(baseMint: PublicKey, quoteMint: PublicKey, baseAmountIn: BN$1, minQuoteAmountOut: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient: PublicKey, userBaseTokenAccount: PublicKey, userQuoteTokenAccount: PublicKey, pool: PublicKey, isMayhemMode: boolean, isTokenV2: boolean): TransactionInstruction[];
-    sellBaseInput(pool: PublicKey, base: BN$1, slippage: number, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
-    sellQuoteInput(pool: PublicKey, quote: BN$1, slippage: number, user: PublicKey, protocolFeeRecipient?: PublicKey | undefined, userBaseTokenAccount?: PublicKey | undefined, userQuoteTokenAccount?: PublicKey | undefined): Promise<TransactionInstruction[]>;
+    sellInstructionsInternalNoPool(index: number, creator: PublicKey, baseMint: PublicKey, quoteMint: PublicKey, baseAmountIn: BN$1, minQuoteAmountOut: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient: PublicKey | undefined, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isCashbackEnabled: boolean): Promise<TransactionInstruction[]>;
+    sellInstructionsSync(baseMint: PublicKey, quoteMint: PublicKey, baseAmountIn: BN$1, minQuoteAmountOut: BN$1, user: PublicKey, coinCreator: PublicKey, protocolFeeRecipient: PublicKey, userBaseTokenAccount: PublicKey, userQuoteTokenAccount: PublicKey, pool: PublicKey, isMayhemMode: boolean, isCashbackEnabled: boolean, isTokenV2: boolean, createWsolVolAccAta?: boolean): TransactionInstruction[];
+    sellBaseInput(pool: PublicKey, base: BN$1, slippage: number, user: PublicKey, protocolFeeRecipient: PublicKey | undefined, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isCashbackEnabled: boolean): Promise<TransactionInstruction[]>;
+    sellQuoteInput(pool: PublicKey, quote: BN$1, slippage: number, user: PublicKey, protocolFeeRecipient: PublicKey | undefined, userBaseTokenAccount: PublicKey | undefined, userQuoteTokenAccount: PublicKey | undefined, isCashbackEnabled: boolean): Promise<TransactionInstruction[]>;
     sellAutocompleteQuoteFromBase(pool: PublicKey, base: BN$1, slippage: number): Promise<BN$1>;
     sellAutocompleteBaseFromQuote(pool: PublicKey, quote: BN$1, slippage: number): Promise<BN$1>;
     sellBaseInputInternal(pool: PublicKey, base: BN$1, slippage: number): Promise<SellBaseInputResult>;
@@ -287,52 +296,39 @@ declare function sendAndConfirmTransaction(connection: Connection, payerKey: Pub
  * Note that this is only a type helper and is not the actual IDL. The original
  * IDL can be found at `target/idl/pump_amm.json`.
  */
-type PumpAmm = {
-    "address": "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA";
-    "metadata": {
-        "name": "pumpAmm";
-        "version": "0.1.0";
-        "spec": "0.1.0";
-        "description": "Created with Anchor";
+interface PumpAmm {
+    address: "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA";
+    metadata: {
+        name: "pumpAmm";
+        version: "0.1.0";
+        spec: "0.1.0";
+        description: "Created with Anchor";
     };
-    "instructions": [
+    instructions: [
         {
-            "name": "adminSetCoinCreator";
-            "docs": [
-                "Overrides the coin creator for a canonical pump pool"
-            ];
-            "discriminator": [
-                242,
-                40,
-                117,
-                145,
-                73,
-                96,
-                105,
-                104
-            ];
-            "accounts": [
+            name: "adminSetCoinCreator";
+            docs: ["Overrides the coin creator for a canonical pump pool"];
+            discriminator: [242, 40, 117, 145, 73, 96, 105, 104];
+            accounts: [
                 {
-                    "name": "adminSetCoinCreatorAuthority";
-                    "signer": true;
-                    "relations": [
-                        "globalConfig"
-                    ];
+                    name: "adminSetCoinCreatorAuthority";
+                    signer: true;
+                    relations: ["globalConfig"];
                 },
                 {
-                    "name": "globalConfig";
+                    name: "globalConfig";
                 },
                 {
-                    "name": "pool";
-                    "writable": true;
+                    name: "pool";
+                    writable: true;
                 },
                 {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -356,44 +352,33 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
+                    name: "program";
                 }
             ];
-            "args": [
+            args: [
                 {
-                    "name": "coinCreator";
-                    "type": "pubkey";
+                    name: "coinCreator";
+                    type: "pubkey";
                 }
             ];
         },
         {
-            "name": "adminUpdateTokenIncentives";
-            "discriminator": [
-                209,
-                11,
-                115,
-                87,
-                213,
-                23,
-                124,
-                204
-            ];
-            "accounts": [
+            name: "adminUpdateTokenIncentives";
+            discriminator: [209, 11, 115, 87, 213, 23, 124, 204];
+            accounts: [
                 {
-                    "name": "admin";
-                    "writable": true;
-                    "signer": true;
-                    "relations": [
-                        "globalConfig"
-                    ];
+                    name: "admin";
+                    writable: true;
+                    signer: true;
+                    relations: ["globalConfig"];
                 },
                 {
-                    "name": "globalConfig";
-                    "pda": {
-                        "seeds": [
+                    name: "globalConfig";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     103,
                                     108,
                                     111,
@@ -413,13 +398,13 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "globalVolumeAccumulator";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "globalVolumeAccumulator";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     103,
                                     108,
                                     111,
@@ -451,29 +436,29 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "mint";
+                    name: "mint";
                 },
                 {
-                    "name": "globalIncentiveTokenAccount";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "globalIncentiveTokenAccount";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "account";
-                                "path": "globalVolumeAccumulator";
+                                kind: "account";
+                                path: "globalVolumeAccumulator";
                             },
                             {
-                                "kind": "account";
-                                "path": "tokenProgram";
+                                kind: "account";
+                                path: "tokenProgram";
                             },
                             {
-                                "kind": "account";
-                                "path": "mint";
+                                kind: "account";
+                                path: "mint";
                             }
                         ];
-                        "program": {
-                            "kind": "const";
-                            "value": [
+                        program: {
+                            kind: "const";
+                            value: [
                                 140,
                                 151,
                                 37,
@@ -511,23 +496,23 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "associatedTokenProgram";
-                    "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
+                    name: "associatedTokenProgram";
+                    address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
                 },
                 {
-                    "name": "systemProgram";
-                    "address": "11111111111111111111111111111111";
+                    name: "systemProgram";
+                    address: "11111111111111111111111111111111";
                 },
                 {
-                    "name": "tokenProgram";
+                    name: "tokenProgram";
                 },
                 {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -551,115 +536,102 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
+                    name: "program";
                 }
             ];
-            "args": [
+            args: [
                 {
-                    "name": "startTime";
-                    "type": "i64";
+                    name: "startTime";
+                    type: "i64";
                 },
                 {
-                    "name": "endTime";
-                    "type": "i64";
+                    name: "endTime";
+                    type: "i64";
                 },
                 {
-                    "name": "secondsInADay";
-                    "type": "i64";
+                    name: "secondsInADay";
+                    type: "i64";
                 },
                 {
-                    "name": "dayNumber";
-                    "type": "u64";
+                    name: "dayNumber";
+                    type: "u64";
                 },
                 {
-                    "name": "tokenSupplyPerDay";
-                    "type": "u64";
+                    name: "tokenSupplyPerDay";
+                    type: "u64";
                 }
             ];
         },
         {
-            "name": "buy";
-            "discriminator": [
-                102,
-                6,
-                61,
-                18,
-                1,
-                218,
-                235,
-                234
+            name: "buy";
+            docs: [
+                "For cashback coins, optionally pass user_volume_accumulator_wsol_ata as remaining_accounts[0].",
+                "If provided and valid, the ATA will be initialized if needed."
             ];
-            "accounts": [
+            discriminator: [102, 6, 61, 18, 1, 218, 235, 234];
+            accounts: [
                 {
-                    "name": "pool";
-                    "writable": true;
+                    name: "pool";
+                    writable: true;
                 },
                 {
-                    "name": "user";
-                    "writable": true;
-                    "signer": true;
+                    name: "user";
+                    writable: true;
+                    signer: true;
                 },
                 {
-                    "name": "globalConfig";
+                    name: "globalConfig";
                 },
                 {
-                    "name": "baseMint";
-                    "relations": [
-                        "pool"
-                    ];
+                    name: "baseMint";
+                    relations: ["pool"];
                 },
                 {
-                    "name": "quoteMint";
-                    "relations": [
-                        "pool"
-                    ];
+                    name: "quoteMint";
+                    relations: ["pool"];
                 },
                 {
-                    "name": "userBaseTokenAccount";
-                    "writable": true;
+                    name: "userBaseTokenAccount";
+                    writable: true;
                 },
                 {
-                    "name": "userQuoteTokenAccount";
-                    "writable": true;
+                    name: "userQuoteTokenAccount";
+                    writable: true;
                 },
                 {
-                    "name": "poolBaseTokenAccount";
-                    "writable": true;
-                    "relations": [
-                        "pool"
-                    ];
+                    name: "poolBaseTokenAccount";
+                    writable: true;
+                    relations: ["pool"];
                 },
                 {
-                    "name": "poolQuoteTokenAccount";
-                    "writable": true;
-                    "relations": [
-                        "pool"
-                    ];
+                    name: "poolQuoteTokenAccount";
+                    writable: true;
+                    relations: ["pool"];
                 },
                 {
-                    "name": "protocolFeeRecipient";
+                    name: "protocolFeeRecipient";
                 },
                 {
-                    "name": "protocolFeeRecipientTokenAccount";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "protocolFeeRecipientTokenAccount";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "account";
-                                "path": "protocolFeeRecipient";
+                                kind: "account";
+                                path: "protocolFeeRecipient";
                             },
                             {
-                                "kind": "account";
-                                "path": "quoteTokenProgram";
+                                kind: "account";
+                                path: "quoteTokenProgram";
                             },
                             {
-                                "kind": "account";
-                                "path": "quoteMint";
+                                kind: "account";
+                                path: "quoteMint";
                             }
                         ];
-                        "program": {
-                            "kind": "const";
-                            "value": [
+                        program: {
+                            kind: "const";
+                            value: [
                                 140,
                                 151,
                                 37,
@@ -697,26 +669,26 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "baseTokenProgram";
+                    name: "baseTokenProgram";
                 },
                 {
-                    "name": "quoteTokenProgram";
+                    name: "quoteTokenProgram";
                 },
                 {
-                    "name": "systemProgram";
-                    "address": "11111111111111111111111111111111";
+                    name: "systemProgram";
+                    address: "11111111111111111111111111111111";
                 },
                 {
-                    "name": "associatedTokenProgram";
-                    "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
+                    name: "associatedTokenProgram";
+                    address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
                 },
                 {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -740,30 +712,30 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
-                    "address": "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA";
+                    name: "program";
+                    address: "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA";
                 },
                 {
-                    "name": "coinCreatorVaultAta";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "coinCreatorVaultAta";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "account";
-                                "path": "coinCreatorVaultAuthority";
+                                kind: "account";
+                                path: "coinCreatorVaultAuthority";
                             },
                             {
-                                "kind": "account";
-                                "path": "quoteTokenProgram";
+                                kind: "account";
+                                path: "quoteTokenProgram";
                             },
                             {
-                                "kind": "account";
-                                "path": "quoteMint";
+                                kind: "account";
+                                path: "quoteMint";
                             }
                         ];
-                        "program": {
-                            "kind": "const";
-                            "value": [
+                        program: {
+                            kind: "const";
+                            value: [
                                 140,
                                 151,
                                 37,
@@ -801,12 +773,12 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "coinCreatorVaultAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "coinCreatorVaultAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     99,
                                     114,
                                     101,
@@ -823,21 +795,20 @@ type PumpAmm = {
                                 ];
                             },
                             {
-                                "kind": "account";
-                                "path": "pool.coin_creator";
-                                "account": "pool";
+                                kind: "account";
+                                path: "pool.coin_creator";
+                                account: "pool";
                             }
                         ];
                     };
                 },
                 {
-                    "name": "globalVolumeAccumulator";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "globalVolumeAccumulator";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     103,
                                     108,
                                     111,
@@ -869,13 +840,13 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "userVolumeAccumulator";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "userVolumeAccumulator";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     117,
                                     115,
                                     101,
@@ -902,34 +873,23 @@ type PumpAmm = {
                                 ];
                             },
                             {
-                                "kind": "account";
-                                "path": "user";
+                                kind: "account";
+                                path: "user";
                             }
                         ];
                     };
                 },
                 {
-                    "name": "feeConfig";
-                    "pda": {
-                        "seeds": [
+                    name: "feeConfig";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
-                                    102,
-                                    101,
-                                    101,
-                                    95,
-                                    99,
-                                    111,
-                                    110,
-                                    102,
-                                    105,
-                                    103
-                                ];
+                                kind: "const";
+                                value: [102, 101, 101, 95, 99, 111, 110, 102, 105, 103];
                             },
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     12,
                                     20,
                                     222,
@@ -965,39 +925,39 @@ type PumpAmm = {
                                 ];
                             }
                         ];
-                        "program": {
-                            "kind": "account";
-                            "path": "feeProgram";
+                        program: {
+                            kind: "account";
+                            path: "feeProgram";
                         };
                     };
                 },
                 {
-                    "name": "feeProgram";
-                    "address": "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ";
+                    name: "feeProgram";
+                    address: "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ";
                 }
             ];
-            "args": [
+            args: [
                 {
-                    "name": "baseAmountOut";
-                    "type": "u64";
+                    name: "baseAmountOut";
+                    type: "u64";
                 },
                 {
-                    "name": "maxQuoteAmountIn";
-                    "type": "u64";
+                    name: "maxQuoteAmountIn";
+                    type: "u64";
                 },
                 {
-                    "name": "trackVolume";
-                    "type": {
-                        "defined": {
-                            "name": "optionBool";
+                    name: "trackVolume";
+                    type: {
+                        defined: {
+                            name: "optionBool";
                         };
                     };
                 }
             ];
         },
         {
-            "name": "buyExactQuoteIn";
-            "docs": [
+            name: "buyExactQuoteIn";
+            docs: [
                 "Given a budget of spendable_quote_in, buy at least min_base_amount_out",
                 "Fees will be deducted from spendable_quote_in",
                 "",
@@ -1006,89 +966,75 @@ type PumpAmm = {
                 "Make sure the payer has enough SOL to cover creation of the following accounts (unless already created):",
                 "- protocol_fee_recipient_token_account: rent.minimum_balance(TokenAccount::LEN)",
                 "- coin_creator_vault_ata: rent.minimum_balance(TokenAccount::LEN)",
-                "- user_volume_accumulator: rent.minimum_balance(UserVolumeAccumulator::LEN)"
+                "- user_volume_accumulator: rent.minimum_balance(UserVolumeAccumulator::LEN)",
+                "",
+                "For cashback coins, optionally pass user_volume_accumulator_wsol_ata as remaining_accounts[0].",
+                "If provided and valid, the ATA will be initialized if needed."
             ];
-            "discriminator": [
-                198,
-                46,
-                21,
-                82,
-                180,
-                217,
-                232,
-                112
-            ];
-            "accounts": [
+            discriminator: [198, 46, 21, 82, 180, 217, 232, 112];
+            accounts: [
                 {
-                    "name": "pool";
-                    "writable": true;
+                    name: "pool";
+                    writable: true;
                 },
                 {
-                    "name": "user";
-                    "writable": true;
-                    "signer": true;
+                    name: "user";
+                    writable: true;
+                    signer: true;
                 },
                 {
-                    "name": "globalConfig";
+                    name: "globalConfig";
                 },
                 {
-                    "name": "baseMint";
-                    "relations": [
-                        "pool"
-                    ];
+                    name: "baseMint";
+                    relations: ["pool"];
                 },
                 {
-                    "name": "quoteMint";
-                    "relations": [
-                        "pool"
-                    ];
+                    name: "quoteMint";
+                    relations: ["pool"];
                 },
                 {
-                    "name": "userBaseTokenAccount";
-                    "writable": true;
+                    name: "userBaseTokenAccount";
+                    writable: true;
                 },
                 {
-                    "name": "userQuoteTokenAccount";
-                    "writable": true;
+                    name: "userQuoteTokenAccount";
+                    writable: true;
                 },
                 {
-                    "name": "poolBaseTokenAccount";
-                    "writable": true;
-                    "relations": [
-                        "pool"
-                    ];
+                    name: "poolBaseTokenAccount";
+                    writable: true;
+                    relations: ["pool"];
                 },
                 {
-                    "name": "poolQuoteTokenAccount";
-                    "writable": true;
-                    "relations": [
-                        "pool"
-                    ];
+                    name: "poolQuoteTokenAccount";
+                    writable: true;
+                    relations: ["pool"];
                 },
                 {
-                    "name": "protocolFeeRecipient";
+                    name: "protocolFeeRecipient";
                 },
                 {
-                    "name": "protocolFeeRecipientTokenAccount";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "protocolFeeRecipientTokenAccount";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "account";
-                                "path": "protocolFeeRecipient";
+                                kind: "account";
+                                path: "protocolFeeRecipient";
                             },
                             {
-                                "kind": "account";
-                                "path": "quoteTokenProgram";
+                                kind: "account";
+                                path: "quoteTokenProgram";
                             },
                             {
-                                "kind": "account";
-                                "path": "quoteMint";
+                                kind: "account";
+                                path: "quoteMint";
                             }
                         ];
-                        "program": {
-                            "kind": "const";
-                            "value": [
+                        program: {
+                            kind: "const";
+                            value: [
                                 140,
                                 151,
                                 37,
@@ -1126,26 +1072,26 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "baseTokenProgram";
+                    name: "baseTokenProgram";
                 },
                 {
-                    "name": "quoteTokenProgram";
+                    name: "quoteTokenProgram";
                 },
                 {
-                    "name": "systemProgram";
-                    "address": "11111111111111111111111111111111";
+                    name: "systemProgram";
+                    address: "11111111111111111111111111111111";
                 },
                 {
-                    "name": "associatedTokenProgram";
-                    "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
+                    name: "associatedTokenProgram";
+                    address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
                 },
                 {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -1169,30 +1115,30 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
-                    "address": "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA";
+                    name: "program";
+                    address: "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA";
                 },
                 {
-                    "name": "coinCreatorVaultAta";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "coinCreatorVaultAta";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "account";
-                                "path": "coinCreatorVaultAuthority";
+                                kind: "account";
+                                path: "coinCreatorVaultAuthority";
                             },
                             {
-                                "kind": "account";
-                                "path": "quoteTokenProgram";
+                                kind: "account";
+                                path: "quoteTokenProgram";
                             },
                             {
-                                "kind": "account";
-                                "path": "quoteMint";
+                                kind: "account";
+                                path: "quoteMint";
                             }
                         ];
-                        "program": {
-                            "kind": "const";
-                            "value": [
+                        program: {
+                            kind: "const";
+                            value: [
                                 140,
                                 151,
                                 37,
@@ -1230,12 +1176,12 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "coinCreatorVaultAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "coinCreatorVaultAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     99,
                                     114,
                                     101,
@@ -1252,21 +1198,20 @@ type PumpAmm = {
                                 ];
                             },
                             {
-                                "kind": "account";
-                                "path": "pool.coin_creator";
-                                "account": "pool";
+                                kind: "account";
+                                path: "pool.coin_creator";
+                                account: "pool";
                             }
                         ];
                     };
                 },
                 {
-                    "name": "globalVolumeAccumulator";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "globalVolumeAccumulator";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     103,
                                     108,
                                     111,
@@ -1298,13 +1243,13 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "userVolumeAccumulator";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "userVolumeAccumulator";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     117,
                                     115,
                                     101,
@@ -1331,34 +1276,23 @@ type PumpAmm = {
                                 ];
                             },
                             {
-                                "kind": "account";
-                                "path": "user";
+                                kind: "account";
+                                path: "user";
                             }
                         ];
                     };
                 },
                 {
-                    "name": "feeConfig";
-                    "pda": {
-                        "seeds": [
+                    name: "feeConfig";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
-                                    102,
-                                    101,
-                                    101,
-                                    95,
-                                    99,
-                                    111,
-                                    110,
-                                    102,
-                                    105,
-                                    103
-                                ];
+                                kind: "const";
+                                value: [102, 101, 101, 95, 99, 111, 110, 102, 105, 103];
                             },
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     12,
                                     20,
                                     222,
@@ -1394,73 +1328,111 @@ type PumpAmm = {
                                 ];
                             }
                         ];
-                        "program": {
-                            "kind": "account";
-                            "path": "feeProgram";
+                        program: {
+                            kind: "account";
+                            path: "feeProgram";
                         };
                     };
                 },
                 {
-                    "name": "feeProgram";
-                    "address": "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ";
+                    name: "feeProgram";
+                    address: "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ";
                 }
             ];
-            "args": [
+            args: [
                 {
-                    "name": "spendableQuoteIn";
-                    "type": "u64";
+                    name: "spendableQuoteIn";
+                    type: "u64";
                 },
                 {
-                    "name": "minBaseAmountOut";
-                    "type": "u64";
+                    name: "minBaseAmountOut";
+                    type: "u64";
                 },
                 {
-                    "name": "trackVolume";
-                    "type": {
-                        "defined": {
-                            "name": "optionBool";
+                    name: "trackVolume";
+                    type: {
+                        defined: {
+                            name: "optionBool";
                         };
                     };
                 }
             ];
         },
         {
-            "name": "claimTokenIncentives";
-            "discriminator": [
-                16,
-                4,
-                71,
-                28,
-                204,
-                1,
-                40,
-                27
-            ];
-            "accounts": [
+            name: "claimCashback";
+            discriminator: [37, 58, 35, 126, 190, 53, 228, 197];
+            accounts: [
                 {
-                    "name": "user";
+                    name: "user";
+                    writable: true;
                 },
                 {
-                    "name": "userAta";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "userVolumeAccumulator";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "account";
-                                "path": "user";
+                                kind: "const";
+                                value: [
+                                    117,
+                                    115,
+                                    101,
+                                    114,
+                                    95,
+                                    118,
+                                    111,
+                                    108,
+                                    117,
+                                    109,
+                                    101,
+                                    95,
+                                    97,
+                                    99,
+                                    99,
+                                    117,
+                                    109,
+                                    117,
+                                    108,
+                                    97,
+                                    116,
+                                    111,
+                                    114
+                                ];
                             },
                             {
-                                "kind": "account";
-                                "path": "tokenProgram";
-                            },
-                            {
-                                "kind": "account";
-                                "path": "mint";
+                                kind: "account";
+                                path: "user";
                             }
                         ];
-                        "program": {
-                            "kind": "const";
-                            "value": [
+                    };
+                },
+                {
+                    name: "quoteMint";
+                },
+                {
+                    name: "quoteTokenProgram";
+                },
+                {
+                    name: "userVolumeAccumulatorWsolTokenAccount";
+                    writable: true;
+                    pda: {
+                        seeds: [
+                            {
+                                kind: "account";
+                                path: "userVolumeAccumulator";
+                            },
+                            {
+                                kind: "account";
+                                path: "quoteTokenProgram";
+                            },
+                            {
+                                kind: "account";
+                                path: "quoteMint";
+                            }
+                        ];
+                        program: {
+                            kind: "const";
+                            value: [
                                 140,
                                 151,
                                 37,
@@ -1498,12 +1470,173 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "globalVolumeAccumulator";
-                    "pda": {
-                        "seeds": [
+                    name: "userWsolTokenAccount";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "account";
+                                path: "user";
+                            },
+                            {
+                                kind: "account";
+                                path: "quoteTokenProgram";
+                            },
+                            {
+                                kind: "account";
+                                path: "quoteMint";
+                            }
+                        ];
+                        program: {
+                            kind: "const";
+                            value: [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ];
+                        };
+                    };
+                },
+                {
+                    name: "systemProgram";
+                    address: "11111111111111111111111111111111";
+                },
+                {
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
+                            {
+                                kind: "const";
+                                value: [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ];
+                            }
+                        ];
+                    };
+                },
+                {
+                    name: "program";
+                    address: "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA";
+                }
+            ];
+            args: [];
+        },
+        {
+            name: "claimTokenIncentives";
+            discriminator: [16, 4, 71, 28, 204, 1, 40, 27];
+            accounts: [
+                {
+                    name: "user";
+                },
+                {
+                    name: "userAta";
+                    writable: true;
+                    pda: {
+                        seeds: [
+                            {
+                                kind: "account";
+                                path: "user";
+                            },
+                            {
+                                kind: "account";
+                                path: "tokenProgram";
+                            },
+                            {
+                                kind: "account";
+                                path: "mint";
+                            }
+                        ];
+                        program: {
+                            kind: "const";
+                            value: [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ];
+                        };
+                    };
+                },
+                {
+                    name: "globalVolumeAccumulator";
+                    pda: {
+                        seeds: [
+                            {
+                                kind: "const";
+                                value: [
                                     103,
                                     108,
                                     111,
@@ -1535,26 +1668,26 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "globalIncentiveTokenAccount";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "globalIncentiveTokenAccount";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "account";
-                                "path": "globalVolumeAccumulator";
+                                kind: "account";
+                                path: "globalVolumeAccumulator";
                             },
                             {
-                                "kind": "account";
-                                "path": "tokenProgram";
+                                kind: "account";
+                                path: "tokenProgram";
                             },
                             {
-                                "kind": "account";
-                                "path": "mint";
+                                kind: "account";
+                                path: "mint";
                             }
                         ];
-                        "program": {
-                            "kind": "const";
-                            "value": [
+                        program: {
+                            kind: "const";
+                            value: [
                                 140,
                                 151,
                                 37,
@@ -1592,13 +1725,13 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "userVolumeAccumulator";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "userVolumeAccumulator";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     117,
                                     115,
                                     101,
@@ -1625,36 +1758,34 @@ type PumpAmm = {
                                 ];
                             },
                             {
-                                "kind": "account";
-                                "path": "user";
+                                kind: "account";
+                                path: "user";
                             }
                         ];
                     };
                 },
                 {
-                    "name": "mint";
-                    "relations": [
-                        "globalVolumeAccumulator"
-                    ];
+                    name: "mint";
+                    relations: ["globalVolumeAccumulator"];
                 },
                 {
-                    "name": "tokenProgram";
+                    name: "tokenProgram";
                 },
                 {
-                    "name": "systemProgram";
-                    "address": "11111111111111111111111111111111";
+                    name: "systemProgram";
+                    address: "11111111111111111111111111111111";
                 },
                 {
-                    "name": "associatedTokenProgram";
-                    "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
+                    name: "associatedTokenProgram";
+                    address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
                 },
                 {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -1678,43 +1809,34 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
-                    "address": "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA";
+                    name: "program";
+                    address: "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA";
                 },
                 {
-                    "name": "payer";
-                    "writable": true;
-                    "signer": true;
+                    name: "payer";
+                    writable: true;
+                    signer: true;
                 }
             ];
-            "args": [];
+            args: [];
         },
         {
-            "name": "closeUserVolumeAccumulator";
-            "discriminator": [
-                249,
-                69,
-                164,
-                218,
-                150,
-                103,
-                84,
-                138
-            ];
-            "accounts": [
+            name: "closeUserVolumeAccumulator";
+            discriminator: [249, 69, 164, 218, 150, 103, 84, 138];
+            accounts: [
                 {
-                    "name": "user";
-                    "writable": true;
-                    "signer": true;
+                    name: "user";
+                    writable: true;
+                    signer: true;
                 },
                 {
-                    "name": "userVolumeAccumulator";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "userVolumeAccumulator";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     117,
                                     115,
                                     101,
@@ -1741,19 +1863,19 @@ type PumpAmm = {
                                 ];
                             },
                             {
-                                "kind": "account";
-                                "path": "user";
+                                kind: "account";
+                                path: "user";
                             }
                         ];
                     };
                 },
                 {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -1777,40 +1899,31 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
+                    name: "program";
                 }
             ];
-            "args": [];
+            args: [];
         },
         {
-            "name": "collectCoinCreatorFee";
-            "discriminator": [
-                160,
-                57,
-                89,
-                42,
-                181,
-                139,
-                43,
-                66
-            ];
-            "accounts": [
+            name: "collectCoinCreatorFee";
+            discriminator: [160, 57, 89, 42, 181, 139, 43, 66];
+            accounts: [
                 {
-                    "name": "quoteMint";
+                    name: "quoteMint";
                 },
                 {
-                    "name": "quoteTokenProgram";
+                    name: "quoteTokenProgram";
                 },
                 {
-                    "name": "coinCreator";
+                    name: "coinCreator";
                 },
                 {
-                    "name": "coinCreatorVaultAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "coinCreatorVaultAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     99,
                                     114,
                                     101,
@@ -1827,33 +1940,33 @@ type PumpAmm = {
                                 ];
                             },
                             {
-                                "kind": "account";
-                                "path": "coinCreator";
+                                kind: "account";
+                                path: "coinCreator";
                             }
                         ];
                     };
                 },
                 {
-                    "name": "coinCreatorVaultAta";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "coinCreatorVaultAta";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "account";
-                                "path": "coinCreatorVaultAuthority";
+                                kind: "account";
+                                path: "coinCreatorVaultAuthority";
                             },
                             {
-                                "kind": "account";
-                                "path": "quoteTokenProgram";
+                                kind: "account";
+                                path: "quoteTokenProgram";
                             },
                             {
-                                "kind": "account";
-                                "path": "quoteMint";
+                                kind: "account";
+                                path: "quoteMint";
                             }
                         ];
-                        "program": {
-                            "kind": "const";
-                            "value": [
+                        program: {
+                            kind: "const";
+                            value: [
                                 140,
                                 151,
                                 37,
@@ -1891,16 +2004,16 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "coinCreatorTokenAccount";
-                    "writable": true;
+                    name: "coinCreatorTokenAccount";
+                    writable: true;
                 },
                 {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -1924,38 +2037,29 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
+                    name: "program";
                 }
             ];
-            "args": [];
+            args: [];
         },
         {
-            "name": "createConfig";
-            "discriminator": [
-                201,
-                207,
-                243,
-                114,
-                75,
-                111,
-                47,
-                189
-            ];
-            "accounts": [
+            name: "createConfig";
+            discriminator: [201, 207, 243, 114, 75, 111, 47, 189];
+            accounts: [
                 {
-                    "name": "admin";
-                    "writable": true;
-                    "signer": true;
-                    "address": "8LWu7QM2dGR1G8nKDHthckea57bkCzXyBTAKPJUBDHo8";
+                    name: "admin";
+                    writable: true;
+                    signer: true;
+                    address: "8LWu7QM2dGR1G8nKDHthckea57bkCzXyBTAKPJUBDHo8";
                 },
                 {
-                    "name": "globalConfig";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "globalConfig";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     103,
                                     108,
                                     111,
@@ -1975,16 +2079,16 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "systemProgram";
-                    "address": "11111111111111111111111111111111";
+                    name: "systemProgram";
+                    address: "11111111111111111111111111111111";
                 },
                 {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -2008,105 +2112,88 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
+                    name: "program";
                 }
             ];
-            "args": [
+            args: [
                 {
-                    "name": "lpFeeBasisPoints";
-                    "type": "u64";
+                    name: "lpFeeBasisPoints";
+                    type: "u64";
                 },
                 {
-                    "name": "protocolFeeBasisPoints";
-                    "type": "u64";
+                    name: "protocolFeeBasisPoints";
+                    type: "u64";
                 },
                 {
-                    "name": "protocolFeeRecipients";
-                    "type": {
-                        "array": [
-                            "pubkey",
-                            8
-                        ];
+                    name: "protocolFeeRecipients";
+                    type: {
+                        array: ["pubkey", 8];
                     };
                 },
                 {
-                    "name": "coinCreatorFeeBasisPoints";
-                    "type": "u64";
+                    name: "coinCreatorFeeBasisPoints";
+                    type: "u64";
                 },
                 {
-                    "name": "adminSetCoinCreatorAuthority";
-                    "type": "pubkey";
+                    name: "adminSetCoinCreatorAuthority";
+                    type: "pubkey";
                 }
             ];
         },
         {
-            "name": "createPool";
-            "discriminator": [
-                233,
-                146,
-                209,
-                142,
-                207,
-                104,
-                64,
-                188
-            ];
-            "accounts": [
+            name: "createPool";
+            discriminator: [233, 146, 209, 142, 207, 104, 64, 188];
+            accounts: [
                 {
-                    "name": "pool";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "pool";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
-                                    112,
-                                    111,
-                                    111,
-                                    108
-                                ];
+                                kind: "const";
+                                value: [112, 111, 111, 108];
                             },
                             {
-                                "kind": "arg";
-                                "path": "index";
+                                kind: "arg";
+                                path: "index";
                             },
                             {
-                                "kind": "account";
-                                "path": "creator";
+                                kind: "account";
+                                path: "creator";
                             },
                             {
-                                "kind": "account";
-                                "path": "baseMint";
+                                kind: "account";
+                                path: "baseMint";
                             },
                             {
-                                "kind": "account";
-                                "path": "quoteMint";
+                                kind: "account";
+                                path: "quoteMint";
                             }
                         ];
                     };
                 },
                 {
-                    "name": "globalConfig";
+                    name: "globalConfig";
                 },
                 {
-                    "name": "creator";
-                    "writable": true;
-                    "signer": true;
+                    name: "creator";
+                    writable: true;
+                    signer: true;
                 },
                 {
-                    "name": "baseMint";
+                    name: "baseMint";
                 },
                 {
-                    "name": "quoteMint";
+                    name: "quoteMint";
                 },
                 {
-                    "name": "lpMint";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "lpMint";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     112,
                                     111,
                                     111,
@@ -2122,41 +2209,41 @@ type PumpAmm = {
                                 ];
                             },
                             {
-                                "kind": "account";
-                                "path": "pool";
+                                kind: "account";
+                                path: "pool";
                             }
                         ];
                     };
                 },
                 {
-                    "name": "userBaseTokenAccount";
-                    "writable": true;
+                    name: "userBaseTokenAccount";
+                    writable: true;
                 },
                 {
-                    "name": "userQuoteTokenAccount";
-                    "writable": true;
+                    name: "userQuoteTokenAccount";
+                    writable: true;
                 },
                 {
-                    "name": "userPoolTokenAccount";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "userPoolTokenAccount";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "account";
-                                "path": "creator";
+                                kind: "account";
+                                path: "creator";
                             },
                             {
-                                "kind": "account";
-                                "path": "token2022Program";
+                                kind: "account";
+                                path: "token2022Program";
                             },
                             {
-                                "kind": "account";
-                                "path": "lpMint";
+                                kind: "account";
+                                path: "lpMint";
                             }
                         ];
-                        "program": {
-                            "kind": "const";
-                            "value": [
+                        program: {
+                            kind: "const";
+                            value: [
                                 140,
                                 151,
                                 37,
@@ -2194,26 +2281,26 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "poolBaseTokenAccount";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "poolBaseTokenAccount";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "account";
-                                "path": "pool";
+                                kind: "account";
+                                path: "pool";
                             },
                             {
-                                "kind": "account";
-                                "path": "baseTokenProgram";
+                                kind: "account";
+                                path: "baseTokenProgram";
                             },
                             {
-                                "kind": "account";
-                                "path": "baseMint";
+                                kind: "account";
+                                path: "baseMint";
                             }
                         ];
-                        "program": {
-                            "kind": "const";
-                            "value": [
+                        program: {
+                            kind: "const";
+                            value: [
                                 140,
                                 151,
                                 37,
@@ -2251,26 +2338,26 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "poolQuoteTokenAccount";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "poolQuoteTokenAccount";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "account";
-                                "path": "pool";
+                                kind: "account";
+                                path: "pool";
                             },
                             {
-                                "kind": "account";
-                                "path": "quoteTokenProgram";
+                                kind: "account";
+                                path: "quoteTokenProgram";
                             },
                             {
-                                "kind": "account";
-                                "path": "quoteMint";
+                                kind: "account";
+                                path: "quoteMint";
                             }
                         ];
-                        "program": {
-                            "kind": "const";
-                            "value": [
+                        program: {
+                            kind: "const";
+                            value: [
                                 140,
                                 151,
                                 37,
@@ -2308,30 +2395,30 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "systemProgram";
-                    "address": "11111111111111111111111111111111";
+                    name: "systemProgram";
+                    address: "11111111111111111111111111111111";
                 },
                 {
-                    "name": "token2022Program";
-                    "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
+                    name: "token2022Program";
+                    address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
                 },
                 {
-                    "name": "baseTokenProgram";
+                    name: "baseTokenProgram";
                 },
                 {
-                    "name": "quoteTokenProgram";
+                    name: "quoteTokenProgram";
                 },
                 {
-                    "name": "associatedTokenProgram";
-                    "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
+                    name: "associatedTokenProgram";
+                    address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
                 },
                 {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -2355,116 +2442,105 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
+                    name: "program";
                 }
             ];
-            "args": [
+            args: [
                 {
-                    "name": "index";
-                    "type": "u16";
+                    name: "index";
+                    type: "u16";
                 },
                 {
-                    "name": "baseAmountIn";
-                    "type": "u64";
+                    name: "baseAmountIn";
+                    type: "u64";
                 },
                 {
-                    "name": "quoteAmountIn";
-                    "type": "u64";
+                    name: "quoteAmountIn";
+                    type: "u64";
                 },
                 {
-                    "name": "coinCreator";
-                    "type": "pubkey";
+                    name: "coinCreator";
+                    type: "pubkey";
                 },
                 {
-                    "name": "isMayhemMode";
-                    "type": "bool";
+                    name: "isMayhemMode";
+                    type: "bool";
+                },
+                {
+                    name: "isCashbackCoin";
+                    type: {
+                        defined: {
+                            name: "optionBool";
+                        };
+                    };
                 }
             ];
         },
         {
-            "name": "deposit";
-            "discriminator": [
-                242,
-                35,
-                198,
-                137,
-                82,
-                225,
-                242,
-                182
-            ];
-            "accounts": [
+            name: "deposit";
+            discriminator: [242, 35, 198, 137, 82, 225, 242, 182];
+            accounts: [
                 {
-                    "name": "pool";
-                    "writable": true;
+                    name: "pool";
+                    writable: true;
                 },
                 {
-                    "name": "globalConfig";
+                    name: "globalConfig";
                 },
                 {
-                    "name": "user";
-                    "signer": true;
+                    name: "user";
+                    signer: true;
                 },
                 {
-                    "name": "baseMint";
-                    "relations": [
-                        "pool"
-                    ];
+                    name: "baseMint";
+                    relations: ["pool"];
                 },
                 {
-                    "name": "quoteMint";
-                    "relations": [
-                        "pool"
-                    ];
+                    name: "quoteMint";
+                    relations: ["pool"];
                 },
                 {
-                    "name": "lpMint";
-                    "writable": true;
-                    "relations": [
-                        "pool"
-                    ];
+                    name: "lpMint";
+                    writable: true;
+                    relations: ["pool"];
                 },
                 {
-                    "name": "userBaseTokenAccount";
-                    "writable": true;
+                    name: "userBaseTokenAccount";
+                    writable: true;
                 },
                 {
-                    "name": "userQuoteTokenAccount";
-                    "writable": true;
+                    name: "userQuoteTokenAccount";
+                    writable: true;
                 },
                 {
-                    "name": "userPoolTokenAccount";
-                    "writable": true;
+                    name: "userPoolTokenAccount";
+                    writable: true;
                 },
                 {
-                    "name": "poolBaseTokenAccount";
-                    "writable": true;
-                    "relations": [
-                        "pool"
-                    ];
+                    name: "poolBaseTokenAccount";
+                    writable: true;
+                    relations: ["pool"];
                 },
                 {
-                    "name": "poolQuoteTokenAccount";
-                    "writable": true;
-                    "relations": [
-                        "pool"
-                    ];
+                    name: "poolQuoteTokenAccount";
+                    writable: true;
+                    relations: ["pool"];
                 },
                 {
-                    "name": "tokenProgram";
-                    "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
+                    name: "tokenProgram";
+                    address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
                 },
                 {
-                    "name": "token2022Program";
-                    "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
+                    name: "token2022Program";
+                    address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
                 },
                 {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -2488,55 +2564,44 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
+                    name: "program";
                 }
             ];
-            "args": [
+            args: [
                 {
-                    "name": "lpTokenAmountOut";
-                    "type": "u64";
+                    name: "lpTokenAmountOut";
+                    type: "u64";
                 },
                 {
-                    "name": "maxBaseAmountIn";
-                    "type": "u64";
+                    name: "maxBaseAmountIn";
+                    type: "u64";
                 },
                 {
-                    "name": "maxQuoteAmountIn";
-                    "type": "u64";
+                    name: "maxQuoteAmountIn";
+                    type: "u64";
                 }
             ];
         },
         {
-            "name": "disable";
-            "discriminator": [
-                185,
-                173,
-                187,
-                90,
-                216,
-                15,
-                238,
-                233
-            ];
-            "accounts": [
+            name: "disable";
+            discriminator: [185, 173, 187, 90, 216, 15, 238, 233];
+            accounts: [
                 {
-                    "name": "admin";
-                    "signer": true;
-                    "relations": [
-                        "globalConfig"
-                    ];
+                    name: "admin";
+                    signer: true;
+                    relations: ["globalConfig"];
                 },
                 {
-                    "name": "globalConfig";
-                    "writable": true;
+                    name: "globalConfig";
+                    writable: true;
                 },
                 {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -2560,64 +2625,55 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
+                    name: "program";
                 }
             ];
-            "args": [
+            args: [
                 {
-                    "name": "disableCreatePool";
-                    "type": "bool";
+                    name: "disableCreatePool";
+                    type: "bool";
                 },
                 {
-                    "name": "disableDeposit";
-                    "type": "bool";
+                    name: "disableDeposit";
+                    type: "bool";
                 },
                 {
-                    "name": "disableWithdraw";
-                    "type": "bool";
+                    name: "disableWithdraw";
+                    type: "bool";
                 },
                 {
-                    "name": "disableBuy";
-                    "type": "bool";
+                    name: "disableBuy";
+                    type: "bool";
                 },
                 {
-                    "name": "disableSell";
-                    "type": "bool";
+                    name: "disableSell";
+                    type: "bool";
                 }
             ];
         },
         {
-            "name": "extendAccount";
-            "discriminator": [
-                234,
-                102,
-                194,
-                203,
-                150,
-                72,
-                62,
-                229
-            ];
-            "accounts": [
+            name: "extendAccount";
+            discriminator: [234, 102, 194, 203, 150, 72, 62, 229];
+            accounts: [
                 {
-                    "name": "account";
-                    "writable": true;
+                    name: "account";
+                    writable: true;
                 },
                 {
-                    "name": "user";
-                    "signer": true;
+                    name: "user";
+                    signer: true;
                 },
                 {
-                    "name": "systemProgram";
-                    "address": "11111111111111111111111111111111";
+                    name: "systemProgram";
+                    address: "11111111111111111111111111111111";
                 },
                 {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -2641,40 +2697,31 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
+                    name: "program";
                 }
             ];
-            "args": [];
+            args: [];
         },
         {
-            "name": "initUserVolumeAccumulator";
-            "discriminator": [
-                94,
-                6,
-                202,
-                115,
-                255,
-                96,
-                232,
-                183
-            ];
-            "accounts": [
+            name: "initUserVolumeAccumulator";
+            discriminator: [94, 6, 202, 115, 255, 96, 232, 183];
+            accounts: [
                 {
-                    "name": "payer";
-                    "writable": true;
-                    "signer": true;
+                    name: "payer";
+                    writable: true;
+                    signer: true;
                 },
                 {
-                    "name": "user";
+                    name: "user";
                 },
                 {
-                    "name": "userVolumeAccumulator";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "userVolumeAccumulator";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     117,
                                     115,
                                     101,
@@ -2701,23 +2748,23 @@ type PumpAmm = {
                                 ];
                             },
                             {
-                                "kind": "account";
-                                "path": "user";
+                                kind: "account";
+                                path: "user";
                             }
                         ];
                     };
                 },
                 {
-                    "name": "systemProgram";
-                    "address": "11111111111111111111111111111111";
+                    name: "systemProgram";
+                    address: "11111111111111111111111111111111";
                 },
                 {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -2741,151 +2788,123 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
+                    name: "program";
                 }
             ];
-            "args": [];
+            args: [];
         },
         {
-            "name": "sell";
-            "discriminator": [
-                51,
-                230,
-                133,
-                164,
-                1,
-                127,
-                131,
-                173
-            ];
-            "accounts": [
+            name: "migratePoolCoinCreator";
+            docs: ["Migrate Pool Coin Creator to Sharing Config"];
+            discriminator: [208, 8, 159, 4, 74, 175, 16, 58];
+            accounts: [
                 {
-                    "name": "pool";
-                    "writable": true;
-                },
-                {
-                    "name": "user";
-                    "writable": true;
-                    "signer": true;
-                },
-                {
-                    "name": "globalConfig";
-                },
-                {
-                    "name": "baseMint";
-                    "relations": [
-                        "pool"
-                    ];
-                },
-                {
-                    "name": "quoteMint";
-                    "relations": [
-                        "pool"
-                    ];
-                },
-                {
-                    "name": "userBaseTokenAccount";
-                    "writable": true;
-                },
-                {
-                    "name": "userQuoteTokenAccount";
-                    "writable": true;
-                },
-                {
-                    "name": "poolBaseTokenAccount";
-                    "writable": true;
-                    "relations": [
-                        "pool"
-                    ];
-                },
-                {
-                    "name": "poolQuoteTokenAccount";
-                    "writable": true;
-                    "relations": [
-                        "pool"
-                    ];
-                },
-                {
-                    "name": "protocolFeeRecipient";
-                },
-                {
-                    "name": "protocolFeeRecipientTokenAccount";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "pool";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "account";
-                                "path": "protocolFeeRecipient";
+                                kind: "const";
+                                value: [112, 111, 111, 108];
                             },
                             {
-                                "kind": "account";
-                                "path": "quoteTokenProgram";
+                                kind: "account";
+                                path: "pool.index";
+                                account: "pool";
                             },
                             {
-                                "kind": "account";
-                                "path": "quoteMint";
+                                kind: "account";
+                                path: "pool.creator";
+                                account: "pool";
+                            },
+                            {
+                                kind: "account";
+                                path: "pool.base_mint";
+                                account: "pool";
+                            },
+                            {
+                                kind: "account";
+                                path: "pool.quote_mint";
+                                account: "pool";
                             }
                         ];
-                        "program": {
-                            "kind": "const";
-                            "value": [
-                                140,
-                                151,
-                                37,
-                                143,
-                                78,
-                                36,
-                                137,
-                                241,
-                                187,
-                                61,
-                                16,
-                                41,
-                                20,
-                                142,
-                                13,
-                                131,
-                                11,
-                                90,
-                                19,
-                                153,
-                                218,
+                    };
+                },
+                {
+                    name: "sharingConfig";
+                    pda: {
+                        seeds: [
+                            {
+                                kind: "const";
+                                value: [
+                                    115,
+                                    104,
+                                    97,
+                                    114,
+                                    105,
+                                    110,
+                                    103,
+                                    45,
+                                    99,
+                                    111,
+                                    110,
+                                    102,
+                                    105,
+                                    103
+                                ];
+                            },
+                            {
+                                kind: "account";
+                                path: "pool.base_mint";
+                                account: "pool";
+                            }
+                        ];
+                        program: {
+                            kind: "const";
+                            value: [
+                                12,
+                                53,
                                 255,
-                                16,
-                                132,
-                                4,
+                                169,
+                                5,
+                                90,
                                 142,
-                                123,
-                                216,
-                                219,
-                                233,
-                                248,
-                                89
+                                86,
+                                141,
+                                168,
+                                247,
+                                188,
+                                7,
+                                86,
+                                21,
+                                39,
+                                76,
+                                241,
+                                201,
+                                44,
+                                164,
+                                31,
+                                64,
+                                0,
+                                156,
+                                81,
+                                106,
+                                164,
+                                20,
+                                194,
+                                124,
+                                112
                             ];
                         };
                     };
                 },
                 {
-                    "name": "baseTokenProgram";
-                },
-                {
-                    "name": "quoteTokenProgram";
-                },
-                {
-                    "name": "systemProgram";
-                    "address": "11111111111111111111111111111111";
-                },
-                {
-                    "name": "associatedTokenProgram";
-                    "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
-                },
-                {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -2909,30 +2928,77 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
-                    "address": "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA";
+                    name: "program";
+                }
+            ];
+            args: [];
+        },
+        {
+            name: "sell";
+            discriminator: [51, 230, 133, 164, 1, 127, 131, 173];
+            accounts: [
+                {
+                    name: "pool";
+                    writable: true;
                 },
                 {
-                    "name": "coinCreatorVaultAta";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "user";
+                    writable: true;
+                    signer: true;
+                },
+                {
+                    name: "globalConfig";
+                },
+                {
+                    name: "baseMint";
+                    relations: ["pool"];
+                },
+                {
+                    name: "quoteMint";
+                    relations: ["pool"];
+                },
+                {
+                    name: "userBaseTokenAccount";
+                    writable: true;
+                },
+                {
+                    name: "userQuoteTokenAccount";
+                    writable: true;
+                },
+                {
+                    name: "poolBaseTokenAccount";
+                    writable: true;
+                    relations: ["pool"];
+                },
+                {
+                    name: "poolQuoteTokenAccount";
+                    writable: true;
+                    relations: ["pool"];
+                },
+                {
+                    name: "protocolFeeRecipient";
+                },
+                {
+                    name: "protocolFeeRecipientTokenAccount";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "account";
-                                "path": "coinCreatorVaultAuthority";
+                                kind: "account";
+                                path: "protocolFeeRecipient";
                             },
                             {
-                                "kind": "account";
-                                "path": "quoteTokenProgram";
+                                kind: "account";
+                                path: "quoteTokenProgram";
                             },
                             {
-                                "kind": "account";
-                                "path": "quoteMint";
+                                kind: "account";
+                                path: "quoteMint";
                             }
                         ];
-                        "program": {
-                            "kind": "const";
-                            "value": [
+                        program: {
+                            kind: "const";
+                            value: [
                                 140,
                                 151,
                                 37,
@@ -2970,12 +3036,116 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "coinCreatorVaultAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "baseTokenProgram";
+                },
+                {
+                    name: "quoteTokenProgram";
+                },
+                {
+                    name: "systemProgram";
+                    address: "11111111111111111111111111111111";
+                },
+                {
+                    name: "associatedTokenProgram";
+                    address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
+                },
+                {
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ];
+                            }
+                        ];
+                    };
+                },
+                {
+                    name: "program";
+                    address: "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA";
+                },
+                {
+                    name: "coinCreatorVaultAta";
+                    writable: true;
+                    pda: {
+                        seeds: [
+                            {
+                                kind: "account";
+                                path: "coinCreatorVaultAuthority";
+                            },
+                            {
+                                kind: "account";
+                                path: "quoteTokenProgram";
+                            },
+                            {
+                                kind: "account";
+                                path: "quoteMint";
+                            }
+                        ];
+                        program: {
+                            kind: "const";
+                            value: [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
+                            ];
+                        };
+                    };
+                },
+                {
+                    name: "coinCreatorVaultAuthority";
+                    pda: {
+                        seeds: [
+                            {
+                                kind: "const";
+                                value: [
                                     99,
                                     114,
                                     101,
@@ -2992,35 +3162,24 @@ type PumpAmm = {
                                 ];
                             },
                             {
-                                "kind": "account";
-                                "path": "pool.coin_creator";
-                                "account": "pool";
+                                kind: "account";
+                                path: "pool.coin_creator";
+                                account: "pool";
                             }
                         ];
                     };
                 },
                 {
-                    "name": "feeConfig";
-                    "pda": {
-                        "seeds": [
+                    name: "feeConfig";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
-                                    102,
-                                    101,
-                                    101,
-                                    95,
-                                    99,
-                                    111,
-                                    110,
-                                    102,
-                                    105,
-                                    103
-                                ];
+                                kind: "const";
+                                value: [102, 101, 101, 95, 99, 111, 110, 102, 105, 103];
                             },
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     12,
                                     20,
                                     222,
@@ -3056,68 +3215,50 @@ type PumpAmm = {
                                 ];
                             }
                         ];
-                        "program": {
-                            "kind": "account";
-                            "path": "feeProgram";
+                        program: {
+                            kind: "account";
+                            path: "feeProgram";
                         };
                     };
                 },
                 {
-                    "name": "feeProgram";
-                    "address": "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ";
+                    name: "feeProgram";
+                    address: "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ";
                 }
             ];
-            "args": [
+            args: [
                 {
-                    "name": "baseAmountIn";
-                    "type": "u64";
+                    name: "baseAmountIn";
+                    type: "u64";
                 },
                 {
-                    "name": "minQuoteAmountOut";
-                    "type": "u64";
+                    name: "minQuoteAmountOut";
+                    type: "u64";
                 }
             ];
         },
         {
-            "name": "setCoinCreator";
-            "docs": [
+            name: "setCoinCreator";
+            docs: [
                 "Sets Pool::coin_creator from Metaplex metadata creator or BondingCurve::creator"
             ];
-            "discriminator": [
-                210,
-                149,
-                128,
-                45,
-                188,
-                58,
-                78,
-                175
-            ];
-            "accounts": [
+            discriminator: [210, 149, 128, 45, 188, 58, 78, 175];
+            accounts: [
                 {
-                    "name": "pool";
-                    "writable": true;
+                    name: "pool";
+                    writable: true;
                 },
                 {
-                    "name": "metadata";
-                    "pda": {
-                        "seeds": [
+                    name: "metadata";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
-                                    109,
-                                    101,
-                                    116,
-                                    97,
-                                    100,
-                                    97,
-                                    116,
-                                    97
-                                ];
+                                kind: "const";
+                                value: [109, 101, 116, 97, 100, 97, 116, 97];
                             },
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     11,
                                     112,
                                     101,
@@ -3153,14 +3294,14 @@ type PumpAmm = {
                                 ];
                             },
                             {
-                                "kind": "account";
-                                "path": "pool.base_mint";
-                                "account": "pool";
+                                kind: "account";
+                                path: "pool.base_mint";
+                                account: "pool";
                             }
                         ];
-                        "program": {
-                            "kind": "const";
-                            "value": [
+                        program: {
+                            kind: "const";
+                            value: [
                                 11,
                                 112,
                                 101,
@@ -3198,12 +3339,12 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "bondingCurve";
-                    "pda": {
-                        "seeds": [
+                    name: "bondingCurve";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     98,
                                     111,
                                     110,
@@ -3220,14 +3361,14 @@ type PumpAmm = {
                                 ];
                             },
                             {
-                                "kind": "account";
-                                "path": "pool.base_mint";
-                                "account": "pool";
+                                kind: "account";
+                                path: "pool.base_mint";
+                                account: "pool";
                             }
                         ];
-                        "program": {
-                            "kind": "const";
-                            "value": [
+                        program: {
+                            kind: "const";
+                            value: [
                                 1,
                                 86,
                                 224,
@@ -3265,12 +3406,12 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -3294,42 +3435,53 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
+                    name: "program";
                 }
             ];
-            "args": [];
+            args: [];
         },
         {
-            "name": "setReservedFeeRecipient";
-            "discriminator": [
-                207,
-                189,
-                178,
-                71,
-                167,
-                122,
-                68,
-                180
-            ];
-            "accounts": [
+            name: "setReservedFeeRecipients";
+            discriminator: [111, 172, 162, 232, 114, 89, 213, 142];
+            accounts: [
                 {
-                    "name": "admin";
-                    "signer": true;
-                    "relations": [
-                        "globalConfig"
-                    ];
-                },
-                {
-                    "name": "globalConfig";
-                    "writable": true;
-                },
-                {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "globalConfig";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
+                                    103,
+                                    108,
+                                    111,
+                                    98,
+                                    97,
+                                    108,
+                                    95,
+                                    99,
+                                    111,
+                                    110,
+                                    102,
+                                    105,
+                                    103
+                                ];
+                            }
+                        ];
+                    };
+                },
+                {
+                    name: "admin";
+                    signer: true;
+                    relations: ["globalConfig"];
+                },
+                {
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
+                            {
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -3353,43 +3505,30 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
+                    name: "program";
                 }
             ];
-            "args": [
+            args: [
                 {
-                    "name": "reservedFeeRecipient";
-                    "type": "pubkey";
-                },
-                {
-                    "name": "whitelistPda";
-                    "type": "pubkey";
+                    name: "whitelistPda";
+                    type: "pubkey";
                 }
             ];
         },
         {
-            "name": "syncUserVolumeAccumulator";
-            "discriminator": [
-                86,
-                31,
-                192,
-                87,
-                163,
-                87,
-                79,
-                238
-            ];
-            "accounts": [
+            name: "syncUserVolumeAccumulator";
+            discriminator: [86, 31, 192, 87, 163, 87, 79, 238];
+            accounts: [
                 {
-                    "name": "user";
+                    name: "user";
                 },
                 {
-                    "name": "globalVolumeAccumulator";
-                    "pda": {
-                        "seeds": [
+                    name: "globalVolumeAccumulator";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     103,
                                     108,
                                     111,
@@ -3421,13 +3560,13 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "userVolumeAccumulator";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
+                    name: "userVolumeAccumulator";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     117,
                                     115,
                                     101,
@@ -3454,19 +3593,19 @@ type PumpAmm = {
                                 ];
                             },
                             {
-                                "kind": "account";
-                                "path": "user";
+                                kind: "account";
+                                path: "user";
                             }
                         ];
                     };
                 },
                 {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -3490,42 +3629,31 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
+                    name: "program";
                 }
             ];
-            "args": [];
+            args: [];
         },
         {
-            "name": "toggleMayhemMode";
-            "discriminator": [
-                1,
-                9,
-                111,
-                208,
-                100,
-                31,
-                255,
-                163
-            ];
-            "accounts": [
+            name: "toggleCashbackEnabled";
+            discriminator: [115, 103, 224, 255, 189, 89, 86, 195];
+            accounts: [
                 {
-                    "name": "admin";
-                    "signer": true;
-                    "relations": [
-                        "globalConfig"
-                    ];
+                    name: "admin";
+                    signer: true;
+                    relations: ["globalConfig"];
                 },
                 {
-                    "name": "globalConfig";
-                    "writable": true;
+                    name: "globalConfig";
+                    writable: true;
                 },
                 {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -3549,50 +3677,36 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
+                    name: "program";
                 }
             ];
-            "args": [
+            args: [
                 {
-                    "name": "enabled";
-                    "type": "bool";
+                    name: "enabled";
+                    type: "bool";
                 }
             ];
         },
         {
-            "name": "updateAdmin";
-            "discriminator": [
-                161,
-                176,
-                40,
-                213,
-                60,
-                184,
-                179,
-                228
-            ];
-            "accounts": [
+            name: "toggleMayhemMode";
+            discriminator: [1, 9, 111, 208, 100, 31, 255, 163];
+            accounts: [
                 {
-                    "name": "admin";
-                    "signer": true;
-                    "relations": [
-                        "globalConfig"
-                    ];
+                    name: "admin";
+                    signer: true;
+                    relations: ["globalConfig"];
                 },
                 {
-                    "name": "globalConfig";
-                    "writable": true;
+                    name: "globalConfig";
+                    writable: true;
                 },
                 {
-                    "name": "newAdmin";
-                },
-                {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
+                                kind: "const";
+                                value: [
                                     95,
                                     95,
                                     101,
@@ -3616,1355 +3730,1477 @@ type PumpAmm = {
                     };
                 },
                 {
-                    "name": "program";
+                    name: "program";
                 }
             ];
-            "args": [];
+            args: [
+                {
+                    name: "enabled";
+                    type: "bool";
+                }
+            ];
         },
         {
-            "name": "updateFeeConfig";
-            "discriminator": [
-                104,
-                184,
-                103,
-                242,
-                88,
-                151,
-                107,
-                20
+            name: "transferCreatorFeesToPump";
+            docs: [
+                "Transfer creator fees to pump creator vault",
+                "If coin creator fees are currently below rent.minimum_balance(TokenAccount::LEN)",
+                "The transfer will be skipped"
             ];
-            "accounts": [
+            discriminator: [139, 52, 134, 85, 228, 229, 108, 241];
+            accounts: [
                 {
-                    "name": "admin";
-                    "signer": true;
-                    "relations": [
-                        "globalConfig"
-                    ];
+                    name: "wsolMint";
+                    docs: ["Pump Canonical Pool are quoted in wSOL"];
                 },
                 {
-                    "name": "globalConfig";
-                    "writable": true;
+                    name: "tokenProgram";
                 },
                 {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "systemProgram";
+                    address: "11111111111111111111111111111111";
+                },
+                {
+                    name: "associatedTokenProgram";
+                    address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
+                },
+                {
+                    name: "coinCreator";
+                },
+                {
+                    name: "coinCreatorVaultAuthority";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
-                                    95,
-                                    95,
+                                kind: "const";
+                                value: [
+                                    99,
+                                    114,
                                     101,
-                                    118,
-                                    101,
-                                    110,
-                                    116,
-                                    95,
                                     97,
-                                    117,
                                     116,
-                                    104,
                                     111,
                                     114,
-                                    105,
-                                    116,
-                                    121
+                                    95,
+                                    118,
+                                    97,
+                                    117,
+                                    108,
+                                    116
                                 ];
+                            },
+                            {
+                                kind: "account";
+                                path: "coinCreator";
                             }
                         ];
                     };
                 },
                 {
-                    "name": "program";
-                }
-            ];
-            "args": [
-                {
-                    "name": "lpFeeBasisPoints";
-                    "type": "u64";
-                },
-                {
-                    "name": "protocolFeeBasisPoints";
-                    "type": "u64";
-                },
-                {
-                    "name": "protocolFeeRecipients";
-                    "type": {
-                        "array": [
-                            "pubkey",
-                            8
-                        ];
-                    };
-                },
-                {
-                    "name": "coinCreatorFeeBasisPoints";
-                    "type": "u64";
-                },
-                {
-                    "name": "adminSetCoinCreatorAuthority";
-                    "type": "pubkey";
-                }
-            ];
-        },
-        {
-            "name": "withdraw";
-            "discriminator": [
-                183,
-                18,
-                70,
-                156,
-                148,
-                109,
-                161,
-                34
-            ];
-            "accounts": [
-                {
-                    "name": "pool";
-                    "writable": true;
-                },
-                {
-                    "name": "globalConfig";
-                },
-                {
-                    "name": "user";
-                    "signer": true;
-                },
-                {
-                    "name": "baseMint";
-                    "relations": [
-                        "pool"
-                    ];
-                },
-                {
-                    "name": "quoteMint";
-                    "relations": [
-                        "pool"
-                    ];
-                },
-                {
-                    "name": "lpMint";
-                    "writable": true;
-                    "relations": [
-                        "pool"
-                    ];
-                },
-                {
-                    "name": "userBaseTokenAccount";
-                    "writable": true;
-                },
-                {
-                    "name": "userQuoteTokenAccount";
-                    "writable": true;
-                },
-                {
-                    "name": "userPoolTokenAccount";
-                    "writable": true;
-                },
-                {
-                    "name": "poolBaseTokenAccount";
-                    "writable": true;
-                    "relations": [
-                        "pool"
-                    ];
-                },
-                {
-                    "name": "poolQuoteTokenAccount";
-                    "writable": true;
-                    "relations": [
-                        "pool"
-                    ];
-                },
-                {
-                    "name": "tokenProgram";
-                    "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
-                },
-                {
-                    "name": "token2022Program";
-                    "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
-                },
-                {
-                    "name": "eventAuthority";
-                    "pda": {
-                        "seeds": [
+                    name: "coinCreatorVaultAta";
+                    writable: true;
+                    pda: {
+                        seeds: [
                             {
-                                "kind": "const";
-                                "value": [
-                                    95,
-                                    95,
-                                    101,
-                                    118,
-                                    101,
-                                    110,
-                                    116,
-                                    95,
-                                    97,
-                                    117,
-                                    116,
-                                    104,
-                                    111,
-                                    114,
-                                    105,
-                                    116,
-                                    121
-                                ];
+                                kind: "account";
+                                path: "coinCreatorVaultAuthority";
+                            },
+                            {
+                                kind: "account";
+                                path: "tokenProgram";
+                            },
+                            {
+                                kind: "account";
+                                path: "wsolMint";
                             }
                         ];
-                    };
-                },
-                {
-                    "name": "program";
-                }
-            ];
-            "args": [
-                {
-                    "name": "lpTokenAmountIn";
-                    "type": "u64";
-                },
-                {
-                    "name": "minBaseAmountOut";
-                    "type": "u64";
-                },
-                {
-                    "name": "minQuoteAmountOut";
-                    "type": "u64";
-                }
-            ];
-        }
-    ];
-    "accounts": [
-        {
-            "name": "bondingCurve";
-            "discriminator": [
-                23,
-                183,
-                248,
-                55,
-                96,
-                216,
-                172,
-                96
-            ];
-        },
-        {
-            "name": "feeConfig";
-            "discriminator": [
-                143,
-                52,
-                146,
-                187,
-                219,
-                123,
-                76,
-                155
-            ];
-        },
-        {
-            "name": "globalConfig";
-            "discriminator": [
-                149,
-                8,
-                156,
-                202,
-                160,
-                252,
-                176,
-                217
-            ];
-        },
-        {
-            "name": "globalVolumeAccumulator";
-            "discriminator": [
-                202,
-                42,
-                246,
-                43,
-                142,
-                190,
-                30,
-                255
-            ];
-        },
-        {
-            "name": "pool";
-            "discriminator": [
-                241,
-                154,
-                109,
-                4,
-                17,
-                177,
-                109,
-                188
-            ];
-        },
-        {
-            "name": "userVolumeAccumulator";
-            "discriminator": [
-                86,
-                255,
-                112,
-                14,
-                102,
-                53,
-                154,
-                250
-            ];
-        }
-    ];
-    "events": [
-        {
-            "name": "adminSetCoinCreatorEvent";
-            "discriminator": [
-                45,
-                220,
-                93,
-                24,
-                25,
-                97,
-                172,
-                104
-            ];
-        },
-        {
-            "name": "adminUpdateTokenIncentivesEvent";
-            "discriminator": [
-                147,
-                250,
-                108,
-                120,
-                247,
-                29,
-                67,
-                222
-            ];
-        },
-        {
-            "name": "buyEvent";
-            "discriminator": [
-                103,
-                244,
-                82,
-                31,
-                44,
-                245,
-                119,
-                119
-            ];
-        },
-        {
-            "name": "claimTokenIncentivesEvent";
-            "discriminator": [
-                79,
-                172,
-                246,
-                49,
-                205,
-                91,
-                206,
-                232
-            ];
-        },
-        {
-            "name": "closeUserVolumeAccumulatorEvent";
-            "discriminator": [
-                146,
-                159,
-                189,
-                172,
-                146,
-                88,
-                56,
-                244
-            ];
-        },
-        {
-            "name": "collectCoinCreatorFeeEvent";
-            "discriminator": [
-                232,
-                245,
-                194,
-                238,
-                234,
-                218,
-                58,
-                89
-            ];
-        },
-        {
-            "name": "createConfigEvent";
-            "discriminator": [
-                107,
-                52,
-                89,
-                129,
-                55,
-                226,
-                81,
-                22
-            ];
-        },
-        {
-            "name": "createPoolEvent";
-            "discriminator": [
-                177,
-                49,
-                12,
-                210,
-                160,
-                118,
-                167,
-                116
-            ];
-        },
-        {
-            "name": "depositEvent";
-            "discriminator": [
-                120,
-                248,
-                61,
-                83,
-                31,
-                142,
-                107,
-                144
-            ];
-        },
-        {
-            "name": "disableEvent";
-            "discriminator": [
-                107,
-                253,
-                193,
-                76,
-                228,
-                202,
-                27,
-                104
-            ];
-        },
-        {
-            "name": "extendAccountEvent";
-            "discriminator": [
-                97,
-                97,
-                215,
-                144,
-                93,
-                146,
-                22,
-                124
-            ];
-        },
-        {
-            "name": "initUserVolumeAccumulatorEvent";
-            "discriminator": [
-                134,
-                36,
-                13,
-                72,
-                232,
-                101,
-                130,
-                216
-            ];
-        },
-        {
-            "name": "sellEvent";
-            "discriminator": [
-                62,
-                47,
-                55,
-                10,
-                165,
-                3,
-                220,
-                42
-            ];
-        },
-        {
-            "name": "setBondingCurveCoinCreatorEvent";
-            "discriminator": [
-                242,
-                231,
-                235,
-                102,
-                65,
-                99,
-                189,
-                211
-            ];
-        },
-        {
-            "name": "setMetaplexCoinCreatorEvent";
-            "discriminator": [
-                150,
-                107,
-                199,
-                123,
-                124,
-                207,
-                102,
-                228
-            ];
-        },
-        {
-            "name": "syncUserVolumeAccumulatorEvent";
-            "discriminator": [
-                197,
-                122,
-                167,
-                124,
-                116,
-                81,
-                91,
-                255
-            ];
-        },
-        {
-            "name": "updateAdminEvent";
-            "discriminator": [
-                225,
-                152,
-                171,
-                87,
-                246,
-                63,
-                66,
-                234
-            ];
-        },
-        {
-            "name": "updateFeeConfigEvent";
-            "discriminator": [
-                90,
-                23,
-                65,
-                35,
-                62,
-                244,
-                188,
-                208
-            ];
-        },
-        {
-            "name": "withdrawEvent";
-            "discriminator": [
-                22,
-                9,
-                133,
-                26,
-                160,
-                44,
-                71,
-                192
-            ];
-        }
-    ];
-    "errors": [
-        {
-            "code": 6000;
-            "name": "feeBasisPointsExceedsMaximum";
-        },
-        {
-            "code": 6001;
-            "name": "zeroBaseAmount";
-        },
-        {
-            "code": 6002;
-            "name": "zeroQuoteAmount";
-        },
-        {
-            "code": 6003;
-            "name": "tooLittlePoolTokenLiquidity";
-        },
-        {
-            "code": 6004;
-            "name": "exceededSlippage";
-        },
-        {
-            "code": 6005;
-            "name": "invalidAdmin";
-        },
-        {
-            "code": 6006;
-            "name": "unsupportedBaseMint";
-        },
-        {
-            "code": 6007;
-            "name": "unsupportedQuoteMint";
-        },
-        {
-            "code": 6008;
-            "name": "invalidBaseMint";
-        },
-        {
-            "code": 6009;
-            "name": "invalidQuoteMint";
-        },
-        {
-            "code": 6010;
-            "name": "invalidLpMint";
-        },
-        {
-            "code": 6011;
-            "name": "allProtocolFeeRecipientsShouldBeNonZero";
-        },
-        {
-            "code": 6012;
-            "name": "unsortedNotUniqueProtocolFeeRecipients";
-        },
-        {
-            "code": 6013;
-            "name": "invalidProtocolFeeRecipient";
-        },
-        {
-            "code": 6014;
-            "name": "invalidPoolBaseTokenAccount";
-        },
-        {
-            "code": 6015;
-            "name": "invalidPoolQuoteTokenAccount";
-        },
-        {
-            "code": 6016;
-            "name": "buyMoreBaseAmountThanPoolReserves";
-        },
-        {
-            "code": 6017;
-            "name": "disabledCreatePool";
-        },
-        {
-            "code": 6018;
-            "name": "disabledDeposit";
-        },
-        {
-            "code": 6019;
-            "name": "disabledWithdraw";
-        },
-        {
-            "code": 6020;
-            "name": "disabledBuy";
-        },
-        {
-            "code": 6021;
-            "name": "disabledSell";
-        },
-        {
-            "code": 6022;
-            "name": "sameMint";
-        },
-        {
-            "code": 6023;
-            "name": "overflow";
-        },
-        {
-            "code": 6024;
-            "name": "truncation";
-        },
-        {
-            "code": 6025;
-            "name": "divisionByZero";
-        },
-        {
-            "code": 6026;
-            "name": "newSizeLessThanCurrentSize";
-        },
-        {
-            "code": 6027;
-            "name": "accountTypeNotSupported";
-        },
-        {
-            "code": 6028;
-            "name": "onlyCanonicalPumpPoolsCanHaveCoinCreator";
-        },
-        {
-            "code": 6029;
-            "name": "invalidAdminSetCoinCreatorAuthority";
-        },
-        {
-            "code": 6030;
-            "name": "startTimeInThePast";
-        },
-        {
-            "code": 6031;
-            "name": "endTimeInThePast";
-        },
-        {
-            "code": 6032;
-            "name": "endTimeBeforeStartTime";
-        },
-        {
-            "code": 6033;
-            "name": "timeRangeTooLarge";
-        },
-        {
-            "code": 6034;
-            "name": "endTimeBeforeCurrentDay";
-        },
-        {
-            "code": 6035;
-            "name": "supplyUpdateForFinishedRange";
-        },
-        {
-            "code": 6036;
-            "name": "dayIndexAfterEndIndex";
-        },
-        {
-            "code": 6037;
-            "name": "dayInActiveRange";
-        },
-        {
-            "code": 6038;
-            "name": "invalidIncentiveMint";
-        },
-        {
-            "code": 6039;
-            "name": "buyNotEnoughQuoteTokensToCoverFees";
-            "msg": "buy: Not enough quote tokens to cover for fees.";
-        },
-        {
-            "code": 6040;
-            "name": "buySlippageBelowMinBaseAmountOut";
-            "msg": "buy: slippage - would buy less tokens than expected min_base_amount_out";
-        },
-        {
-            "code": 6041;
-            "name": "mayhemModeDisabled";
-        },
-        {
-            "code": 6042;
-            "name": "onlyPumpPoolsMayhemMode";
-        },
-        {
-            "code": 6043;
-            "name": "mayhemModeInDesiredState";
-        }
-    ];
-    "types": [
-        {
-            "name": "adminSetCoinCreatorEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
-                    {
-                        "name": "timestamp";
-                        "type": "i64";
-                    },
-                    {
-                        "name": "adminSetCoinCreatorAuthority";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "baseMint";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "pool";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "oldCoinCreator";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "newCoinCreator";
-                        "type": "pubkey";
-                    }
-                ];
-            };
-        },
-        {
-            "name": "adminUpdateTokenIncentivesEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
-                    {
-                        "name": "startTime";
-                        "type": "i64";
-                    },
-                    {
-                        "name": "endTime";
-                        "type": "i64";
-                    },
-                    {
-                        "name": "dayNumber";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "tokenSupplyPerDay";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "mint";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "secondsInADay";
-                        "type": "i64";
-                    },
-                    {
-                        "name": "timestamp";
-                        "type": "i64";
-                    }
-                ];
-            };
-        },
-        {
-            "name": "bondingCurve";
-            "type": {
-                "kind": "struct";
-                "fields": [
-                    {
-                        "name": "virtualTokenReserves";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "virtualSolReserves";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "realTokenReserves";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "realSolReserves";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "tokenTotalSupply";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "complete";
-                        "type": "bool";
-                    },
-                    {
-                        "name": "creator";
-                        "type": "pubkey";
-                    }
-                ];
-            };
-        },
-        {
-            "name": "buyEvent";
-            "docs": [
-                "ix_name: \"buy\" | \"buy_exact_quote_in\""
-            ];
-            "type": {
-                "kind": "struct";
-                "fields": [
-                    {
-                        "name": "timestamp";
-                        "type": "i64";
-                    },
-                    {
-                        "name": "baseAmountOut";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "maxQuoteAmountIn";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "userBaseTokenReserves";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "userQuoteTokenReserves";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "poolBaseTokenReserves";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "poolQuoteTokenReserves";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "quoteAmountIn";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "lpFeeBasisPoints";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "lpFee";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "protocolFeeBasisPoints";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "protocolFee";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "quoteAmountInWithLpFee";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "userQuoteAmountIn";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "pool";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "user";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "userBaseTokenAccount";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "userQuoteTokenAccount";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "protocolFeeRecipient";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "protocolFeeRecipientTokenAccount";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "coinCreator";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "coinCreatorFeeBasisPoints";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "coinCreatorFee";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "trackVolume";
-                        "type": "bool";
-                    },
-                    {
-                        "name": "totalUnclaimedTokens";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "totalClaimedTokens";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "currentSolVolume";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "lastUpdateTimestamp";
-                        "type": "i64";
-                    },
-                    {
-                        "name": "minBaseAmountOut";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "ixName";
-                        "type": "string";
-                    }
-                ];
-            };
-        },
-        {
-            "name": "claimTokenIncentivesEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
-                    {
-                        "name": "user";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "mint";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "amount";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "timestamp";
-                        "type": "i64";
-                    },
-                    {
-                        "name": "totalClaimedTokens";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "currentSolVolume";
-                        "type": "u64";
-                    }
-                ];
-            };
-        },
-        {
-            "name": "closeUserVolumeAccumulatorEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
-                    {
-                        "name": "user";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "timestamp";
-                        "type": "i64";
-                    },
-                    {
-                        "name": "totalUnclaimedTokens";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "totalClaimedTokens";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "currentSolVolume";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "lastUpdateTimestamp";
-                        "type": "i64";
-                    }
-                ];
-            };
-        },
-        {
-            "name": "collectCoinCreatorFeeEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
-                    {
-                        "name": "timestamp";
-                        "type": "i64";
-                    },
-                    {
-                        "name": "coinCreator";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "coinCreatorFee";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "coinCreatorVaultAta";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "coinCreatorTokenAccount";
-                        "type": "pubkey";
-                    }
-                ];
-            };
-        },
-        {
-            "name": "createConfigEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
-                    {
-                        "name": "timestamp";
-                        "type": "i64";
-                    },
-                    {
-                        "name": "admin";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "lpFeeBasisPoints";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "protocolFeeBasisPoints";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "protocolFeeRecipients";
-                        "type": {
-                            "array": [
-                                "pubkey",
-                                8
+                        program: {
+                            kind: "const";
+                            value: [
+                                140,
+                                151,
+                                37,
+                                143,
+                                78,
+                                36,
+                                137,
+                                241,
+                                187,
+                                61,
+                                16,
+                                41,
+                                20,
+                                142,
+                                13,
+                                131,
+                                11,
+                                90,
+                                19,
+                                153,
+                                218,
+                                255,
+                                16,
+                                132,
+                                4,
+                                142,
+                                123,
+                                216,
+                                219,
+                                233,
+                                248,
+                                89
                             ];
+                        };
+                    };
+                },
+                {
+                    name: "pumpCreatorVault";
+                    writable: true;
+                    pda: {
+                        seeds: [
+                            {
+                                kind: "const";
+                                value: [
+                                    99,
+                                    114,
+                                    101,
+                                    97,
+                                    116,
+                                    111,
+                                    114,
+                                    45,
+                                    118,
+                                    97,
+                                    117,
+                                    108,
+                                    116
+                                ];
+                            },
+                            {
+                                kind: "account";
+                                path: "coinCreator";
+                            }
+                        ];
+                        program: {
+                            kind: "const";
+                            value: [
+                                1,
+                                86,
+                                224,
+                                246,
+                                147,
+                                102,
+                                90,
+                                207,
+                                68,
+                                219,
+                                21,
+                                104,
+                                191,
+                                23,
+                                91,
+                                170,
+                                81,
+                                137,
+                                203,
+                                151,
+                                245,
+                                210,
+                                255,
+                                59,
+                                101,
+                                93,
+                                43,
+                                182,
+                                253,
+                                109,
+                                24,
+                                176
+                            ];
+                        };
+                    };
+                },
+                {
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
+                            {
+                                kind: "const";
+                                value: [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ];
+                            }
+                        ];
+                    };
+                },
+                {
+                    name: "program";
+                }
+            ];
+            args: [];
+        },
+        {
+            name: "updateAdmin";
+            discriminator: [161, 176, 40, 213, 60, 184, 179, 228];
+            accounts: [
+                {
+                    name: "admin";
+                    signer: true;
+                    relations: ["globalConfig"];
+                },
+                {
+                    name: "globalConfig";
+                    writable: true;
+                },
+                {
+                    name: "newAdmin";
+                },
+                {
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
+                            {
+                                kind: "const";
+                                value: [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ];
+                            }
+                        ];
+                    };
+                },
+                {
+                    name: "program";
+                }
+            ];
+            args: [];
+        },
+        {
+            name: "updateFeeConfig";
+            discriminator: [104, 184, 103, 242, 88, 151, 107, 20];
+            accounts: [
+                {
+                    name: "admin";
+                    signer: true;
+                    relations: ["globalConfig"];
+                },
+                {
+                    name: "globalConfig";
+                    writable: true;
+                },
+                {
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
+                            {
+                                kind: "const";
+                                value: [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ];
+                            }
+                        ];
+                    };
+                },
+                {
+                    name: "program";
+                }
+            ];
+            args: [
+                {
+                    name: "lpFeeBasisPoints";
+                    type: "u64";
+                },
+                {
+                    name: "protocolFeeBasisPoints";
+                    type: "u64";
+                },
+                {
+                    name: "protocolFeeRecipients";
+                    type: {
+                        array: ["pubkey", 8];
+                    };
+                },
+                {
+                    name: "coinCreatorFeeBasisPoints";
+                    type: "u64";
+                },
+                {
+                    name: "adminSetCoinCreatorAuthority";
+                    type: "pubkey";
+                }
+            ];
+        },
+        {
+            name: "withdraw";
+            discriminator: [183, 18, 70, 156, 148, 109, 161, 34];
+            accounts: [
+                {
+                    name: "pool";
+                    writable: true;
+                },
+                {
+                    name: "globalConfig";
+                },
+                {
+                    name: "user";
+                    signer: true;
+                },
+                {
+                    name: "baseMint";
+                    relations: ["pool"];
+                },
+                {
+                    name: "quoteMint";
+                    relations: ["pool"];
+                },
+                {
+                    name: "lpMint";
+                    writable: true;
+                    relations: ["pool"];
+                },
+                {
+                    name: "userBaseTokenAccount";
+                    writable: true;
+                },
+                {
+                    name: "userQuoteTokenAccount";
+                    writable: true;
+                },
+                {
+                    name: "userPoolTokenAccount";
+                    writable: true;
+                },
+                {
+                    name: "poolBaseTokenAccount";
+                    writable: true;
+                    relations: ["pool"];
+                },
+                {
+                    name: "poolQuoteTokenAccount";
+                    writable: true;
+                    relations: ["pool"];
+                },
+                {
+                    name: "tokenProgram";
+                    address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
+                },
+                {
+                    name: "token2022Program";
+                    address: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
+                },
+                {
+                    name: "eventAuthority";
+                    pda: {
+                        seeds: [
+                            {
+                                kind: "const";
+                                value: [
+                                    95,
+                                    95,
+                                    101,
+                                    118,
+                                    101,
+                                    110,
+                                    116,
+                                    95,
+                                    97,
+                                    117,
+                                    116,
+                                    104,
+                                    111,
+                                    114,
+                                    105,
+                                    116,
+                                    121
+                                ];
+                            }
+                        ];
+                    };
+                },
+                {
+                    name: "program";
+                }
+            ];
+            args: [
+                {
+                    name: "lpTokenAmountIn";
+                    type: "u64";
+                },
+                {
+                    name: "minBaseAmountOut";
+                    type: "u64";
+                },
+                {
+                    name: "minQuoteAmountOut";
+                    type: "u64";
+                }
+            ];
+        }
+    ];
+    accounts: [
+        {
+            name: "bondingCurve";
+            discriminator: [23, 183, 248, 55, 96, 216, 172, 96];
+        },
+        {
+            name: "feeConfig";
+            discriminator: [143, 52, 146, 187, 219, 123, 76, 155];
+        },
+        {
+            name: "globalConfig";
+            discriminator: [149, 8, 156, 202, 160, 252, 176, 217];
+        },
+        {
+            name: "globalVolumeAccumulator";
+            discriminator: [202, 42, 246, 43, 142, 190, 30, 255];
+        },
+        {
+            name: "pool";
+            discriminator: [241, 154, 109, 4, 17, 177, 109, 188];
+        },
+        {
+            name: "sharingConfig";
+            discriminator: [216, 74, 9, 0, 56, 140, 93, 75];
+        },
+        {
+            name: "userVolumeAccumulator";
+            discriminator: [86, 255, 112, 14, 102, 53, 154, 250];
+        }
+    ];
+    events: [
+        {
+            name: "adminSetCoinCreatorEvent";
+            discriminator: [45, 220, 93, 24, 25, 97, 172, 104];
+        },
+        {
+            name: "adminUpdateTokenIncentivesEvent";
+            discriminator: [147, 250, 108, 120, 247, 29, 67, 222];
+        },
+        {
+            name: "buyEvent";
+            discriminator: [103, 244, 82, 31, 44, 245, 119, 119];
+        },
+        {
+            name: "claimCashbackEvent";
+            discriminator: [226, 214, 246, 33, 7, 242, 147, 229];
+        },
+        {
+            name: "claimTokenIncentivesEvent";
+            discriminator: [79, 172, 246, 49, 205, 91, 206, 232];
+        },
+        {
+            name: "closeUserVolumeAccumulatorEvent";
+            discriminator: [146, 159, 189, 172, 146, 88, 56, 244];
+        },
+        {
+            name: "collectCoinCreatorFeeEvent";
+            discriminator: [232, 245, 194, 238, 234, 218, 58, 89];
+        },
+        {
+            name: "createConfigEvent";
+            discriminator: [107, 52, 89, 129, 55, 226, 81, 22];
+        },
+        {
+            name: "createPoolEvent";
+            discriminator: [177, 49, 12, 210, 160, 118, 167, 116];
+        },
+        {
+            name: "depositEvent";
+            discriminator: [120, 248, 61, 83, 31, 142, 107, 144];
+        },
+        {
+            name: "disableEvent";
+            discriminator: [107, 253, 193, 76, 228, 202, 27, 104];
+        },
+        {
+            name: "extendAccountEvent";
+            discriminator: [97, 97, 215, 144, 93, 146, 22, 124];
+        },
+        {
+            name: "initUserVolumeAccumulatorEvent";
+            discriminator: [134, 36, 13, 72, 232, 101, 130, 216];
+        },
+        {
+            name: "migratePoolCoinCreatorEvent";
+            discriminator: [170, 221, 82, 199, 147, 165, 247, 46];
+        },
+        {
+            name: "reservedFeeRecipientsEvent";
+            discriminator: [43, 188, 250, 18, 221, 75, 187, 95];
+        },
+        {
+            name: "sellEvent";
+            discriminator: [62, 47, 55, 10, 165, 3, 220, 42];
+        },
+        {
+            name: "setBondingCurveCoinCreatorEvent";
+            discriminator: [242, 231, 235, 102, 65, 99, 189, 211];
+        },
+        {
+            name: "setMetaplexCoinCreatorEvent";
+            discriminator: [150, 107, 199, 123, 124, 207, 102, 228];
+        },
+        {
+            name: "syncUserVolumeAccumulatorEvent";
+            discriminator: [197, 122, 167, 124, 116, 81, 91, 255];
+        },
+        {
+            name: "updateAdminEvent";
+            discriminator: [225, 152, 171, 87, 246, 63, 66, 234];
+        },
+        {
+            name: "updateFeeConfigEvent";
+            discriminator: [90, 23, 65, 35, 62, 244, 188, 208];
+        },
+        {
+            name: "withdrawEvent";
+            discriminator: [22, 9, 133, 26, 160, 44, 71, 192];
+        }
+    ];
+    errors: [
+        {
+            code: 6000;
+            name: "feeBasisPointsExceedsMaximum";
+        },
+        {
+            code: 6001;
+            name: "zeroBaseAmount";
+        },
+        {
+            code: 6002;
+            name: "zeroQuoteAmount";
+        },
+        {
+            code: 6003;
+            name: "tooLittlePoolTokenLiquidity";
+        },
+        {
+            code: 6004;
+            name: "exceededSlippage";
+        },
+        {
+            code: 6005;
+            name: "invalidAdmin";
+        },
+        {
+            code: 6006;
+            name: "unsupportedBaseMint";
+        },
+        {
+            code: 6007;
+            name: "unsupportedQuoteMint";
+        },
+        {
+            code: 6008;
+            name: "invalidBaseMint";
+        },
+        {
+            code: 6009;
+            name: "invalidQuoteMint";
+        },
+        {
+            code: 6010;
+            name: "invalidLpMint";
+        },
+        {
+            code: 6011;
+            name: "allProtocolFeeRecipientsShouldBeNonZero";
+        },
+        {
+            code: 6012;
+            name: "unsortedNotUniqueProtocolFeeRecipients";
+        },
+        {
+            code: 6013;
+            name: "invalidProtocolFeeRecipient";
+        },
+        {
+            code: 6014;
+            name: "invalidPoolBaseTokenAccount";
+        },
+        {
+            code: 6015;
+            name: "invalidPoolQuoteTokenAccount";
+        },
+        {
+            code: 6016;
+            name: "buyMoreBaseAmountThanPoolReserves";
+        },
+        {
+            code: 6017;
+            name: "disabledCreatePool";
+        },
+        {
+            code: 6018;
+            name: "disabledDeposit";
+        },
+        {
+            code: 6019;
+            name: "disabledWithdraw";
+        },
+        {
+            code: 6020;
+            name: "disabledBuy";
+        },
+        {
+            code: 6021;
+            name: "disabledSell";
+        },
+        {
+            code: 6022;
+            name: "sameMint";
+        },
+        {
+            code: 6023;
+            name: "overflow";
+        },
+        {
+            code: 6024;
+            name: "truncation";
+        },
+        {
+            code: 6025;
+            name: "divisionByZero";
+        },
+        {
+            code: 6026;
+            name: "newSizeLessThanCurrentSize";
+        },
+        {
+            code: 6027;
+            name: "accountTypeNotSupported";
+        },
+        {
+            code: 6028;
+            name: "onlyCanonicalPumpPoolsCanHaveCoinCreator";
+        },
+        {
+            code: 6029;
+            name: "invalidAdminSetCoinCreatorAuthority";
+        },
+        {
+            code: 6030;
+            name: "startTimeInThePast";
+        },
+        {
+            code: 6031;
+            name: "endTimeInThePast";
+        },
+        {
+            code: 6032;
+            name: "endTimeBeforeStartTime";
+        },
+        {
+            code: 6033;
+            name: "timeRangeTooLarge";
+        },
+        {
+            code: 6034;
+            name: "endTimeBeforeCurrentDay";
+        },
+        {
+            code: 6035;
+            name: "supplyUpdateForFinishedRange";
+        },
+        {
+            code: 6036;
+            name: "dayIndexAfterEndIndex";
+        },
+        {
+            code: 6037;
+            name: "dayInActiveRange";
+        },
+        {
+            code: 6038;
+            name: "invalidIncentiveMint";
+        },
+        {
+            code: 6039;
+            name: "buyNotEnoughQuoteTokensToCoverFees";
+            msg: "buy: Not enough quote tokens to cover for fees.";
+        },
+        {
+            code: 6040;
+            name: "buySlippageBelowMinBaseAmountOut";
+            msg: "buy: slippage - would buy less tokens than expected min_base_amount_out";
+        },
+        {
+            code: 6041;
+            name: "mayhemModeDisabled";
+        },
+        {
+            code: 6042;
+            name: "onlyPumpPoolsMayhemMode";
+        },
+        {
+            code: 6043;
+            name: "mayhemModeInDesiredState";
+        },
+        {
+            code: 6044;
+            name: "notEnoughRemainingAccounts";
+        },
+        {
+            code: 6045;
+            name: "invalidSharingConfigBaseMint";
+        },
+        {
+            code: 6046;
+            name: "invalidSharingConfigCoinCreator";
+        },
+        {
+            code: 6047;
+            name: "coinCreatorMigratedToSharingConfig";
+            msg: "coin creator has been migrated to sharing config, use pump_fees::reset_fee_sharing_config instead";
+        },
+        {
+            code: 6048;
+            name: "creatorVaultMigratedToSharingConfig";
+            msg: "creator_vault has been migrated to sharing config, use pump:distribute_creator_fees instead";
+        },
+        {
+            code: 6049;
+            name: "cashbackNotEnabled";
+            msg: "Cashback is disabled";
+        },
+        {
+            code: 6050;
+            name: "onlyPumpPoolsCashback";
+        },
+        {
+            code: 6051;
+            name: "cashbackNotInDesiredState";
+        },
+        {
+            code: 6052;
+            name: "cashbackEarnedDoesNotMatchTokenInVault";
+        }
+    ];
+    types: [
+        {
+            name: "adminSetCoinCreatorEvent";
+            type: {
+                kind: "struct";
+                fields: [
+                    {
+                        name: "timestamp";
+                        type: "i64";
+                    },
+                    {
+                        name: "adminSetCoinCreatorAuthority";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "baseMint";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "pool";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "oldCoinCreator";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "newCoinCreator";
+                        type: "pubkey";
+                    }
+                ];
+            };
+        },
+        {
+            name: "adminUpdateTokenIncentivesEvent";
+            type: {
+                kind: "struct";
+                fields: [
+                    {
+                        name: "startTime";
+                        type: "i64";
+                    },
+                    {
+                        name: "endTime";
+                        type: "i64";
+                    },
+                    {
+                        name: "dayNumber";
+                        type: "u64";
+                    },
+                    {
+                        name: "tokenSupplyPerDay";
+                        type: "u64";
+                    },
+                    {
+                        name: "mint";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "secondsInADay";
+                        type: "i64";
+                    },
+                    {
+                        name: "timestamp";
+                        type: "i64";
+                    }
+                ];
+            };
+        },
+        {
+            name: "bondingCurve";
+            type: {
+                kind: "struct";
+                fields: [
+                    {
+                        name: "virtualTokenReserves";
+                        type: "u64";
+                    },
+                    {
+                        name: "virtualSolReserves";
+                        type: "u64";
+                    },
+                    {
+                        name: "realTokenReserves";
+                        type: "u64";
+                    },
+                    {
+                        name: "realSolReserves";
+                        type: "u64";
+                    },
+                    {
+                        name: "tokenTotalSupply";
+                        type: "u64";
+                    },
+                    {
+                        name: "complete";
+                        type: "bool";
+                    },
+                    {
+                        name: "creator";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "isMayhemMode";
+                        type: "bool";
+                    },
+                    {
+                        name: "isCashbackCoin";
+                        type: "bool";
+                    }
+                ];
+            };
+        },
+        {
+            name: "buyEvent";
+            docs: ['ix_name: "buy" | "buy_exact_quote_in"'];
+            type: {
+                kind: "struct";
+                fields: [
+                    {
+                        name: "timestamp";
+                        type: "i64";
+                    },
+                    {
+                        name: "baseAmountOut";
+                        type: "u64";
+                    },
+                    {
+                        name: "maxQuoteAmountIn";
+                        type: "u64";
+                    },
+                    {
+                        name: "userBaseTokenReserves";
+                        type: "u64";
+                    },
+                    {
+                        name: "userQuoteTokenReserves";
+                        type: "u64";
+                    },
+                    {
+                        name: "poolBaseTokenReserves";
+                        type: "u64";
+                    },
+                    {
+                        name: "poolQuoteTokenReserves";
+                        type: "u64";
+                    },
+                    {
+                        name: "quoteAmountIn";
+                        type: "u64";
+                    },
+                    {
+                        name: "lpFeeBasisPoints";
+                        type: "u64";
+                    },
+                    {
+                        name: "lpFee";
+                        type: "u64";
+                    },
+                    {
+                        name: "protocolFeeBasisPoints";
+                        type: "u64";
+                    },
+                    {
+                        name: "protocolFee";
+                        type: "u64";
+                    },
+                    {
+                        name: "quoteAmountInWithLpFee";
+                        type: "u64";
+                    },
+                    {
+                        name: "userQuoteAmountIn";
+                        type: "u64";
+                    },
+                    {
+                        name: "pool";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "user";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "userBaseTokenAccount";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "userQuoteTokenAccount";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "protocolFeeRecipient";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "protocolFeeRecipientTokenAccount";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "coinCreator";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "coinCreatorFeeBasisPoints";
+                        type: "u64";
+                    },
+                    {
+                        name: "coinCreatorFee";
+                        type: "u64";
+                    },
+                    {
+                        name: "trackVolume";
+                        type: "bool";
+                    },
+                    {
+                        name: "totalUnclaimedTokens";
+                        type: "u64";
+                    },
+                    {
+                        name: "totalClaimedTokens";
+                        type: "u64";
+                    },
+                    {
+                        name: "currentSolVolume";
+                        type: "u64";
+                    },
+                    {
+                        name: "lastUpdateTimestamp";
+                        type: "i64";
+                    },
+                    {
+                        name: "minBaseAmountOut";
+                        type: "u64";
+                    },
+                    {
+                        name: "ixName";
+                        type: "string";
+                    },
+                    {
+                        name: "cashbackFeeBasisPoints";
+                        type: "u64";
+                    },
+                    {
+                        name: "cashback";
+                        type: "u64";
+                    }
+                ];
+            };
+        },
+        {
+            name: "claimCashbackEvent";
+            type: {
+                kind: "struct";
+                fields: [
+                    {
+                        name: "user";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "amount";
+                        type: "u64";
+                    },
+                    {
+                        name: "timestamp";
+                        type: "i64";
+                    },
+                    {
+                        name: "totalClaimed";
+                        type: "u64";
+                    },
+                    {
+                        name: "totalCashbackEarned";
+                        type: "u64";
+                    }
+                ];
+            };
+        },
+        {
+            name: "claimTokenIncentivesEvent";
+            type: {
+                kind: "struct";
+                fields: [
+                    {
+                        name: "user";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "mint";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "amount";
+                        type: "u64";
+                    },
+                    {
+                        name: "timestamp";
+                        type: "i64";
+                    },
+                    {
+                        name: "totalClaimedTokens";
+                        type: "u64";
+                    },
+                    {
+                        name: "currentSolVolume";
+                        type: "u64";
+                    }
+                ];
+            };
+        },
+        {
+            name: "closeUserVolumeAccumulatorEvent";
+            type: {
+                kind: "struct";
+                fields: [
+                    {
+                        name: "user";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "timestamp";
+                        type: "i64";
+                    },
+                    {
+                        name: "totalUnclaimedTokens";
+                        type: "u64";
+                    },
+                    {
+                        name: "totalClaimedTokens";
+                        type: "u64";
+                    },
+                    {
+                        name: "currentSolVolume";
+                        type: "u64";
+                    },
+                    {
+                        name: "lastUpdateTimestamp";
+                        type: "i64";
+                    }
+                ];
+            };
+        },
+        {
+            name: "collectCoinCreatorFeeEvent";
+            type: {
+                kind: "struct";
+                fields: [
+                    {
+                        name: "timestamp";
+                        type: "i64";
+                    },
+                    {
+                        name: "coinCreator";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "coinCreatorFee";
+                        type: "u64";
+                    },
+                    {
+                        name: "coinCreatorVaultAta";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "coinCreatorTokenAccount";
+                        type: "pubkey";
+                    }
+                ];
+            };
+        },
+        {
+            name: "configStatus";
+            type: {
+                kind: "enum";
+                variants: [
+                    {
+                        name: "paused";
+                    },
+                    {
+                        name: "active";
+                    }
+                ];
+            };
+        },
+        {
+            name: "createConfigEvent";
+            type: {
+                kind: "struct";
+                fields: [
+                    {
+                        name: "timestamp";
+                        type: "i64";
+                    },
+                    {
+                        name: "admin";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "lpFeeBasisPoints";
+                        type: "u64";
+                    },
+                    {
+                        name: "protocolFeeBasisPoints";
+                        type: "u64";
+                    },
+                    {
+                        name: "protocolFeeRecipients";
+                        type: {
+                            array: ["pubkey", 8];
                         };
                     },
                     {
-                        "name": "coinCreatorFeeBasisPoints";
-                        "type": "u64";
+                        name: "coinCreatorFeeBasisPoints";
+                        type: "u64";
                     },
                     {
-                        "name": "adminSetCoinCreatorAuthority";
-                        "type": "pubkey";
+                        name: "adminSetCoinCreatorAuthority";
+                        type: "pubkey";
                     }
                 ];
             };
         },
         {
-            "name": "createPoolEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "createPoolEvent";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "timestamp";
-                        "type": "i64";
+                        name: "timestamp";
+                        type: "i64";
                     },
                     {
-                        "name": "index";
-                        "type": "u16";
+                        name: "index";
+                        type: "u16";
                     },
                     {
-                        "name": "creator";
-                        "type": "pubkey";
+                        name: "creator";
+                        type: "pubkey";
                     },
                     {
-                        "name": "baseMint";
-                        "type": "pubkey";
+                        name: "baseMint";
+                        type: "pubkey";
                     },
                     {
-                        "name": "quoteMint";
-                        "type": "pubkey";
+                        name: "quoteMint";
+                        type: "pubkey";
                     },
                     {
-                        "name": "baseMintDecimals";
-                        "type": "u8";
+                        name: "baseMintDecimals";
+                        type: "u8";
                     },
                     {
-                        "name": "quoteMintDecimals";
-                        "type": "u8";
+                        name: "quoteMintDecimals";
+                        type: "u8";
                     },
                     {
-                        "name": "baseAmountIn";
-                        "type": "u64";
+                        name: "baseAmountIn";
+                        type: "u64";
                     },
                     {
-                        "name": "quoteAmountIn";
-                        "type": "u64";
+                        name: "quoteAmountIn";
+                        type: "u64";
                     },
                     {
-                        "name": "poolBaseAmount";
-                        "type": "u64";
+                        name: "poolBaseAmount";
+                        type: "u64";
                     },
                     {
-                        "name": "poolQuoteAmount";
-                        "type": "u64";
+                        name: "poolQuoteAmount";
+                        type: "u64";
                     },
                     {
-                        "name": "minimumLiquidity";
-                        "type": "u64";
+                        name: "minimumLiquidity";
+                        type: "u64";
                     },
                     {
-                        "name": "initialLiquidity";
-                        "type": "u64";
+                        name: "initialLiquidity";
+                        type: "u64";
                     },
                     {
-                        "name": "lpTokenAmountOut";
-                        "type": "u64";
+                        name: "lpTokenAmountOut";
+                        type: "u64";
                     },
                     {
-                        "name": "poolBump";
-                        "type": "u8";
+                        name: "poolBump";
+                        type: "u8";
                     },
                     {
-                        "name": "pool";
-                        "type": "pubkey";
+                        name: "pool";
+                        type: "pubkey";
                     },
                     {
-                        "name": "lpMint";
-                        "type": "pubkey";
+                        name: "lpMint";
+                        type: "pubkey";
                     },
                     {
-                        "name": "userBaseTokenAccount";
-                        "type": "pubkey";
+                        name: "userBaseTokenAccount";
+                        type: "pubkey";
                     },
                     {
-                        "name": "userQuoteTokenAccount";
-                        "type": "pubkey";
+                        name: "userQuoteTokenAccount";
+                        type: "pubkey";
                     },
                     {
-                        "name": "coinCreator";
-                        "type": "pubkey";
+                        name: "coinCreator";
+                        type: "pubkey";
                     },
                     {
-                        "name": "isMayhemMode";
-                        "type": "bool";
+                        name: "isMayhemMode";
+                        type: "bool";
                     }
                 ];
             };
         },
         {
-            "name": "depositEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "depositEvent";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "timestamp";
-                        "type": "i64";
+                        name: "timestamp";
+                        type: "i64";
                     },
                     {
-                        "name": "lpTokenAmountOut";
-                        "type": "u64";
+                        name: "lpTokenAmountOut";
+                        type: "u64";
                     },
                     {
-                        "name": "maxBaseAmountIn";
-                        "type": "u64";
+                        name: "maxBaseAmountIn";
+                        type: "u64";
                     },
                     {
-                        "name": "maxQuoteAmountIn";
-                        "type": "u64";
+                        name: "maxQuoteAmountIn";
+                        type: "u64";
                     },
                     {
-                        "name": "userBaseTokenReserves";
-                        "type": "u64";
+                        name: "userBaseTokenReserves";
+                        type: "u64";
                     },
                     {
-                        "name": "userQuoteTokenReserves";
-                        "type": "u64";
+                        name: "userQuoteTokenReserves";
+                        type: "u64";
                     },
                     {
-                        "name": "poolBaseTokenReserves";
-                        "type": "u64";
+                        name: "poolBaseTokenReserves";
+                        type: "u64";
                     },
                     {
-                        "name": "poolQuoteTokenReserves";
-                        "type": "u64";
+                        name: "poolQuoteTokenReserves";
+                        type: "u64";
                     },
                     {
-                        "name": "baseAmountIn";
-                        "type": "u64";
+                        name: "baseAmountIn";
+                        type: "u64";
                     },
                     {
-                        "name": "quoteAmountIn";
-                        "type": "u64";
+                        name: "quoteAmountIn";
+                        type: "u64";
                     },
                     {
-                        "name": "lpMintSupply";
-                        "type": "u64";
+                        name: "lpMintSupply";
+                        type: "u64";
                     },
                     {
-                        "name": "pool";
-                        "type": "pubkey";
+                        name: "pool";
+                        type: "pubkey";
                     },
                     {
-                        "name": "user";
-                        "type": "pubkey";
+                        name: "user";
+                        type: "pubkey";
                     },
                     {
-                        "name": "userBaseTokenAccount";
-                        "type": "pubkey";
+                        name: "userBaseTokenAccount";
+                        type: "pubkey";
                     },
                     {
-                        "name": "userQuoteTokenAccount";
-                        "type": "pubkey";
+                        name: "userQuoteTokenAccount";
+                        type: "pubkey";
                     },
                     {
-                        "name": "userPoolTokenAccount";
-                        "type": "pubkey";
+                        name: "userPoolTokenAccount";
+                        type: "pubkey";
                     }
                 ];
             };
         },
         {
-            "name": "disableEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "disableEvent";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "timestamp";
-                        "type": "i64";
+                        name: "timestamp";
+                        type: "i64";
                     },
                     {
-                        "name": "admin";
-                        "type": "pubkey";
+                        name: "admin";
+                        type: "pubkey";
                     },
                     {
-                        "name": "disableCreatePool";
-                        "type": "bool";
+                        name: "disableCreatePool";
+                        type: "bool";
                     },
                     {
-                        "name": "disableDeposit";
-                        "type": "bool";
+                        name: "disableDeposit";
+                        type: "bool";
                     },
                     {
-                        "name": "disableWithdraw";
-                        "type": "bool";
+                        name: "disableWithdraw";
+                        type: "bool";
                     },
                     {
-                        "name": "disableBuy";
-                        "type": "bool";
+                        name: "disableBuy";
+                        type: "bool";
                     },
                     {
-                        "name": "disableSell";
-                        "type": "bool";
+                        name: "disableSell";
+                        type: "bool";
                     }
                 ];
             };
         },
         {
-            "name": "extendAccountEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "extendAccountEvent";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "timestamp";
-                        "type": "i64";
+                        name: "timestamp";
+                        type: "i64";
                     },
                     {
-                        "name": "account";
-                        "type": "pubkey";
+                        name: "account";
+                        type: "pubkey";
                     },
                     {
-                        "name": "user";
-                        "type": "pubkey";
+                        name: "user";
+                        type: "pubkey";
                     },
                     {
-                        "name": "currentSize";
-                        "type": "u64";
+                        name: "currentSize";
+                        type: "u64";
                     },
                     {
-                        "name": "newSize";
-                        "type": "u64";
+                        name: "newSize";
+                        type: "u64";
                     }
                 ];
             };
         },
         {
-            "name": "feeConfig";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "feeConfig";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "bump";
-                        "type": "u8";
+                        name: "bump";
+                        type: "u8";
                     },
                     {
-                        "name": "admin";
-                        "type": "pubkey";
+                        name: "admin";
+                        type: "pubkey";
                     },
                     {
-                        "name": "flatFees";
-                        "type": {
-                            "defined": {
-                                "name": "fees";
+                        name: "flatFees";
+                        type: {
+                            defined: {
+                                name: "fees";
                             };
                         };
                     },
                     {
-                        "name": "feeTiers";
-                        "type": {
-                            "vec": {
-                                "defined": {
-                                    "name": "feeTier";
+                        name: "feeTiers";
+                        type: {
+                            vec: {
+                                defined: {
+                                    name: "feeTier";
                                 };
                             };
                         };
@@ -4973,19 +5209,19 @@ type PumpAmm = {
             };
         },
         {
-            "name": "feeTier";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "feeTier";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "marketCapLamportsThreshold";
-                        "type": "u128";
+                        name: "marketCapLamportsThreshold";
+                        type: "u128";
                     },
                     {
-                        "name": "fees";
-                        "type": {
-                            "defined": {
-                                "name": "fees";
+                        name: "fees";
+                        type: {
+                            defined: {
+                                name: "fees";
                             };
                         };
                     }
@@ -4993,48 +5229,46 @@ type PumpAmm = {
             };
         },
         {
-            "name": "fees";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "fees";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "lpFeeBps";
-                        "type": "u64";
+                        name: "lpFeeBps";
+                        type: "u64";
                     },
                     {
-                        "name": "protocolFeeBps";
-                        "type": "u64";
+                        name: "protocolFeeBps";
+                        type: "u64";
                     },
                     {
-                        "name": "creatorFeeBps";
-                        "type": "u64";
+                        name: "creatorFeeBps";
+                        type: "u64";
                     }
                 ];
             };
         },
         {
-            "name": "globalConfig";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "globalConfig";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "admin";
-                        "docs": [
-                            "The admin pubkey"
-                        ];
-                        "type": "pubkey";
+                        name: "admin";
+                        docs: ["The admin pubkey"];
+                        type: "pubkey";
                     },
                     {
-                        "name": "lpFeeBasisPoints";
-                        "type": "u64";
+                        name: "lpFeeBasisPoints";
+                        type: "u64";
                     },
                     {
-                        "name": "protocolFeeBasisPoints";
-                        "type": "u64";
+                        name: "protocolFeeBasisPoints";
+                        type: "u64";
                     },
                     {
-                        "name": "disableFlags";
-                        "docs": [
+                        name: "disableFlags";
+                        docs: [
                             "Flags to disable certain functionality",
                             "bit 0 - Disable create pool",
                             "bit 1 - Disable deposit",
@@ -5042,523 +5276,649 @@ type PumpAmm = {
                             "bit 3 - Disable buy",
                             "bit 4 - Disable sell"
                         ];
-                        "type": "u8";
+                        type: "u8";
                     },
                     {
-                        "name": "protocolFeeRecipients";
-                        "docs": [
-                            "Addresses of the protocol fee recipients"
-                        ];
-                        "type": {
-                            "array": [
-                                "pubkey",
-                                8
-                            ];
+                        name: "protocolFeeRecipients";
+                        docs: ["Addresses of the protocol fee recipients"];
+                        type: {
+                            array: ["pubkey", 8];
                         };
                     },
                     {
-                        "name": "coinCreatorFeeBasisPoints";
-                        "type": "u64";
+                        name: "coinCreatorFeeBasisPoints";
+                        type: "u64";
                     },
                     {
-                        "name": "adminSetCoinCreatorAuthority";
-                        "docs": [
-                            "The admin authority for setting coin creators"
-                        ];
-                        "type": "pubkey";
+                        name: "adminSetCoinCreatorAuthority";
+                        docs: ["The admin authority for setting coin creators"];
+                        type: "pubkey";
                     },
                     {
-                        "name": "whitelistPda";
-                        "type": "pubkey";
+                        name: "whitelistPda";
+                        type: "pubkey";
                     },
                     {
-                        "name": "reservedFeeRecipient";
-                        "type": "pubkey";
+                        name: "reservedFeeRecipient";
+                        type: "pubkey";
                     },
                     {
-                        "name": "mayhemModeEnabled";
-                        "type": "bool";
+                        name: "mayhemModeEnabled";
+                        type: "bool";
+                    },
+                    {
+                        name: "reservedFeeRecipients";
+                        type: {
+                            array: ["pubkey", 7];
+                        };
+                    },
+                    {
+                        name: "isCashbackEnabled";
+                        type: "bool";
                     }
                 ];
             };
         },
         {
-            "name": "globalVolumeAccumulator";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "globalVolumeAccumulator";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "startTime";
-                        "type": "i64";
+                        name: "startTime";
+                        type: "i64";
                     },
                     {
-                        "name": "endTime";
-                        "type": "i64";
+                        name: "endTime";
+                        type: "i64";
                     },
                     {
-                        "name": "secondsInADay";
-                        "type": "i64";
+                        name: "secondsInADay";
+                        type: "i64";
                     },
                     {
-                        "name": "mint";
-                        "type": "pubkey";
+                        name: "mint";
+                        type: "pubkey";
                     },
                     {
-                        "name": "totalTokenSupply";
-                        "type": {
-                            "array": [
-                                "u64",
-                                30
-                            ];
+                        name: "totalTokenSupply";
+                        type: {
+                            array: ["u64", 30];
                         };
                     },
                     {
-                        "name": "solVolumes";
-                        "type": {
-                            "array": [
-                                "u64",
-                                30
-                            ];
+                        name: "solVolumes";
+                        type: {
+                            array: ["u64", 30];
                         };
                     }
                 ];
             };
         },
         {
-            "name": "initUserVolumeAccumulatorEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "initUserVolumeAccumulatorEvent";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "payer";
-                        "type": "pubkey";
+                        name: "payer";
+                        type: "pubkey";
                     },
                     {
-                        "name": "user";
-                        "type": "pubkey";
+                        name: "user";
+                        type: "pubkey";
                     },
                     {
-                        "name": "timestamp";
-                        "type": "i64";
+                        name: "timestamp";
+                        type: "i64";
                     }
                 ];
             };
         },
         {
-            "name": "optionBool";
-            "type": {
-                "kind": "struct";
-                "fields": [
-                    "bool"
-                ];
-            };
-        },
-        {
-            "name": "pool";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "migratePoolCoinCreatorEvent";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "poolBump";
-                        "type": "u8";
+                        name: "timestamp";
+                        type: "i64";
                     },
                     {
-                        "name": "index";
-                        "type": "u16";
+                        name: "baseMint";
+                        type: "pubkey";
                     },
                     {
-                        "name": "creator";
-                        "type": "pubkey";
+                        name: "pool";
+                        type: "pubkey";
                     },
                     {
-                        "name": "baseMint";
-                        "type": "pubkey";
+                        name: "sharingConfig";
+                        type: "pubkey";
                     },
                     {
-                        "name": "quoteMint";
-                        "type": "pubkey";
+                        name: "oldCoinCreator";
+                        type: "pubkey";
                     },
                     {
-                        "name": "lpMint";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "poolBaseTokenAccount";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "poolQuoteTokenAccount";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "lpSupply";
-                        "docs": [
-                            "True circulating supply without burns and lock-ups"
-                        ];
-                        "type": "u64";
-                    },
-                    {
-                        "name": "coinCreator";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "isMayhemMode";
-                        "type": "bool";
+                        name: "newCoinCreator";
+                        type: "pubkey";
                     }
                 ];
             };
         },
         {
-            "name": "sellEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "optionBool";
+            type: {
+                kind: "struct";
+                fields: ["bool"];
+            };
+        },
+        {
+            name: "pool";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "timestamp";
-                        "type": "i64";
+                        name: "poolBump";
+                        type: "u8";
                     },
                     {
-                        "name": "baseAmountIn";
-                        "type": "u64";
+                        name: "index";
+                        type: "u16";
                     },
                     {
-                        "name": "minQuoteAmountOut";
-                        "type": "u64";
+                        name: "creator";
+                        type: "pubkey";
                     },
                     {
-                        "name": "userBaseTokenReserves";
-                        "type": "u64";
+                        name: "baseMint";
+                        type: "pubkey";
                     },
                     {
-                        "name": "userQuoteTokenReserves";
-                        "type": "u64";
+                        name: "quoteMint";
+                        type: "pubkey";
                     },
                     {
-                        "name": "poolBaseTokenReserves";
-                        "type": "u64";
+                        name: "lpMint";
+                        type: "pubkey";
                     },
                     {
-                        "name": "poolQuoteTokenReserves";
-                        "type": "u64";
+                        name: "poolBaseTokenAccount";
+                        type: "pubkey";
                     },
                     {
-                        "name": "quoteAmountOut";
-                        "type": "u64";
+                        name: "poolQuoteTokenAccount";
+                        type: "pubkey";
                     },
                     {
-                        "name": "lpFeeBasisPoints";
-                        "type": "u64";
+                        name: "lpSupply";
+                        docs: ["True circulating supply without burns and lock-ups"];
+                        type: "u64";
                     },
                     {
-                        "name": "lpFee";
-                        "type": "u64";
+                        name: "coinCreator";
+                        type: "pubkey";
                     },
                     {
-                        "name": "protocolFeeBasisPoints";
-                        "type": "u64";
+                        name: "isMayhemMode";
+                        type: "bool";
                     },
                     {
-                        "name": "protocolFee";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "quoteAmountOutWithoutLpFee";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "userQuoteAmountOut";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "pool";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "user";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "userBaseTokenAccount";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "userQuoteTokenAccount";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "protocolFeeRecipient";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "protocolFeeRecipientTokenAccount";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "coinCreator";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "coinCreatorFeeBasisPoints";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "coinCreatorFee";
-                        "type": "u64";
+                        name: "isCashbackCoin";
+                        type: "bool";
                     }
                 ];
             };
         },
         {
-            "name": "setBondingCurveCoinCreatorEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "reservedFeeRecipientsEvent";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "timestamp";
-                        "type": "i64";
+                        name: "timestamp";
+                        type: "i64";
                     },
                     {
-                        "name": "baseMint";
-                        "type": "pubkey";
+                        name: "reservedFeeRecipient";
+                        type: "pubkey";
                     },
                     {
-                        "name": "pool";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "bondingCurve";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "coinCreator";
-                        "type": "pubkey";
+                        name: "reservedFeeRecipients";
+                        type: {
+                            array: ["pubkey", 7];
+                        };
                     }
                 ];
             };
         },
         {
-            "name": "setMetaplexCoinCreatorEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "sellEvent";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "timestamp";
-                        "type": "i64";
+                        name: "timestamp";
+                        type: "i64";
                     },
                     {
-                        "name": "baseMint";
-                        "type": "pubkey";
+                        name: "baseAmountIn";
+                        type: "u64";
                     },
                     {
-                        "name": "pool";
-                        "type": "pubkey";
+                        name: "minQuoteAmountOut";
+                        type: "u64";
                     },
                     {
-                        "name": "metadata";
-                        "type": "pubkey";
+                        name: "userBaseTokenReserves";
+                        type: "u64";
                     },
                     {
-                        "name": "coinCreator";
-                        "type": "pubkey";
+                        name: "userQuoteTokenReserves";
+                        type: "u64";
+                    },
+                    {
+                        name: "poolBaseTokenReserves";
+                        type: "u64";
+                    },
+                    {
+                        name: "poolQuoteTokenReserves";
+                        type: "u64";
+                    },
+                    {
+                        name: "quoteAmountOut";
+                        type: "u64";
+                    },
+                    {
+                        name: "lpFeeBasisPoints";
+                        type: "u64";
+                    },
+                    {
+                        name: "lpFee";
+                        type: "u64";
+                    },
+                    {
+                        name: "protocolFeeBasisPoints";
+                        type: "u64";
+                    },
+                    {
+                        name: "protocolFee";
+                        type: "u64";
+                    },
+                    {
+                        name: "quoteAmountOutWithoutLpFee";
+                        type: "u64";
+                    },
+                    {
+                        name: "userQuoteAmountOut";
+                        type: "u64";
+                    },
+                    {
+                        name: "pool";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "user";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "userBaseTokenAccount";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "userQuoteTokenAccount";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "protocolFeeRecipient";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "protocolFeeRecipientTokenAccount";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "coinCreator";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "coinCreatorFeeBasisPoints";
+                        type: "u64";
+                    },
+                    {
+                        name: "coinCreatorFee";
+                        type: "u64";
+                    },
+                    {
+                        name: "cashbackFeeBasisPoints";
+                        type: "u64";
+                    },
+                    {
+                        name: "cashback";
+                        type: "u64";
                     }
                 ];
             };
         },
         {
-            "name": "syncUserVolumeAccumulatorEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "setBondingCurveCoinCreatorEvent";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "user";
-                        "type": "pubkey";
+                        name: "timestamp";
+                        type: "i64";
                     },
                     {
-                        "name": "totalClaimedTokensBefore";
-                        "type": "u64";
+                        name: "baseMint";
+                        type: "pubkey";
                     },
                     {
-                        "name": "totalClaimedTokensAfter";
-                        "type": "u64";
+                        name: "pool";
+                        type: "pubkey";
                     },
                     {
-                        "name": "timestamp";
-                        "type": "i64";
+                        name: "bondingCurve";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "coinCreator";
+                        type: "pubkey";
                     }
                 ];
             };
         },
         {
-            "name": "updateAdminEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "setMetaplexCoinCreatorEvent";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "timestamp";
-                        "type": "i64";
+                        name: "timestamp";
+                        type: "i64";
                     },
                     {
-                        "name": "admin";
-                        "type": "pubkey";
+                        name: "baseMint";
+                        type: "pubkey";
                     },
                     {
-                        "name": "newAdmin";
-                        "type": "pubkey";
+                        name: "pool";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "metadata";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "coinCreator";
+                        type: "pubkey";
                     }
                 ];
             };
         },
         {
-            "name": "updateFeeConfigEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "shareholder";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "timestamp";
-                        "type": "i64";
+                        name: "address";
+                        type: "pubkey";
                     },
                     {
-                        "name": "admin";
-                        "type": "pubkey";
+                        name: "shareBps";
+                        type: "u16";
+                    }
+                ];
+            };
+        },
+        {
+            name: "sharingConfig";
+            type: {
+                kind: "struct";
+                fields: [
+                    {
+                        name: "bump";
+                        type: "u8";
                     },
                     {
-                        "name": "lpFeeBasisPoints";
-                        "type": "u64";
+                        name: "version";
+                        type: "u8";
                     },
                     {
-                        "name": "protocolFeeBasisPoints";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "protocolFeeRecipients";
-                        "type": {
-                            "array": [
-                                "pubkey",
-                                8
-                            ];
+                        name: "status";
+                        type: {
+                            defined: {
+                                name: "configStatus";
+                            };
                         };
                     },
                     {
-                        "name": "coinCreatorFeeBasisPoints";
-                        "type": "u64";
+                        name: "mint";
+                        type: "pubkey";
                     },
                     {
-                        "name": "adminSetCoinCreatorAuthority";
-                        "type": "pubkey";
+                        name: "admin";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "adminRevoked";
+                        type: "bool";
+                    },
+                    {
+                        name: "shareholders";
+                        type: {
+                            vec: {
+                                defined: {
+                                    name: "shareholder";
+                                };
+                            };
+                        };
                     }
                 ];
             };
         },
         {
-            "name": "userVolumeAccumulator";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "syncUserVolumeAccumulatorEvent";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "user";
-                        "type": "pubkey";
+                        name: "user";
+                        type: "pubkey";
                     },
                     {
-                        "name": "needsClaim";
-                        "type": "bool";
+                        name: "totalClaimedTokensBefore";
+                        type: "u64";
                     },
                     {
-                        "name": "totalUnclaimedTokens";
-                        "type": "u64";
+                        name: "totalClaimedTokensAfter";
+                        type: "u64";
                     },
                     {
-                        "name": "totalClaimedTokens";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "currentSolVolume";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "lastUpdateTimestamp";
-                        "type": "i64";
-                    },
-                    {
-                        "name": "hasTotalClaimedTokens";
-                        "type": "bool";
+                        name: "timestamp";
+                        type: "i64";
                     }
                 ];
             };
         },
         {
-            "name": "withdrawEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
+            name: "updateAdminEvent";
+            type: {
+                kind: "struct";
+                fields: [
                     {
-                        "name": "timestamp";
-                        "type": "i64";
+                        name: "timestamp";
+                        type: "i64";
                     },
                     {
-                        "name": "lpTokenAmountIn";
-                        "type": "u64";
+                        name: "admin";
+                        type: "pubkey";
                     },
                     {
-                        "name": "minBaseAmountOut";
-                        "type": "u64";
+                        name: "newAdmin";
+                        type: "pubkey";
+                    }
+                ];
+            };
+        },
+        {
+            name: "updateFeeConfigEvent";
+            type: {
+                kind: "struct";
+                fields: [
+                    {
+                        name: "timestamp";
+                        type: "i64";
                     },
                     {
-                        "name": "minQuoteAmountOut";
-                        "type": "u64";
+                        name: "admin";
+                        type: "pubkey";
                     },
                     {
-                        "name": "userBaseTokenReserves";
-                        "type": "u64";
+                        name: "lpFeeBasisPoints";
+                        type: "u64";
                     },
                     {
-                        "name": "userQuoteTokenReserves";
-                        "type": "u64";
+                        name: "protocolFeeBasisPoints";
+                        type: "u64";
                     },
                     {
-                        "name": "poolBaseTokenReserves";
-                        "type": "u64";
+                        name: "protocolFeeRecipients";
+                        type: {
+                            array: ["pubkey", 8];
+                        };
                     },
                     {
-                        "name": "poolQuoteTokenReserves";
-                        "type": "u64";
+                        name: "coinCreatorFeeBasisPoints";
+                        type: "u64";
                     },
                     {
-                        "name": "baseAmountOut";
-                        "type": "u64";
+                        name: "adminSetCoinCreatorAuthority";
+                        type: "pubkey";
+                    }
+                ];
+            };
+        },
+        {
+            name: "userVolumeAccumulator";
+            type: {
+                kind: "struct";
+                fields: [
+                    {
+                        name: "user";
+                        type: "pubkey";
                     },
                     {
-                        "name": "quoteAmountOut";
-                        "type": "u64";
+                        name: "needsClaim";
+                        type: "bool";
                     },
                     {
-                        "name": "lpMintSupply";
-                        "type": "u64";
+                        name: "totalUnclaimedTokens";
+                        type: "u64";
                     },
                     {
-                        "name": "pool";
-                        "type": "pubkey";
+                        name: "totalClaimedTokens";
+                        type: "u64";
                     },
                     {
-                        "name": "user";
-                        "type": "pubkey";
+                        name: "currentSolVolume";
+                        type: "u64";
                     },
                     {
-                        "name": "userBaseTokenAccount";
-                        "type": "pubkey";
+                        name: "lastUpdateTimestamp";
+                        type: "i64";
                     },
                     {
-                        "name": "userQuoteTokenAccount";
-                        "type": "pubkey";
+                        name: "hasTotalClaimedTokens";
+                        type: "bool";
                     },
                     {
-                        "name": "userPoolTokenAccount";
-                        "type": "pubkey";
+                        name: "cashbackEarned";
+                        type: "u64";
+                    },
+                    {
+                        name: "totalCashbackClaimed";
+                        type: "u64";
+                    }
+                ];
+            };
+        },
+        {
+            name: "withdrawEvent";
+            type: {
+                kind: "struct";
+                fields: [
+                    {
+                        name: "timestamp";
+                        type: "i64";
+                    },
+                    {
+                        name: "lpTokenAmountIn";
+                        type: "u64";
+                    },
+                    {
+                        name: "minBaseAmountOut";
+                        type: "u64";
+                    },
+                    {
+                        name: "minQuoteAmountOut";
+                        type: "u64";
+                    },
+                    {
+                        name: "userBaseTokenReserves";
+                        type: "u64";
+                    },
+                    {
+                        name: "userQuoteTokenReserves";
+                        type: "u64";
+                    },
+                    {
+                        name: "poolBaseTokenReserves";
+                        type: "u64";
+                    },
+                    {
+                        name: "poolQuoteTokenReserves";
+                        type: "u64";
+                    },
+                    {
+                        name: "baseAmountOut";
+                        type: "u64";
+                    },
+                    {
+                        name: "quoteAmountOut";
+                        type: "u64";
+                    },
+                    {
+                        name: "lpMintSupply";
+                        type: "u64";
+                    },
+                    {
+                        name: "pool";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "user";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "userBaseTokenAccount";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "userQuoteTokenAccount";
+                        type: "pubkey";
+                    },
+                    {
+                        name: "userPoolTokenAccount";
+                        type: "pubkey";
                     }
                 ];
             };
         }
     ];
-};
+}
 
 declare function getPumpAmmProgram(connection: Connection, programId?: string): Program<PumpAmm>;
 
@@ -5853,6 +6213,10 @@ var instructions = [
 	},
 	{
 		name: "buy",
+		docs: [
+			"For cashback coins, optionally pass user_volume_accumulator_wsol_ata as remaining_accounts[0].",
+			"If provided and valid, the ATA will be initialized if needed."
+		],
 		discriminator: [
 			102,
 			6,
@@ -6106,7 +6470,6 @@ var instructions = [
 			},
 			{
 				name: "global_volume_accumulator",
-				writable: true,
 				pda: {
 					seeds: [
 						{
@@ -6280,7 +6643,10 @@ var instructions = [
 			"Make sure the payer has enough SOL to cover creation of the following accounts (unless already created):",
 			"- protocol_fee_recipient_token_account: rent.minimum_balance(TokenAccount::LEN)",
 			"- coin_creator_vault_ata: rent.minimum_balance(TokenAccount::LEN)",
-			"- user_volume_accumulator: rent.minimum_balance(UserVolumeAccumulator::LEN)"
+			"- user_volume_accumulator: rent.minimum_balance(UserVolumeAccumulator::LEN)",
+			"",
+			"For cashback coins, optionally pass user_volume_accumulator_wsol_ata as remaining_accounts[0].",
+			"If provided and valid, the ATA will be initialized if needed."
 		],
 		discriminator: [
 			198,
@@ -6535,7 +6901,6 @@ var instructions = [
 			},
 			{
 				name: "global_volume_accumulator",
-				writable: true,
 				pda: {
 					seeds: [
 						{
@@ -6696,6 +7061,224 @@ var instructions = [
 					}
 				}
 			}
+		]
+	},
+	{
+		name: "claim_cashback",
+		discriminator: [
+			37,
+			58,
+			35,
+			126,
+			190,
+			53,
+			228,
+			197
+		],
+		accounts: [
+			{
+				name: "user",
+				writable: true
+			},
+			{
+				name: "user_volume_accumulator",
+				writable: true,
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								117,
+								115,
+								101,
+								114,
+								95,
+								118,
+								111,
+								108,
+								117,
+								109,
+								101,
+								95,
+								97,
+								99,
+								99,
+								117,
+								109,
+								117,
+								108,
+								97,
+								116,
+								111,
+								114
+							]
+						},
+						{
+							kind: "account",
+							path: "user"
+						}
+					]
+				}
+			},
+			{
+				name: "quote_mint"
+			},
+			{
+				name: "quote_token_program"
+			},
+			{
+				name: "user_volume_accumulator_wsol_token_account",
+				writable: true,
+				pda: {
+					seeds: [
+						{
+							kind: "account",
+							path: "user_volume_accumulator"
+						},
+						{
+							kind: "account",
+							path: "quote_token_program"
+						},
+						{
+							kind: "account",
+							path: "quote_mint"
+						}
+					],
+					program: {
+						kind: "const",
+						value: [
+							140,
+							151,
+							37,
+							143,
+							78,
+							36,
+							137,
+							241,
+							187,
+							61,
+							16,
+							41,
+							20,
+							142,
+							13,
+							131,
+							11,
+							90,
+							19,
+							153,
+							218,
+							255,
+							16,
+							132,
+							4,
+							142,
+							123,
+							216,
+							219,
+							233,
+							248,
+							89
+						]
+					}
+				}
+			},
+			{
+				name: "user_wsol_token_account",
+				writable: true,
+				pda: {
+					seeds: [
+						{
+							kind: "account",
+							path: "user"
+						},
+						{
+							kind: "account",
+							path: "quote_token_program"
+						},
+						{
+							kind: "account",
+							path: "quote_mint"
+						}
+					],
+					program: {
+						kind: "const",
+						value: [
+							140,
+							151,
+							37,
+							143,
+							78,
+							36,
+							137,
+							241,
+							187,
+							61,
+							16,
+							41,
+							20,
+							142,
+							13,
+							131,
+							11,
+							90,
+							19,
+							153,
+							218,
+							255,
+							16,
+							132,
+							4,
+							142,
+							123,
+							216,
+							219,
+							233,
+							248,
+							89
+						]
+					}
+				}
+			},
+			{
+				name: "system_program",
+				address: "11111111111111111111111111111111"
+			},
+			{
+				name: "event_authority",
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								95,
+								95,
+								101,
+								118,
+								101,
+								110,
+								116,
+								95,
+								97,
+								117,
+								116,
+								104,
+								111,
+								114,
+								105,
+								116,
+								121
+							]
+						}
+					]
+				}
+			},
+			{
+				name: "program",
+				address: "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"
+			}
+		],
+		args: [
 		]
 	},
 	{
@@ -7655,6 +8238,14 @@ var instructions = [
 			{
 				name: "is_mayhem_mode",
 				type: "bool"
+			},
+			{
+				name: "is_cashback_coin",
+				type: {
+					defined: {
+						name: "OptionBool"
+					}
+				}
 			}
 		]
 	},
@@ -7988,6 +8579,163 @@ var instructions = [
 			{
 				name: "system_program",
 				address: "11111111111111111111111111111111"
+			},
+			{
+				name: "event_authority",
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								95,
+								95,
+								101,
+								118,
+								101,
+								110,
+								116,
+								95,
+								97,
+								117,
+								116,
+								104,
+								111,
+								114,
+								105,
+								116,
+								121
+							]
+						}
+					]
+				}
+			},
+			{
+				name: "program"
+			}
+		],
+		args: [
+		]
+	},
+	{
+		name: "migrate_pool_coin_creator",
+		docs: [
+			"Migrate Pool Coin Creator to Sharing Config"
+		],
+		discriminator: [
+			208,
+			8,
+			159,
+			4,
+			74,
+			175,
+			16,
+			58
+		],
+		accounts: [
+			{
+				name: "pool",
+				writable: true,
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								112,
+								111,
+								111,
+								108
+							]
+						},
+						{
+							kind: "account",
+							path: "pool.index",
+							account: "Pool"
+						},
+						{
+							kind: "account",
+							path: "pool.creator",
+							account: "Pool"
+						},
+						{
+							kind: "account",
+							path: "pool.base_mint",
+							account: "Pool"
+						},
+						{
+							kind: "account",
+							path: "pool.quote_mint",
+							account: "Pool"
+						}
+					]
+				}
+			},
+			{
+				name: "sharing_config",
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								115,
+								104,
+								97,
+								114,
+								105,
+								110,
+								103,
+								45,
+								99,
+								111,
+								110,
+								102,
+								105,
+								103
+							]
+						},
+						{
+							kind: "account",
+							path: "pool.base_mint",
+							account: "Pool"
+						}
+					],
+					program: {
+						kind: "const",
+						value: [
+							12,
+							53,
+							255,
+							169,
+							5,
+							90,
+							142,
+							86,
+							141,
+							168,
+							247,
+							188,
+							7,
+							86,
+							21,
+							39,
+							76,
+							241,
+							201,
+							44,
+							164,
+							31,
+							64,
+							0,
+							156,
+							81,
+							106,
+							164,
+							20,
+							194,
+							124,
+							112
+						]
+					}
+				}
 			},
 			{
 				name: "event_authority",
@@ -8580,28 +9328,50 @@ var instructions = [
 		]
 	},
 	{
-		name: "set_reserved_fee_recipient",
+		name: "set_reserved_fee_recipients",
 		discriminator: [
-			207,
-			189,
-			178,
-			71,
-			167,
-			122,
-			68,
-			180
+			111,
+			172,
+			162,
+			232,
+			114,
+			89,
+			213,
+			142
 		],
 		accounts: [
+			{
+				name: "global_config",
+				writable: true,
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								103,
+								108,
+								111,
+								98,
+								97,
+								108,
+								95,
+								99,
+								111,
+								110,
+								102,
+								105,
+								103
+							]
+						}
+					]
+				}
+			},
 			{
 				name: "admin",
 				signer: true,
 				relations: [
 					"global_config"
 				]
-			},
-			{
-				name: "global_config",
-				writable: true
 			},
 			{
 				name: "event_authority",
@@ -8637,10 +9407,6 @@ var instructions = [
 			}
 		],
 		args: [
-			{
-				name: "reserved_fee_recipient",
-				type: "pubkey"
-			},
 			{
 				name: "whitelist_pda",
 				type: "pubkey"
@@ -8777,6 +9543,70 @@ var instructions = [
 		]
 	},
 	{
+		name: "toggle_cashback_enabled",
+		discriminator: [
+			115,
+			103,
+			224,
+			255,
+			189,
+			89,
+			86,
+			195
+		],
+		accounts: [
+			{
+				name: "admin",
+				signer: true,
+				relations: [
+					"global_config"
+				]
+			},
+			{
+				name: "global_config",
+				writable: true
+			},
+			{
+				name: "event_authority",
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								95,
+								95,
+								101,
+								118,
+								101,
+								110,
+								116,
+								95,
+								97,
+								117,
+								116,
+								104,
+								111,
+								114,
+								105,
+								116,
+								121
+							]
+						}
+					]
+				}
+			},
+			{
+				name: "program"
+			}
+		],
+		args: [
+			{
+				name: "enabled",
+				type: "bool"
+			}
+		]
+	},
+	{
 		name: "toggle_mayhem_mode",
 		discriminator: [
 			1,
@@ -8838,6 +9668,234 @@ var instructions = [
 				name: "enabled",
 				type: "bool"
 			}
+		]
+	},
+	{
+		name: "transfer_creator_fees_to_pump",
+		docs: [
+			"Transfer creator fees to pump creator vault",
+			"If coin creator fees are currently below rent.minimum_balance(TokenAccount::LEN)",
+			"The transfer will be skipped"
+		],
+		discriminator: [
+			139,
+			52,
+			134,
+			85,
+			228,
+			229,
+			108,
+			241
+		],
+		accounts: [
+			{
+				name: "wsol_mint",
+				docs: [
+					"Pump Canonical Pool are quoted in wSOL"
+				]
+			},
+			{
+				name: "token_program"
+			},
+			{
+				name: "system_program",
+				address: "11111111111111111111111111111111"
+			},
+			{
+				name: "associated_token_program",
+				address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+			},
+			{
+				name: "coin_creator"
+			},
+			{
+				name: "coin_creator_vault_authority",
+				writable: true,
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								99,
+								114,
+								101,
+								97,
+								116,
+								111,
+								114,
+								95,
+								118,
+								97,
+								117,
+								108,
+								116
+							]
+						},
+						{
+							kind: "account",
+							path: "coin_creator"
+						}
+					]
+				}
+			},
+			{
+				name: "coin_creator_vault_ata",
+				writable: true,
+				pda: {
+					seeds: [
+						{
+							kind: "account",
+							path: "coin_creator_vault_authority"
+						},
+						{
+							kind: "account",
+							path: "token_program"
+						},
+						{
+							kind: "account",
+							path: "wsol_mint"
+						}
+					],
+					program: {
+						kind: "const",
+						value: [
+							140,
+							151,
+							37,
+							143,
+							78,
+							36,
+							137,
+							241,
+							187,
+							61,
+							16,
+							41,
+							20,
+							142,
+							13,
+							131,
+							11,
+							90,
+							19,
+							153,
+							218,
+							255,
+							16,
+							132,
+							4,
+							142,
+							123,
+							216,
+							219,
+							233,
+							248,
+							89
+						]
+					}
+				}
+			},
+			{
+				name: "pump_creator_vault",
+				writable: true,
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								99,
+								114,
+								101,
+								97,
+								116,
+								111,
+								114,
+								45,
+								118,
+								97,
+								117,
+								108,
+								116
+							]
+						},
+						{
+							kind: "account",
+							path: "coin_creator"
+						}
+					],
+					program: {
+						kind: "const",
+						value: [
+							1,
+							86,
+							224,
+							246,
+							147,
+							102,
+							90,
+							207,
+							68,
+							219,
+							21,
+							104,
+							191,
+							23,
+							91,
+							170,
+							81,
+							137,
+							203,
+							151,
+							245,
+							210,
+							255,
+							59,
+							101,
+							93,
+							43,
+							182,
+							253,
+							109,
+							24,
+							176
+						]
+					}
+				}
+			},
+			{
+				name: "event_authority",
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								95,
+								95,
+								101,
+								118,
+								101,
+								110,
+								116,
+								95,
+								97,
+								117,
+								116,
+								104,
+								111,
+								114,
+								105,
+								116,
+								121
+							]
+						}
+					]
+				}
+			},
+			{
+				name: "program"
+			}
+		],
+		args: [
 		]
 	},
 	{
@@ -9181,6 +10239,19 @@ var accounts = [
 		]
 	},
 	{
+		name: "SharingConfig",
+		discriminator: [
+			216,
+			74,
+			9,
+			0,
+			56,
+			140,
+			93,
+			75
+		]
+	},
+	{
 		name: "UserVolumeAccumulator",
 		discriminator: [
 			86,
@@ -9232,6 +10303,19 @@ var events = [
 			245,
 			119,
 			119
+		]
+	},
+	{
+		name: "ClaimCashbackEvent",
+		discriminator: [
+			226,
+			214,
+			246,
+			33,
+			7,
+			242,
+			147,
+			229
 		]
 	},
 	{
@@ -9349,6 +10433,32 @@ var events = [
 			101,
 			130,
 			216
+		]
+	},
+	{
+		name: "MigratePoolCoinCreatorEvent",
+		discriminator: [
+			170,
+			221,
+			82,
+			199,
+			147,
+			165,
+			247,
+			46
+		]
+	},
+	{
+		name: "ReservedFeeRecipientsEvent",
+		discriminator: [
+			43,
+			188,
+			250,
+			18,
+			221,
+			75,
+			187,
+			95
 		]
 	},
 	{
@@ -9621,6 +10731,45 @@ var errors = [
 	{
 		code: 6043,
 		name: "MayhemModeInDesiredState"
+	},
+	{
+		code: 6044,
+		name: "NotEnoughRemainingAccounts"
+	},
+	{
+		code: 6045,
+		name: "InvalidSharingConfigBaseMint"
+	},
+	{
+		code: 6046,
+		name: "InvalidSharingConfigCoinCreator"
+	},
+	{
+		code: 6047,
+		name: "CoinCreatorMigratedToSharingConfig",
+		msg: "coin creator has been migrated to sharing config, use pump_fees::reset_fee_sharing_config instead"
+	},
+	{
+		code: 6048,
+		name: "CreatorVaultMigratedToSharingConfig",
+		msg: "creator_vault has been migrated to sharing config, use pump:distribute_creator_fees instead"
+	},
+	{
+		code: 6049,
+		name: "CashbackNotEnabled",
+		msg: "Cashback is disabled"
+	},
+	{
+		code: 6050,
+		name: "OnlyPumpPoolsCashback"
+	},
+	{
+		code: 6051,
+		name: "CashbackNotInDesiredState"
+	},
+	{
+		code: 6052,
+		name: "CashbackEarnedDoesNotMatchTokenInVault"
 	}
 ];
 var types = [
@@ -9724,6 +10873,14 @@ var types = [
 				{
 					name: "creator",
 					type: "pubkey"
+				},
+				{
+					name: "is_mayhem_mode",
+					type: "bool"
+				},
+				{
+					name: "is_cashback_coin",
+					type: "bool"
 				}
 			]
 		}
@@ -9855,6 +11012,42 @@ var types = [
 				{
 					name: "ix_name",
 					type: "string"
+				},
+				{
+					name: "cashback_fee_basis_points",
+					type: "u64"
+				},
+				{
+					name: "cashback",
+					type: "u64"
+				}
+			]
+		}
+	},
+	{
+		name: "ClaimCashbackEvent",
+		type: {
+			kind: "struct",
+			fields: [
+				{
+					name: "user",
+					type: "pubkey"
+				},
+				{
+					name: "amount",
+					type: "u64"
+				},
+				{
+					name: "timestamp",
+					type: "i64"
+				},
+				{
+					name: "total_claimed",
+					type: "u64"
+				},
+				{
+					name: "total_cashback_earned",
+					type: "u64"
 				}
 			]
 		}
@@ -9947,6 +11140,20 @@ var types = [
 				{
 					name: "coin_creator_token_account",
 					type: "pubkey"
+				}
+			]
+		}
+	},
+	{
+		name: "ConfigStatus",
+		type: {
+			kind: "enum",
+			variants: [
+				{
+					name: "Paused"
+				},
+				{
+					name: "Active"
 				}
 			]
 		}
@@ -10360,6 +11567,19 @@ var types = [
 				{
 					name: "mayhem_mode_enabled",
 					type: "bool"
+				},
+				{
+					name: "reserved_fee_recipients",
+					type: {
+						array: [
+							"pubkey",
+							7
+						]
+					}
+				},
+				{
+					name: "is_cashback_enabled",
+					type: "bool"
 				}
 			]
 		}
@@ -10427,6 +11647,38 @@ var types = [
 		}
 	},
 	{
+		name: "MigratePoolCoinCreatorEvent",
+		type: {
+			kind: "struct",
+			fields: [
+				{
+					name: "timestamp",
+					type: "i64"
+				},
+				{
+					name: "base_mint",
+					type: "pubkey"
+				},
+				{
+					name: "pool",
+					type: "pubkey"
+				},
+				{
+					name: "sharing_config",
+					type: "pubkey"
+				},
+				{
+					name: "old_coin_creator",
+					type: "pubkey"
+				},
+				{
+					name: "new_coin_creator",
+					type: "pubkey"
+				}
+			]
+		}
+	},
+	{
 		name: "OptionBool",
 		type: {
 			kind: "struct",
@@ -10486,6 +11738,35 @@ var types = [
 				{
 					name: "is_mayhem_mode",
 					type: "bool"
+				},
+				{
+					name: "is_cashback_coin",
+					type: "bool"
+				}
+			]
+		}
+	},
+	{
+		name: "ReservedFeeRecipientsEvent",
+		type: {
+			kind: "struct",
+			fields: [
+				{
+					name: "timestamp",
+					type: "i64"
+				},
+				{
+					name: "reserved_fee_recipient",
+					type: "pubkey"
+				},
+				{
+					name: "reserved_fee_recipients",
+					type: {
+						array: [
+							"pubkey",
+							7
+						]
+					}
 				}
 			]
 		}
@@ -10586,6 +11867,14 @@ var types = [
 				{
 					name: "coin_creator_fee",
 					type: "u64"
+				},
+				{
+					name: "cashback_fee_basis_points",
+					type: "u64"
+				},
+				{
+					name: "cashback",
+					type: "u64"
 				}
 			]
 		}
@@ -10642,6 +11931,68 @@ var types = [
 				{
 					name: "coin_creator",
 					type: "pubkey"
+				}
+			]
+		}
+	},
+	{
+		name: "Shareholder",
+		type: {
+			kind: "struct",
+			fields: [
+				{
+					name: "address",
+					type: "pubkey"
+				},
+				{
+					name: "share_bps",
+					type: "u16"
+				}
+			]
+		}
+	},
+	{
+		name: "SharingConfig",
+		type: {
+			kind: "struct",
+			fields: [
+				{
+					name: "bump",
+					type: "u8"
+				},
+				{
+					name: "version",
+					type: "u8"
+				},
+				{
+					name: "status",
+					type: {
+						defined: {
+							name: "ConfigStatus"
+						}
+					}
+				},
+				{
+					name: "mint",
+					type: "pubkey"
+				},
+				{
+					name: "admin",
+					type: "pubkey"
+				},
+				{
+					name: "admin_revoked",
+					type: "bool"
+				},
+				{
+					name: "shareholders",
+					type: {
+						vec: {
+							defined: {
+								name: "Shareholder"
+							}
+						}
+					}
 				}
 			]
 		}
@@ -10763,6 +12114,14 @@ var types = [
 				{
 					name: "has_total_claimed_tokens",
 					type: "bool"
+				},
+				{
+					name: "cashback_earned",
+					type: "u64"
+				},
+				{
+					name: "total_cashback_claimed",
+					type: "u64"
 				}
 			]
 		}

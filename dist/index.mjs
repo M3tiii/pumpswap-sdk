@@ -3364,6 +3364,10 @@ var pump_amm_default = {
     },
     {
       name: "buy",
+      docs: [
+        "For cashback coins, optionally pass user_volume_accumulator_wsol_ata as remaining_accounts[0].",
+        "If provided and valid, the ATA will be initialized if needed."
+      ],
       discriminator: [
         102,
         6,
@@ -3617,7 +3621,6 @@ var pump_amm_default = {
         },
         {
           name: "global_volume_accumulator",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -3791,7 +3794,10 @@ var pump_amm_default = {
         "Make sure the payer has enough SOL to cover creation of the following accounts (unless already created):",
         "- protocol_fee_recipient_token_account: rent.minimum_balance(TokenAccount::LEN)",
         "- coin_creator_vault_ata: rent.minimum_balance(TokenAccount::LEN)",
-        "- user_volume_accumulator: rent.minimum_balance(UserVolumeAccumulator::LEN)"
+        "- user_volume_accumulator: rent.minimum_balance(UserVolumeAccumulator::LEN)",
+        "",
+        "For cashback coins, optionally pass user_volume_accumulator_wsol_ata as remaining_accounts[0].",
+        "If provided and valid, the ATA will be initialized if needed."
       ],
       discriminator: [
         198,
@@ -4046,7 +4052,6 @@ var pump_amm_default = {
         },
         {
           name: "global_volume_accumulator",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -4208,6 +4213,223 @@ var pump_amm_default = {
           }
         }
       ]
+    },
+    {
+      name: "claim_cashback",
+      discriminator: [
+        37,
+        58,
+        35,
+        126,
+        190,
+        53,
+        228,
+        197
+      ],
+      accounts: [
+        {
+          name: "user",
+          writable: true
+        },
+        {
+          name: "user_volume_accumulator",
+          writable: true,
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  118,
+                  111,
+                  108,
+                  117,
+                  109,
+                  101,
+                  95,
+                  97,
+                  99,
+                  99,
+                  117,
+                  109,
+                  117,
+                  108,
+                  97,
+                  116,
+                  111,
+                  114
+                ]
+              },
+              {
+                kind: "account",
+                path: "user"
+              }
+            ]
+          }
+        },
+        {
+          name: "quote_mint"
+        },
+        {
+          name: "quote_token_program"
+        },
+        {
+          name: "user_volume_accumulator_wsol_token_account",
+          writable: true,
+          pda: {
+            seeds: [
+              {
+                kind: "account",
+                path: "user_volume_accumulator"
+              },
+              {
+                kind: "account",
+                path: "quote_token_program"
+              },
+              {
+                kind: "account",
+                path: "quote_mint"
+              }
+            ],
+            program: {
+              kind: "const",
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          name: "user_wsol_token_account",
+          writable: true,
+          pda: {
+            seeds: [
+              {
+                kind: "account",
+                path: "user"
+              },
+              {
+                kind: "account",
+                path: "quote_token_program"
+              },
+              {
+                kind: "account",
+                path: "quote_mint"
+              }
+            ],
+            program: {
+              kind: "const",
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          name: "system_program",
+          address: "11111111111111111111111111111111"
+        },
+        {
+          name: "event_authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          name: "program",
+          address: "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"
+        }
+      ],
+      args: []
     },
     {
       name: "claim_token_incentives",
@@ -5163,6 +5385,14 @@ var pump_amm_default = {
         {
           name: "is_mayhem_mode",
           type: "bool"
+        },
+        {
+          name: "is_cashback_coin",
+          type: {
+            defined: {
+              name: "OptionBool"
+            }
+          }
         }
       ]
     },
@@ -5495,6 +5725,162 @@ var pump_amm_default = {
         {
           name: "system_program",
           address: "11111111111111111111111111111111"
+        },
+        {
+          name: "event_authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          name: "program"
+        }
+      ],
+      args: []
+    },
+    {
+      name: "migrate_pool_coin_creator",
+      docs: [
+        "Migrate Pool Coin Creator to Sharing Config"
+      ],
+      discriminator: [
+        208,
+        8,
+        159,
+        4,
+        74,
+        175,
+        16,
+        58
+      ],
+      accounts: [
+        {
+          name: "pool",
+          writable: true,
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                kind: "account",
+                path: "pool.index",
+                account: "Pool"
+              },
+              {
+                kind: "account",
+                path: "pool.creator",
+                account: "Pool"
+              },
+              {
+                kind: "account",
+                path: "pool.base_mint",
+                account: "Pool"
+              },
+              {
+                kind: "account",
+                path: "pool.quote_mint",
+                account: "Pool"
+              }
+            ]
+          }
+        },
+        {
+          name: "sharing_config",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  115,
+                  104,
+                  97,
+                  114,
+                  105,
+                  110,
+                  103,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                kind: "account",
+                path: "pool.base_mint",
+                account: "Pool"
+              }
+            ],
+            program: {
+              kind: "const",
+              value: [
+                12,
+                53,
+                255,
+                169,
+                5,
+                90,
+                142,
+                86,
+                141,
+                168,
+                247,
+                188,
+                7,
+                86,
+                21,
+                39,
+                76,
+                241,
+                201,
+                44,
+                164,
+                31,
+                64,
+                0,
+                156,
+                81,
+                106,
+                164,
+                20,
+                194,
+                124,
+                112
+              ]
+            }
+          }
         },
         {
           name: "event_authority",
@@ -6085,28 +6471,50 @@ var pump_amm_default = {
       args: []
     },
     {
-      name: "set_reserved_fee_recipient",
+      name: "set_reserved_fee_recipients",
       discriminator: [
-        207,
-        189,
-        178,
-        71,
-        167,
-        122,
-        68,
-        180
+        111,
+        172,
+        162,
+        232,
+        114,
+        89,
+        213,
+        142
       ],
       accounts: [
+        {
+          name: "global_config",
+          writable: true,
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
         {
           name: "admin",
           signer: true,
           relations: [
             "global_config"
           ]
-        },
-        {
-          name: "global_config",
-          writable: true
         },
         {
           name: "event_authority",
@@ -6142,10 +6550,6 @@ var pump_amm_default = {
         }
       ],
       args: [
-        {
-          name: "reserved_fee_recipient",
-          type: "pubkey"
-        },
         {
           name: "whitelist_pda",
           type: "pubkey"
@@ -6281,6 +6685,70 @@ var pump_amm_default = {
       args: []
     },
     {
+      name: "toggle_cashback_enabled",
+      discriminator: [
+        115,
+        103,
+        224,
+        255,
+        189,
+        89,
+        86,
+        195
+      ],
+      accounts: [
+        {
+          name: "admin",
+          signer: true,
+          relations: [
+            "global_config"
+          ]
+        },
+        {
+          name: "global_config",
+          writable: true
+        },
+        {
+          name: "event_authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          name: "program"
+        }
+      ],
+      args: [
+        {
+          name: "enabled",
+          type: "bool"
+        }
+      ]
+    },
+    {
       name: "toggle_mayhem_mode",
       discriminator: [
         1,
@@ -6343,6 +6811,233 @@ var pump_amm_default = {
           type: "bool"
         }
       ]
+    },
+    {
+      name: "transfer_creator_fees_to_pump",
+      docs: [
+        "Transfer creator fees to pump creator vault",
+        "If coin creator fees are currently below rent.minimum_balance(TokenAccount::LEN)",
+        "The transfer will be skipped"
+      ],
+      discriminator: [
+        139,
+        52,
+        134,
+        85,
+        228,
+        229,
+        108,
+        241
+      ],
+      accounts: [
+        {
+          name: "wsol_mint",
+          docs: [
+            "Pump Canonical Pool are quoted in wSOL"
+          ]
+        },
+        {
+          name: "token_program"
+        },
+        {
+          name: "system_program",
+          address: "11111111111111111111111111111111"
+        },
+        {
+          name: "associated_token_program",
+          address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          name: "coin_creator"
+        },
+        {
+          name: "coin_creator_vault_authority",
+          writable: true,
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  99,
+                  114,
+                  101,
+                  97,
+                  116,
+                  111,
+                  114,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                kind: "account",
+                path: "coin_creator"
+              }
+            ]
+          }
+        },
+        {
+          name: "coin_creator_vault_ata",
+          writable: true,
+          pda: {
+            seeds: [
+              {
+                kind: "account",
+                path: "coin_creator_vault_authority"
+              },
+              {
+                kind: "account",
+                path: "token_program"
+              },
+              {
+                kind: "account",
+                path: "wsol_mint"
+              }
+            ],
+            program: {
+              kind: "const",
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          name: "pump_creator_vault",
+          writable: true,
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  99,
+                  114,
+                  101,
+                  97,
+                  116,
+                  111,
+                  114,
+                  45,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                kind: "account",
+                path: "coin_creator"
+              }
+            ],
+            program: {
+              kind: "const",
+              value: [
+                1,
+                86,
+                224,
+                246,
+                147,
+                102,
+                90,
+                207,
+                68,
+                219,
+                21,
+                104,
+                191,
+                23,
+                91,
+                170,
+                81,
+                137,
+                203,
+                151,
+                245,
+                210,
+                255,
+                59,
+                101,
+                93,
+                43,
+                182,
+                253,
+                109,
+                24,
+                176
+              ]
+            }
+          }
+        },
+        {
+          name: "event_authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          name: "program"
+        }
+      ],
+      args: []
     },
     {
       name: "update_admin",
@@ -6684,6 +7379,19 @@ var pump_amm_default = {
       ]
     },
     {
+      name: "SharingConfig",
+      discriminator: [
+        216,
+        74,
+        9,
+        0,
+        56,
+        140,
+        93,
+        75
+      ]
+    },
+    {
       name: "UserVolumeAccumulator",
       discriminator: [
         86,
@@ -6735,6 +7443,19 @@ var pump_amm_default = {
         245,
         119,
         119
+      ]
+    },
+    {
+      name: "ClaimCashbackEvent",
+      discriminator: [
+        226,
+        214,
+        246,
+        33,
+        7,
+        242,
+        147,
+        229
       ]
     },
     {
@@ -6852,6 +7573,32 @@ var pump_amm_default = {
         101,
         130,
         216
+      ]
+    },
+    {
+      name: "MigratePoolCoinCreatorEvent",
+      discriminator: [
+        170,
+        221,
+        82,
+        199,
+        147,
+        165,
+        247,
+        46
+      ]
+    },
+    {
+      name: "ReservedFeeRecipientsEvent",
+      discriminator: [
+        43,
+        188,
+        250,
+        18,
+        221,
+        75,
+        187,
+        95
       ]
     },
     {
@@ -7124,6 +7871,45 @@ var pump_amm_default = {
     {
       code: 6043,
       name: "MayhemModeInDesiredState"
+    },
+    {
+      code: 6044,
+      name: "NotEnoughRemainingAccounts"
+    },
+    {
+      code: 6045,
+      name: "InvalidSharingConfigBaseMint"
+    },
+    {
+      code: 6046,
+      name: "InvalidSharingConfigCoinCreator"
+    },
+    {
+      code: 6047,
+      name: "CoinCreatorMigratedToSharingConfig",
+      msg: "coin creator has been migrated to sharing config, use pump_fees::reset_fee_sharing_config instead"
+    },
+    {
+      code: 6048,
+      name: "CreatorVaultMigratedToSharingConfig",
+      msg: "creator_vault has been migrated to sharing config, use pump:distribute_creator_fees instead"
+    },
+    {
+      code: 6049,
+      name: "CashbackNotEnabled",
+      msg: "Cashback is disabled"
+    },
+    {
+      code: 6050,
+      name: "OnlyPumpPoolsCashback"
+    },
+    {
+      code: 6051,
+      name: "CashbackNotInDesiredState"
+    },
+    {
+      code: 6052,
+      name: "CashbackEarnedDoesNotMatchTokenInVault"
     }
   ],
   types: [
@@ -7227,6 +8013,14 @@ var pump_amm_default = {
           {
             name: "creator",
             type: "pubkey"
+          },
+          {
+            name: "is_mayhem_mode",
+            type: "bool"
+          },
+          {
+            name: "is_cashback_coin",
+            type: "bool"
           }
         ]
       }
@@ -7358,6 +8152,42 @@ var pump_amm_default = {
           {
             name: "ix_name",
             type: "string"
+          },
+          {
+            name: "cashback_fee_basis_points",
+            type: "u64"
+          },
+          {
+            name: "cashback",
+            type: "u64"
+          }
+        ]
+      }
+    },
+    {
+      name: "ClaimCashbackEvent",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "user",
+            type: "pubkey"
+          },
+          {
+            name: "amount",
+            type: "u64"
+          },
+          {
+            name: "timestamp",
+            type: "i64"
+          },
+          {
+            name: "total_claimed",
+            type: "u64"
+          },
+          {
+            name: "total_cashback_earned",
+            type: "u64"
           }
         ]
       }
@@ -7450,6 +8280,20 @@ var pump_amm_default = {
           {
             name: "coin_creator_token_account",
             type: "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      name: "ConfigStatus",
+      type: {
+        kind: "enum",
+        variants: [
+          {
+            name: "Paused"
+          },
+          {
+            name: "Active"
           }
         ]
       }
@@ -7863,6 +8707,19 @@ var pump_amm_default = {
           {
             name: "mayhem_mode_enabled",
             type: "bool"
+          },
+          {
+            name: "reserved_fee_recipients",
+            type: {
+              array: [
+                "pubkey",
+                7
+              ]
+            }
+          },
+          {
+            name: "is_cashback_enabled",
+            type: "bool"
           }
         ]
       }
@@ -7930,6 +8787,38 @@ var pump_amm_default = {
       }
     },
     {
+      name: "MigratePoolCoinCreatorEvent",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "timestamp",
+            type: "i64"
+          },
+          {
+            name: "base_mint",
+            type: "pubkey"
+          },
+          {
+            name: "pool",
+            type: "pubkey"
+          },
+          {
+            name: "sharing_config",
+            type: "pubkey"
+          },
+          {
+            name: "old_coin_creator",
+            type: "pubkey"
+          },
+          {
+            name: "new_coin_creator",
+            type: "pubkey"
+          }
+        ]
+      }
+    },
+    {
       name: "OptionBool",
       type: {
         kind: "struct",
@@ -7989,6 +8878,35 @@ var pump_amm_default = {
           {
             name: "is_mayhem_mode",
             type: "bool"
+          },
+          {
+            name: "is_cashback_coin",
+            type: "bool"
+          }
+        ]
+      }
+    },
+    {
+      name: "ReservedFeeRecipientsEvent",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "timestamp",
+            type: "i64"
+          },
+          {
+            name: "reserved_fee_recipient",
+            type: "pubkey"
+          },
+          {
+            name: "reserved_fee_recipients",
+            type: {
+              array: [
+                "pubkey",
+                7
+              ]
+            }
           }
         ]
       }
@@ -8089,6 +9007,14 @@ var pump_amm_default = {
           {
             name: "coin_creator_fee",
             type: "u64"
+          },
+          {
+            name: "cashback_fee_basis_points",
+            type: "u64"
+          },
+          {
+            name: "cashback",
+            type: "u64"
           }
         ]
       }
@@ -8145,6 +9071,68 @@ var pump_amm_default = {
           {
             name: "coin_creator",
             type: "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      name: "Shareholder",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "address",
+            type: "pubkey"
+          },
+          {
+            name: "share_bps",
+            type: "u16"
+          }
+        ]
+      }
+    },
+    {
+      name: "SharingConfig",
+      type: {
+        kind: "struct",
+        fields: [
+          {
+            name: "bump",
+            type: "u8"
+          },
+          {
+            name: "version",
+            type: "u8"
+          },
+          {
+            name: "status",
+            type: {
+              defined: {
+                name: "ConfigStatus"
+              }
+            }
+          },
+          {
+            name: "mint",
+            type: "pubkey"
+          },
+          {
+            name: "admin",
+            type: "pubkey"
+          },
+          {
+            name: "admin_revoked",
+            type: "bool"
+          },
+          {
+            name: "shareholders",
+            type: {
+              vec: {
+                defined: {
+                  name: "Shareholder"
+                }
+              }
+            }
           }
         ]
       }
@@ -8266,6 +9254,14 @@ var pump_amm_default = {
           {
             name: "has_total_claimed_tokens",
             type: "bool"
+          },
+          {
+            name: "cashback_earned",
+            type: "u64"
+          },
+          {
+            name: "total_cashback_claimed",
+            type: "u64"
           }
         ]
       }
@@ -8568,6 +9564,7 @@ var staticAccounts = {
 };
 var staticBuffers = {
   creatorVault: Buffer.from("creator_vault"),
+  poolV2: Buffer.from("pool-v2"),
   userVolumeAccumulator: Buffer.from("user_volume_accumulator"),
   tokenProgram: TOKEN_PROGRAM_ID.toBuffer(),
   tokenProgram2022: TOKEN_2022_PROGRAM_ID2.toBuffer()
@@ -8668,8 +9665,9 @@ var PumpAmmInternalSdk = class {
             )
           );
         }
+        const isCashbackEnabled = false;
         instructions.push(
-          await this.program.methods.createPool(index, baseIn, quoteIn, SYSTEM_PROGRAM_ID, isMayhemMode).accountsPartial({
+          await this.program.methods.createPool(index, baseIn, quoteIn, SYSTEM_PROGRAM_ID, isMayhemMode, { 0: isCashbackEnabled }).accountsPartial({
             globalConfig: this.globalConfig,
             baseMint,
             quoteMint,
@@ -8983,7 +9981,7 @@ var PumpAmmInternalSdk = class {
       poolQuoteTokenAccount
     };
   }
-  async buyInstructionsInternal(pool, baseOut, maxQuoteIn, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
+  async buyInstructionsInternal(pool, baseOut, maxQuoteIn, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0, isCashbackEnabled) {
     const poolAccountInfo = await this.connection.getAccountInfo(pool);
     const poolData = this.program.coder.accounts.decode(
       "pool",
@@ -9006,12 +10004,13 @@ var PumpAmmInternalSdk = class {
           coinCreator,
           protocolFeeRecipient,
           userBaseTokenAccount,
-          userQuoteTokenAccount
+          userQuoteTokenAccount,
+          isCashbackEnabled
         );
       }
     );
   }
-  async buyInstructionsInternalNoPool(index, creator, baseMint, quoteMint, baseOut, maxQuoteIn, user, coinCreator, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
+  async buyInstructionsInternalNoPool(index, creator, baseMint, quoteMint, baseOut, maxQuoteIn, user, coinCreator, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0, isCashbackEnabled) {
     const [pool] = this.poolKey(index, creator, baseMint, quoteMint);
     const swapAccounts = await this.swapAccounts(
       pool,
@@ -9045,8 +10044,40 @@ var PumpAmmInternalSdk = class {
             baseWsolAtaCreated = true;
           }
         }
+        let remainingAccounts = [];
+        if (isCashbackEnabled) {
+          const userVolumeAccumulatorWsolAta = getAssociatedTokenAddressSync2(
+            quoteMint,
+            swapAccounts.userVolumeAccumulator,
+            true,
+            swapAccounts.quoteTokenProgram
+          );
+          instructions.push(
+            createAssociatedTokenAccountIdempotentInstruction(
+              user,
+              userVolumeAccumulatorWsolAta,
+              swapAccounts.userVolumeAccumulator,
+              this.program.programId,
+              swapAccounts.quoteTokenProgram
+            )
+          );
+          remainingAccounts.push({
+            pubkey: userVolumeAccumulatorWsolAta,
+            isSigner: false,
+            isWritable: true
+          });
+        }
+        const [poolV2] = PublicKey4.findProgramAddressSync(
+          [staticBuffers.poolV2, baseMint.toBuffer()],
+          this.program.programId
+        );
+        remainingAccounts.push({
+          pubkey: poolV2,
+          isSigner: false,
+          isWritable: false
+        });
         instructions.push(
-          await this.program.methods.buy(baseOut, maxQuoteIn, { 0: true }).accountsPartial(swapAccounts).instruction()
+          await this.program.methods.buy(baseOut, maxQuoteIn, { 0: true }).accountsPartial(swapAccounts).remainingAccounts(remainingAccounts).instruction()
         );
         if (baseWsolAtaCreated) {
           instructions.push(
@@ -9063,8 +10094,8 @@ var PumpAmmInternalSdk = class {
       }
     );
   }
-  buyInstructionsSync(baseMint, quoteMint, baseOut, maxQuoteIn, user, coinCreator, protocolFeeRecipient, userBaseTokenAccount = void 0, userQuoteTokenAccount, pool, isMayhemMode, isTokenV2) {
-    let ataIns = null;
+  buyInstructionsSync(baseMint, quoteMint, baseOut, maxQuoteIn, user, coinCreator, protocolFeeRecipient, userBaseTokenAccount = void 0, userQuoteTokenAccount, pool, isMayhemMode, isCashbackEnabled, isTokenV2, createWsolVolAccAta = true) {
+    const instructions = [];
     let baseTokenProgram = TOKEN_PROGRAM_ID;
     let baseTokenProgramBuffer = staticBuffers.tokenProgram;
     const quoteTokenProgram = TOKEN_PROGRAM_ID;
@@ -9080,13 +10111,14 @@ var PumpAmmInternalSdk = class {
         true,
         baseTokenProgram
       );
-      ataIns = createAssociatedTokenAccountIdempotentInstruction(
+      const ataIns = createAssociatedTokenAccountIdempotentInstruction(
         user,
         userBaseTokenAccount,
         user,
         baseMint,
         baseTokenProgram
       );
+      instructions.push(ataIns);
     }
     const [coinCreatorVaultAuthority] = PublicKey4.findProgramAddressSync(
       [staticBuffers.creatorVault, coinCreator.toBuffer()],
@@ -9244,6 +10276,39 @@ var PumpAmmInternalSdk = class {
         isWritable: false
       }
     ];
+    if (isCashbackEnabled) {
+      const userVolumeAccumulatorWsolAta = getAssociatedTokenAddressSync2(
+        quoteMint,
+        userVolumeAccumulator,
+        true,
+        quoteTokenProgram
+      );
+      if (createWsolVolAccAta) {
+        instructions.push(
+          createAssociatedTokenAccountIdempotentInstruction(
+            user,
+            userVolumeAccumulatorWsolAta,
+            userVolumeAccumulator,
+            this.program.programId,
+            quoteTokenProgram
+          )
+        );
+      }
+      keys.push({
+        pubkey: userVolumeAccumulatorWsolAta,
+        isSigner: false,
+        isWritable: true
+      });
+    }
+    const [poolV2] = PublicKey4.findProgramAddressSync(
+      [staticBuffers.poolV2, baseMint.toBuffer()],
+      this.program.programId
+    );
+    keys.push({
+      pubkey: poolV2,
+      isSigner: false,
+      isWritable: false
+    });
     const data = this.program.coder.instruction.encode("buy", {
       baseAmountOut: baseOut,
       maxQuoteAmountIn: maxQuoteIn,
@@ -9254,9 +10319,10 @@ var PumpAmmInternalSdk = class {
       keys,
       data
     });
-    return ataIns ? [ataIns, buyIns] : [buyIns];
+    instructions.push(buyIns);
+    return instructions;
   }
-  async buyBaseInput(pool, base, slippage, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
+  async buyBaseInput(pool, base, slippage, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0, isCashbackEnabled) {
     const { maxQuote } = await this.buyBaseInputInternal(pool, base, slippage);
     return this.buyInstructionsInternal(
       pool,
@@ -9265,10 +10331,11 @@ var PumpAmmInternalSdk = class {
       user,
       protocolFeeRecipient,
       userBaseTokenAccount,
-      userQuoteTokenAccount
+      userQuoteTokenAccount,
+      isCashbackEnabled
     );
   }
-  async buyQuoteInput(pool, quote, slippage, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
+  async buyQuoteInput(pool, quote, slippage, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0, isCashbackEnabled) {
     const { base, maxQuote } = await this.buyQuoteInputInternal(
       pool,
       quote,
@@ -9281,7 +10348,8 @@ var PumpAmmInternalSdk = class {
       user,
       protocolFeeRecipient,
       userBaseTokenAccount,
-      userQuoteTokenAccount
+      userQuoteTokenAccount,
+      isCashbackEnabled
     );
   }
   async buyAutocompleteQuoteFromBase(pool, base, slippage) {
@@ -9329,7 +10397,7 @@ var PumpAmmInternalSdk = class {
       coinCreator
     );
   }
-  async sellInstructionsInternal(pool, baseAmountIn, minQuoteAmountOut, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
+  async sellInstructionsInternal(pool, baseAmountIn, minQuoteAmountOut, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0, isCashbackEnabled) {
     const poolAccountInfo = await this.connection.getAccountInfo(pool);
     const poolData = this.program.coder.accounts.decode(
       "pool",
@@ -9352,7 +10420,8 @@ var PumpAmmInternalSdk = class {
           coinCreator,
           protocolFeeRecipient,
           userBaseTokenAccount,
-          userQuoteTokenAccount
+          userQuoteTokenAccount,
+          isCashbackEnabled
         );
       }
     );
@@ -9378,7 +10447,7 @@ var PumpAmmInternalSdk = class {
     }
     return [...instructions, ...await block()];
   }
-  async sellInstructionsInternalNoPool(index, creator, baseMint, quoteMint, baseAmountIn, minQuoteAmountOut, user, coinCreator, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
+  async sellInstructionsInternalNoPool(index, creator, baseMint, quoteMint, baseAmountIn, minQuoteAmountOut, user, coinCreator, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0, isCashbackEnabled) {
     const [pool] = this.poolKey(index, creator, baseMint, quoteMint);
     const swapAccounts = await this.swapAccounts(
       pool,
@@ -9412,8 +10481,49 @@ var PumpAmmInternalSdk = class {
             quoteWsolAtaCreated = true;
           }
         }
+        let remainingAccounts = [];
+        if (isCashbackEnabled) {
+          const [userVolumeAccumulator] = PublicKey4.findProgramAddressSync(
+            [staticBuffers.userVolumeAccumulator, user.toBuffer()],
+            this.program.programId
+          );
+          const userVolumeAccumulatorWsolAta = getAssociatedTokenAddressSync2(
+            quoteMint,
+            userVolumeAccumulator,
+            true,
+            swapAccounts.quoteTokenProgram
+          );
+          instructions.push(
+            createAssociatedTokenAccountIdempotentInstruction(
+              user,
+              userVolumeAccumulatorWsolAta,
+              userVolumeAccumulator,
+              this.program.programId,
+              swapAccounts.quoteTokenProgram
+            )
+          );
+          remainingAccounts.push({
+            pubkey: userVolumeAccumulatorWsolAta,
+            isSigner: false,
+            isWritable: true
+          });
+          remainingAccounts.push({
+            pubkey: userVolumeAccumulator,
+            isSigner: false,
+            isWritable: true
+          });
+        }
+        const [poolV2] = PublicKey4.findProgramAddressSync(
+          [staticBuffers.poolV2, baseMint.toBuffer()],
+          this.program.programId
+        );
+        remainingAccounts.push({
+          pubkey: poolV2,
+          isSigner: false,
+          isWritable: false
+        });
         instructions.push(
-          await this.program.methods.sell(baseAmountIn, minQuoteAmountOut).accountsPartial(swapAccounts).instruction()
+          await this.program.methods.sell(baseAmountIn, minQuoteAmountOut).accountsPartial(swapAccounts).remainingAccounts(remainingAccounts).instruction()
         );
         if (quoteWsolAtaCreated) {
           instructions.push(
@@ -9430,7 +10540,7 @@ var PumpAmmInternalSdk = class {
       }
     );
   }
-  sellInstructionsSync(baseMint, quoteMint, baseAmountIn, minQuoteAmountOut, user, coinCreator, protocolFeeRecipient, userBaseTokenAccount, userQuoteTokenAccount, pool, isMayhemMode, isTokenV2) {
+  sellInstructionsSync(baseMint, quoteMint, baseAmountIn, minQuoteAmountOut, user, coinCreator, protocolFeeRecipient, userBaseTokenAccount, userQuoteTokenAccount, pool, isMayhemMode, isCashbackEnabled, isTokenV2, createWsolVolAccAta = true) {
     let baseTokenProgram = TOKEN_PROGRAM_ID;
     let baseTokenProgramBuffer = staticBuffers.tokenProgram;
     const quoteTokenProgram = TOKEN_PROGRAM_ID;
@@ -9458,6 +10568,10 @@ var PumpAmmInternalSdk = class {
     const [poolQuoteTokenAccount] = PublicKey4.findProgramAddressSync(
       [pool.toBuffer(), quoteTokenProgramBuffer, quoteMint.toBuffer()],
       staticAccounts.associatedTokenProgram
+    );
+    const [poolV2] = PublicKey4.findProgramAddressSync(
+      [staticBuffers.poolV2, baseMint.toBuffer()],
+      this.program.programId
     );
     let protocolFeeRecipientTokenAccount;
     if (isMayhemMode) {
@@ -9581,6 +10695,45 @@ var PumpAmmInternalSdk = class {
         isWritable: false
       }
     ];
+    const instructions = [];
+    if (isCashbackEnabled) {
+      const [userVolumeAccumulator] = PublicKey4.findProgramAddressSync(
+        [staticBuffers.userVolumeAccumulator, user.toBuffer()],
+        this.program.programId
+      );
+      const userVolumeAccumulatorWsolAta = getAssociatedTokenAddressSync2(
+        quoteMint,
+        userVolumeAccumulator,
+        true,
+        quoteTokenProgram
+      );
+      if (createWsolVolAccAta) {
+        instructions.push(
+          createAssociatedTokenAccountIdempotentInstruction(
+            user,
+            userVolumeAccumulatorWsolAta,
+            userVolumeAccumulator,
+            this.program.programId,
+            quoteTokenProgram
+          )
+        );
+      }
+      keys.push({
+        pubkey: userVolumeAccumulatorWsolAta,
+        isSigner: false,
+        isWritable: true
+      });
+      keys.push({
+        pubkey: userVolumeAccumulator,
+        isSigner: false,
+        isWritable: true
+      });
+    }
+    keys.push({
+      pubkey: poolV2,
+      isSigner: false,
+      isWritable: false
+    });
     const data = this.program.coder.instruction.encode("sell", {
       baseAmountIn,
       minQuoteAmountOut
@@ -9590,9 +10743,10 @@ var PumpAmmInternalSdk = class {
       keys,
       data
     });
-    return [sellIns];
+    instructions.push(sellIns);
+    return instructions;
   }
-  async sellBaseInput(pool, base, slippage, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
+  async sellBaseInput(pool, base, slippage, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0, isCashbackEnabled) {
     const { minQuote } = await this.sellBaseInputInternal(pool, base, slippage);
     return this.sellInstructionsInternal(
       pool,
@@ -9601,10 +10755,11 @@ var PumpAmmInternalSdk = class {
       user,
       protocolFeeRecipient,
       userBaseTokenAccount,
-      userQuoteTokenAccount
+      userQuoteTokenAccount,
+      isCashbackEnabled
     );
   }
-  async sellQuoteInput(pool, quote, slippage, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0) {
+  async sellQuoteInput(pool, quote, slippage, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0, isCashbackEnabled) {
     const { base, minQuote } = await this.sellQuoteInputInternal(
       pool,
       quote,
@@ -9617,7 +10772,8 @@ var PumpAmmInternalSdk = class {
       user,
       protocolFeeRecipient,
       userBaseTokenAccount,
-      userQuoteTokenAccount
+      userQuoteTokenAccount,
+      isCashbackEnabled
     );
   }
   async sellAutocompleteQuoteFromBase(pool, base, slippage) {
@@ -9748,6 +10904,10 @@ var PumpAmmInternalSdk = class {
         quoteTokenProgram
       );
     }
+    const [userVolumeAccumulator] = PublicKey4.findProgramAddressSync(
+      [staticBuffers.userVolumeAccumulator, user.toBuffer()],
+      this.program.programId
+    );
     const coinCreatorVaultAuthority = this.coinCreatorVaultAuthorityPda(coinCreator);
     return {
       pool,
@@ -9777,7 +10937,10 @@ var PumpAmmInternalSdk = class {
         quoteMint,
         quoteTokenProgram
       ),
-      coinCreatorVaultAuthority
+      coinCreatorVaultAuthority,
+      userVolumeAccumulator,
+      feeConfig: staticAccounts.feeConfig,
+      feeProgram: staticAccounts.feeProgram
     };
   }
   coinCreatorVaultAuthorityPda(coinCreator) {
@@ -9810,7 +10973,9 @@ var PumpAmmInternalSdk = class {
 
 // src/sdk/pumpAmm.ts
 var staticAccounts2 = {
-  mayhemFeeRecipient: new PublicKey5("GesfTA3X2arioaHp8bbKdjG9vJtskViWACZoYvxp4twS")
+  mayhemFeeRecipient: new PublicKey5(
+    "GesfTA3X2arioaHp8bbKdjG9vJtskViWACZoYvxp4twS"
+  )
 };
 var PumpAmmSdk = class {
   pumpAmmInternalSdk;
@@ -9921,7 +11086,7 @@ var PumpAmmSdk = class {
       quote
     };
   }
-  async swapBaseInstructions(pool, base, slippage, direction, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0, isMayhemMode) {
+  async swapBaseInstructions(pool, base, slippage, direction, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0, isMayhemMode, isCashbackEnabled) {
     if (direction == "quoteToBase") {
       return await this.pumpAmmInternalSdk.buyBaseInput(
         pool,
@@ -9930,7 +11095,8 @@ var PumpAmmSdk = class {
         user,
         isMayhemMode ? staticAccounts2.mayhemFeeRecipient : protocolFeeRecipient,
         userBaseTokenAccount,
-        userQuoteTokenAccount
+        userQuoteTokenAccount,
+        isCashbackEnabled
       );
     }
     return await this.pumpAmmInternalSdk.sellBaseInput(
@@ -9940,10 +11106,11 @@ var PumpAmmSdk = class {
       user,
       isMayhemMode ? staticAccounts2.mayhemFeeRecipient : protocolFeeRecipient,
       userBaseTokenAccount,
-      userQuoteTokenAccount
+      userQuoteTokenAccount,
+      isCashbackEnabled
     );
   }
-  async swapQuoteInstructions(pool, quote, slippage, direction, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0, isMayhemMode) {
+  async swapQuoteInstructions(pool, quote, slippage, direction, user, protocolFeeRecipient = void 0, userBaseTokenAccount = void 0, userQuoteTokenAccount = void 0, isMayhemMode, isCashbackEnabled) {
     if (direction == "quoteToBase") {
       return await this.pumpAmmInternalSdk.buyQuoteInput(
         pool,
@@ -9952,7 +11119,8 @@ var PumpAmmSdk = class {
         user,
         isMayhemMode ? staticAccounts2.mayhemFeeRecipient : protocolFeeRecipient,
         userBaseTokenAccount,
-        userQuoteTokenAccount
+        userQuoteTokenAccount,
+        isCashbackEnabled
       );
     }
     return await this.pumpAmmInternalSdk.sellQuoteInput(
@@ -9962,7 +11130,8 @@ var PumpAmmSdk = class {
       user,
       isMayhemMode ? staticAccounts2.mayhemFeeRecipient : protocolFeeRecipient,
       userBaseTokenAccount,
-      userQuoteTokenAccount
+      userQuoteTokenAccount,
+      isCashbackEnabled
     );
   }
   async swapAutocompleteQuoteFromBase(pool, base, slippage, direction) {
@@ -10114,7 +11283,7 @@ async function sendAndConfirmTransaction(connection, payerKey, instructions, sig
 }
 
 // src/index.ts
-console.log("You are using custom pumpswap sdk v4.4");
+console.log("You are using custom pumpswap sdk v4.5");
 export {
   CANONICAL_POOL_INDEX,
   PUMP_AMM_PROGRAM_ID,
