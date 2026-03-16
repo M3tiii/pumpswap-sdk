@@ -760,7 +760,7 @@ export class PumpAmmInternalSdk {
               user,
               userVolumeAccumulatorWsolAta,
               swapAccounts.userVolumeAccumulator,
-              this.program.programId,
+              swapAccounts.quoteMint,
               swapAccounts.quoteTokenProgram,
             ),
           );
@@ -1031,7 +1031,7 @@ export class PumpAmmInternalSdk {
             user,
             userVolumeAccumulatorWsolAta,
             userVolumeAccumulator,
-            this.program.programId,
+            quoteMint,
             quoteTokenProgram,
           ),
         );
@@ -1358,7 +1358,7 @@ export class PumpAmmInternalSdk {
               user,
               userVolumeAccumulatorWsolAta,
               userVolumeAccumulator,
-              this.program.programId,
+              swapAccounts.quoteMint,
               swapAccounts.quoteTokenProgram,
             ),
           );
@@ -1613,7 +1613,7 @@ export class PumpAmmInternalSdk {
             user,
             userVolumeAccumulatorWsolAta,
             userVolumeAccumulator,
-            this.program.programId,
+            quoteMint,
             quoteTokenProgram,
           ),
         );

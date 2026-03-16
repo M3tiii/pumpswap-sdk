@@ -10057,7 +10057,7 @@ var PumpAmmInternalSdk = class {
               user,
               userVolumeAccumulatorWsolAta,
               swapAccounts.userVolumeAccumulator,
-              this.program.programId,
+              swapAccounts.quoteMint,
               swapAccounts.quoteTokenProgram
             )
           );
@@ -10289,7 +10289,7 @@ var PumpAmmInternalSdk = class {
             user,
             userVolumeAccumulatorWsolAta,
             userVolumeAccumulator,
-            this.program.programId,
+            quoteMint,
             quoteTokenProgram
           )
         );
@@ -10498,7 +10498,7 @@ var PumpAmmInternalSdk = class {
               user,
               userVolumeAccumulatorWsolAta,
               userVolumeAccumulator,
-              this.program.programId,
+              swapAccounts.quoteMint,
               swapAccounts.quoteTokenProgram
             )
           );
@@ -10713,7 +10713,7 @@ var PumpAmmInternalSdk = class {
             user,
             userVolumeAccumulatorWsolAta,
             userVolumeAccumulator,
-            this.program.programId,
+            quoteMint,
             quoteTokenProgram
           )
         );
@@ -11283,7 +11283,7 @@ async function sendAndConfirmTransaction(connection, payerKey, instructions, sig
 }
 
 // src/index.ts
-console.log("You are using custom pumpswap sdk v4.5");
+console.log("You are using custom pumpswap sdk v4.6");
 export {
   CANONICAL_POOL_INDEX,
   PUMP_AMM_PROGRAM_ID,
