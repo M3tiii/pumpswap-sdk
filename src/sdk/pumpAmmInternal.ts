@@ -64,6 +64,7 @@ const staticAccounts = {
   mayhemFeeRecipientWSol: new PublicKey(
     "C93K8DX4YsABYJtHX9awzgZW3LWzBqBVezEbbLJH4yet",
   ),
+  feeRecipientV2: new PublicKey("EHAAiTxcdDwQ3U4bU6YcMsQGaekdzLS3B5SmYo46kJtL"),
 };
 
 const staticBuffers = {
@@ -72,6 +73,7 @@ const staticBuffers = {
   userVolumeAccumulator: Buffer.from("user_volume_accumulator"),
   tokenProgram: TOKEN_PROGRAM_ID.toBuffer(),
   tokenProgram2022: TOKEN_2022_PROGRAM_ID.toBuffer(),
+  feeRecipientV2: staticAccounts.feeRecipientV2.toBuffer(),
 };
 
 export class PumpAmmInternalSdk {
@@ -209,7 +211,14 @@ export class PumpAmmInternalSdk {
 
         instructions.push(
           await this.program.methods
-            .createPool(index, baseIn, quoteIn, SYSTEM_PROGRAM_ID, isMayhemMode, { 0: isCashbackEnabled })
+            .createPool(
+              index,
+              baseIn,
+              quoteIn,
+              SYSTEM_PROGRAM_ID,
+              isMayhemMode,
+              { 0: isCashbackEnabled },
+            )
             .accountsPartial({
               globalConfig: this.globalConfig,
               baseMint,
@@ -783,6 +792,27 @@ export class PumpAmmInternalSdk {
           isWritable: false,
         });
 
+        const [feeRecipientV2Ata] = PublicKey.findProgramAddressSync(
+          [
+            staticBuffers.feeRecipientV2,
+            swapAccounts.quoteTokenProgram.toBuffer(),
+            swapAccounts.quoteMint.toBuffer(),
+          ],
+          this.program.programId,
+        );
+
+        remainingAccounts.push({
+          pubkey: staticAccounts.feeRecipientV2,
+          isSigner: false,
+          isWritable: false,
+        });
+
+        remainingAccounts.push({
+          pubkey: feeRecipientV2Ata,
+          isSigner: false,
+          isWritable: true,
+        });
+
         instructions.push(
           await this.program.methods
             .buy(baseOut, maxQuoteIn, { 0: true })
@@ -1053,6 +1083,27 @@ export class PumpAmmInternalSdk {
       pubkey: poolV2,
       isSigner: false,
       isWritable: false,
+    });
+
+    const [feeRecipientV2Ata] = PublicKey.findProgramAddressSync(
+      [
+        staticBuffers.feeRecipientV2,
+        quoteTokenProgram.toBuffer(),
+        quoteMint.toBuffer(),
+      ],
+      this.program.programId,
+    );
+
+    keys.push({
+      pubkey: staticAccounts.feeRecipientV2,
+      isSigner: false,
+      isWritable: false,
+    });
+
+    keys.push({
+      pubkey: feeRecipientV2Ata,
+      isSigner: false,
+      isWritable: true,
     });
 
     const data = this.program.coder.instruction.encode("buy", {
@@ -1387,6 +1438,27 @@ export class PumpAmmInternalSdk {
           isWritable: false,
         });
 
+        const [feeRecipientV2Ata] = PublicKey.findProgramAddressSync(
+          [
+            staticBuffers.feeRecipientV2,
+            swapAccounts.quoteTokenProgram.toBuffer(),
+            swapAccounts.quoteMint.toBuffer(),
+          ],
+          this.program.programId,
+        );
+
+        remainingAccounts.push({
+          pubkey: staticAccounts.feeRecipientV2,
+          isSigner: false,
+          isWritable: false,
+        });
+
+        remainingAccounts.push({
+          pubkey: feeRecipientV2Ata,
+          isSigner: false,
+          isWritable: true,
+        });
+
         instructions.push(
           await this.program.methods
             .sell(baseAmountIn, minQuoteAmountOut)
@@ -1636,6 +1708,27 @@ export class PumpAmmInternalSdk {
       pubkey: poolV2,
       isSigner: false,
       isWritable: false,
+    });
+
+    const [feeRecipientV2Ata] = PublicKey.findProgramAddressSync(
+      [
+        staticBuffers.feeRecipientV2,
+        quoteTokenProgram.toBuffer(),
+        quoteMint.toBuffer(),
+      ],
+      this.program.programId,
+    );
+
+    keys.push({
+      pubkey: staticAccounts.feeRecipientV2,
+      isSigner: false,
+      isWritable: false,
+    });
+
+    keys.push({
+      pubkey: feeRecipientV2Ata,
+      isSigner: false,
+      isWritable: true,
     });
 
     const data = this.program.coder.instruction.encode("sell", {

@@ -9560,14 +9560,16 @@ var staticAccounts = {
   ),
   mayhemFeeRecipientWSol: new PublicKey4(
     "C93K8DX4YsABYJtHX9awzgZW3LWzBqBVezEbbLJH4yet"
-  )
+  ),
+  feeRecipientV2: new PublicKey4("EHAAiTxcdDwQ3U4bU6YcMsQGaekdzLS3B5SmYo46kJtL")
 };
 var staticBuffers = {
   creatorVault: Buffer.from("creator_vault"),
   poolV2: Buffer.from("pool-v2"),
   userVolumeAccumulator: Buffer.from("user_volume_accumulator"),
   tokenProgram: TOKEN_PROGRAM_ID.toBuffer(),
-  tokenProgram2022: TOKEN_2022_PROGRAM_ID2.toBuffer()
+  tokenProgram2022: TOKEN_2022_PROGRAM_ID2.toBuffer(),
+  feeRecipientV2: staticAccounts.feeRecipientV2.toBuffer()
 };
 var PumpAmmInternalSdk = class {
   connection;
@@ -9667,7 +9669,14 @@ var PumpAmmInternalSdk = class {
         }
         const isCashbackEnabled = false;
         instructions.push(
-          await this.program.methods.createPool(index, baseIn, quoteIn, SYSTEM_PROGRAM_ID, isMayhemMode, { 0: isCashbackEnabled }).accountsPartial({
+          await this.program.methods.createPool(
+            index,
+            baseIn,
+            quoteIn,
+            SYSTEM_PROGRAM_ID,
+            isMayhemMode,
+            { 0: isCashbackEnabled }
+          ).accountsPartial({
             globalConfig: this.globalConfig,
             baseMint,
             quoteMint,
@@ -10076,6 +10085,24 @@ var PumpAmmInternalSdk = class {
           isSigner: false,
           isWritable: false
         });
+        const [feeRecipientV2Ata] = PublicKey4.findProgramAddressSync(
+          [
+            staticBuffers.feeRecipientV2,
+            swapAccounts.quoteTokenProgram.toBuffer(),
+            swapAccounts.quoteMint.toBuffer()
+          ],
+          this.program.programId
+        );
+        remainingAccounts.push({
+          pubkey: staticAccounts.feeRecipientV2,
+          isSigner: false,
+          isWritable: false
+        });
+        remainingAccounts.push({
+          pubkey: feeRecipientV2Ata,
+          isSigner: false,
+          isWritable: true
+        });
         instructions.push(
           await this.program.methods.buy(baseOut, maxQuoteIn, { 0: true }).accountsPartial(swapAccounts).remainingAccounts(remainingAccounts).instruction()
         );
@@ -10309,6 +10336,24 @@ var PumpAmmInternalSdk = class {
       isSigner: false,
       isWritable: false
     });
+    const [feeRecipientV2Ata] = PublicKey4.findProgramAddressSync(
+      [
+        staticBuffers.feeRecipientV2,
+        quoteTokenProgram.toBuffer(),
+        quoteMint.toBuffer()
+      ],
+      this.program.programId
+    );
+    keys.push({
+      pubkey: staticAccounts.feeRecipientV2,
+      isSigner: false,
+      isWritable: false
+    });
+    keys.push({
+      pubkey: feeRecipientV2Ata,
+      isSigner: false,
+      isWritable: true
+    });
     const data = this.program.coder.instruction.encode("buy", {
       baseAmountOut: baseOut,
       maxQuoteAmountIn: maxQuoteIn,
@@ -10522,6 +10567,24 @@ var PumpAmmInternalSdk = class {
           isSigner: false,
           isWritable: false
         });
+        const [feeRecipientV2Ata] = PublicKey4.findProgramAddressSync(
+          [
+            staticBuffers.feeRecipientV2,
+            swapAccounts.quoteTokenProgram.toBuffer(),
+            swapAccounts.quoteMint.toBuffer()
+          ],
+          this.program.programId
+        );
+        remainingAccounts.push({
+          pubkey: staticAccounts.feeRecipientV2,
+          isSigner: false,
+          isWritable: false
+        });
+        remainingAccounts.push({
+          pubkey: feeRecipientV2Ata,
+          isSigner: false,
+          isWritable: true
+        });
         instructions.push(
           await this.program.methods.sell(baseAmountIn, minQuoteAmountOut).accountsPartial(swapAccounts).remainingAccounts(remainingAccounts).instruction()
         );
@@ -10733,6 +10796,24 @@ var PumpAmmInternalSdk = class {
       pubkey: poolV2,
       isSigner: false,
       isWritable: false
+    });
+    const [feeRecipientV2Ata] = PublicKey4.findProgramAddressSync(
+      [
+        staticBuffers.feeRecipientV2,
+        quoteTokenProgram.toBuffer(),
+        quoteMint.toBuffer()
+      ],
+      this.program.programId
+    );
+    keys.push({
+      pubkey: staticAccounts.feeRecipientV2,
+      isSigner: false,
+      isWritable: false
+    });
+    keys.push({
+      pubkey: feeRecipientV2Ata,
+      isSigner: false,
+      isWritable: true
     });
     const data = this.program.coder.instruction.encode("sell", {
       baseAmountIn,
@@ -11283,7 +11364,7 @@ async function sendAndConfirmTransaction(connection, payerKey, instructions, sig
 }
 
 // src/index.ts
-console.log("You are using custom pumpswap sdk v4.6");
+console.log("You are using custom pumpswap sdk v4.7");
 export {
   CANONICAL_POOL_INDEX,
   PUMP_AMM_PROGRAM_ID,
