@@ -798,7 +798,7 @@ export class PumpAmmInternalSdk {
             swapAccounts.quoteTokenProgram.toBuffer(),
             swapAccounts.quoteMint.toBuffer(),
           ],
-          this.program.programId,
+          staticAccounts.associatedTokenProgram,
         );
 
         remainingAccounts.push({
@@ -1091,7 +1091,7 @@ export class PumpAmmInternalSdk {
         quoteTokenProgram.toBuffer(),
         quoteMint.toBuffer(),
       ],
-      this.program.programId,
+      staticAccounts.associatedTokenProgram,
     );
 
     keys.push({
@@ -1444,7 +1444,7 @@ export class PumpAmmInternalSdk {
             swapAccounts.quoteTokenProgram.toBuffer(),
             swapAccounts.quoteMint.toBuffer(),
           ],
-          this.program.programId,
+          staticAccounts.associatedTokenProgram,
         );
 
         remainingAccounts.push({
@@ -1716,7 +1716,7 @@ export class PumpAmmInternalSdk {
         quoteTokenProgram.toBuffer(),
         quoteMint.toBuffer(),
       ],
-      this.program.programId,
+      staticAccounts.associatedTokenProgram,
     );
 
     keys.push({
